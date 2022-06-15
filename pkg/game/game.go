@@ -30,8 +30,11 @@ func (g *Game) Init() (err error) {
 	ebiten.SetWindowSize(1280, 720)
 
 	// Load some assets. This will be abstracted elsewhere.
-	img, _ := readImage("magnet.png")
-	magnetImage = ebiten.NewImageFromImage(img)
+	if img, err := readImage("magnet.png"); err == nil {
+		magnetImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
 
 	return
 }
