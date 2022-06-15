@@ -5,18 +5,18 @@ import (
 	"embed"
 	"image"
 	_ "image/png"
-	"path/filepath"
+	"path"
 )
 
 //go:embed assets/*
 var assets embed.FS
 
 func readFile(p string) ([]byte, error) {
-	return assets.ReadFile(filepath.Join("assets", p))
+	return assets.ReadFile(path.Join("assets", p))
 }
 
 func readImage(p string) (image.Image, error) {
-	data, err := readFile(filepath.Join("images", p))
+	data, err := readFile(path.Join("images", p))
 	if err != nil {
 		return nil, err
 	}
