@@ -1,6 +1,7 @@
 package game
 
 import (
+	"image"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -31,6 +32,7 @@ func (g *Game) Init() (err error) {
 
 	// Load some assets. This will be abstracted elsewhere.
 	if img, err := readImage("magnet.png"); err == nil {
+		ebiten.SetWindowIcon([]image.Image{img})
 		magnetImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
