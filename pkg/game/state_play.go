@@ -1,12 +1,18 @@
 package game
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"fmt"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type PlayState struct {
-	game *Game
+	game  *Game
+	level Level
 }
 
 func (s *PlayState) Init() error {
+	fmt.Println("TODO: generate live collision map/entities from", s.level)
 	return nil
 }
 
