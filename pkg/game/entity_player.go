@@ -25,6 +25,11 @@ func (e *PlayerEntity) Update() error {
 	speed := 1.0
 	switch a := e.action.(type) {
 	case *EntityActionMove:
+		if math.Abs(e.physics.X-a.x) < a.distance && math.Abs(e.physics.Y-a.y) < a.distance {
+			a.complete = true
+			break
+		}
+
 		// FIXME: Make this use actual physics resolution!
 		r := math.Atan2(e.physics.Y-a.y, e.physics.X-a.x)
 		x := math.Cos(r) * speed
@@ -32,9 +37,6 @@ func (e *PlayerEntity) Update() error {
 
 		e.physics.X -= x
 		e.physics.Y -= y
-		if math.Abs(e.physics.X-a.x) < a.distance && math.Abs(e.physics.Y-a.y) < a.distance {
-			a.complete = true
-		}
 	case *EntityActionPlace:
 		fmt.Println("TODO: Place turret @", a.x, a.y)
 		a.complete = true
