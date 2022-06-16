@@ -66,7 +66,7 @@ func (s *PlayState) Dispose() error {
 func (s *PlayState) Update() error {
 	// Update our players.
 	for _, p := range s.game.players {
-		if err := p.Update(); err != nil {
+		if err := p.Update(s); err != nil {
 			return err
 		}
 	}
