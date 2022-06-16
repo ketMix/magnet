@@ -33,8 +33,8 @@ func (p *Player) Update(s *PlayState) error {
 			// We wrap the place action as a move action's next step.
 			action = &EntityActionMove{
 				x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
-				y:        float64(ty)*float64(cellHeight) + float64(cellHeight)/2,
-				distance: 16,
+				y:        float64(ty+1)*float64(cellHeight) + float64(cellHeight)/2,
+				distance: 8,
 				next: &EntityActionPlace{
 					x: tx,
 					y: ty,
