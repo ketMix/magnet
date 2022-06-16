@@ -23,7 +23,7 @@ func (s *MenuState) Init() error {
 	}
 
 	// Add players here...?
-	s.game.players = append(s.game.players, &Player{})
+	s.game.players = append(s.game.players, NewPlayer())
 
 	return nil
 }
