@@ -8,9 +8,10 @@ import (
 )
 
 type PlayState struct {
-	game     *Game
-	level    Level
-	entities []Entity
+	game             *Game
+	level            Level
+	cameraX, cameraY float64
+	entities         []Entity
 }
 
 func (s *PlayState) Init() error {
@@ -88,11 +89,13 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	screenOp := &ebiten.DrawImageOptions{}
 	// FIXME: Base this on some sort of player lookup or a global self reference.
 	if s.game.players[0].entity != nil {
-		screenOp.GeoM.Translate(
-			-s.game.players[0].entity.Physics().X+float64(screenWidth)/2,
-			-s.game.players[0].entity.Physics().Y+float64(screenHeight)/2,
-		)
+		s.cameraX = -s.game.players[0].entity.Physics().X + float64(screenWidth)/2
+		s.cameraY = -s.game.players[0].entity.Physics().Y + float64(screenHeight)/2
 	}
+	screenOp.GeoM.Translate(
+		s.cameraX,
+		s.cameraY,
+	)
 
 	// Draw the map.
 	for y, r := range s.level.cells {
