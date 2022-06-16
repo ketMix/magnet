@@ -2,6 +2,7 @@ package game
 
 import (
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -116,4 +117,18 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	bounds := text.BoundString(boldFace, s.level.title)
 	centeredX := screenWidth/2 - bounds.Min.X - bounds.Dx()/2
 	text.Draw(screen, s.level.title, boldFace, centeredX, bounds.Dy()+1, color.White)
+}
+
+// getCursorPosition returns the cursor position relative to the map.
+func (s *PlayState) getCursorPosition() (x, y int) {
+	x, y = ebiten.CursorPosition()
+	x -= int(s.cameraX)
+	y -= int(s.cameraY)
+	return x, y
+}
+
+// getClosestCellPosition returns the closest cell position to the passed x and y coords.
+func (s *PlayState) getClosestCellPosition(x, y int) (int, int) {
+	tx, ty := math.Floor(float64(x)/float64(cellWidth)), math.Floor(float64(y)/float64(cellHeight))
+	return int(tx), int(ty)
 }
