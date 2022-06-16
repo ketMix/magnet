@@ -38,7 +38,7 @@ func (s *PlayState) buildFromLevel() {
 					}
 				}
 				if target != nil {
-					e := NewPlayerEntity(target)
+					e := NewActorEntity(target)
 					// Tie 'em together.
 					e.player = target
 					target.entity = e

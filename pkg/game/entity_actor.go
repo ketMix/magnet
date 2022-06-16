@@ -6,13 +6,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type PlayerEntity struct {
+type ActorEntity struct {
 	BaseEntity
 	player *Player
 }
 
-func NewPlayerEntity(player *Player) *PlayerEntity {
-	return &PlayerEntity{
+func NewActorEntity(player *Player) *ActorEntity {
+	return &ActorEntity{
 		BaseEntity: BaseEntity{
 			physics: PhysicsObject{},
 		},
@@ -20,7 +20,7 @@ func NewPlayerEntity(player *Player) *PlayerEntity {
 	}
 }
 
-func (e *PlayerEntity) Update() (request Request, err error) {
+func (e *ActorEntity) Update() (request Request, err error) {
 	speed := 1.0
 	switch a := e.action.(type) {
 	case *EntityActionMove:
@@ -50,7 +50,7 @@ func (e *PlayerEntity) Update() (request Request, err error) {
 	return request, nil
 }
 
-func (e *PlayerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
+func (e *ActorEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Concat(screenOp.GeoM)
 	op.GeoM.Translate(
