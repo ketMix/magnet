@@ -116,6 +116,21 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	// Check for any special pending renders, such as move target or pending turret location.
+	for _, p := range s.game.players {
+		if p.entity != nil {
+			if p.entity.Action() != nil && p.entity.Action().Next() != nil {
+				switch a := p.entity.Action().Next().(type) {
+				case *EntityActionPlace:
+					op := &ebiten.DrawImageOptions{}
+					op.GeoM.Concat(screenOp.GeoM)
+					op.GeoM.Translate(float64(a.x*cellWidth), float64(a.y*cellHeight))
+					screen.DrawImage(turretBaseImage, op)
+				}
+			}
+		}
+	}
+
 	// Draw our entities.
 	for _, e := range s.entities {
 		e.Draw(screen, screenOp)
