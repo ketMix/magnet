@@ -14,6 +14,7 @@ var (
 	normalFace, boldFace      font.Face
 	playerImage               *ebiten.Image
 	grassImage                *ebiten.Image
+	turretBaseImage           *ebiten.Image
 )
 
 // Game is our ebiten engine interface compliant type.
@@ -80,6 +81,11 @@ func (g *Game) Init() (err error) {
 	}
 	if img, err := readImage("grass.png"); err == nil {
 		grassImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+	if img, err := readImage("turret-base2.png"); err == nil {
+		turretBaseImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
