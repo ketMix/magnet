@@ -2,12 +2,15 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 // For now...
 var (
 	// Our internal screen width and height.
 	screenWidth, screenHeight int
+	normalFace, boldFace      font.Face
 )
 
 // Game is our ebiten engine interface compliant type.
@@ -28,11 +31,43 @@ func (g *Game) Init() (err error) {
 	// Size our screen.
 	ebiten.SetWindowSize(1280, 720)
 
+	// Load our global fonts.
+	data, err := readFile("fonts/OpenSansPX.ttf")
+	if err != nil {
+		return err
+	}
+	tt, err := opentype.Parse(data)
+	if err != nil {
+		return err
+	}
+	if normalFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	}); err != nil {
+		return err
+	}
+	data, err = readFile("fonts/OpenSansPXBold.ttf")
+	if err != nil {
+		return err
+	}
+	tt, err = opentype.Parse(data)
+	if err != nil {
+		return err
+	}
+	if boldFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	}); err != nil {
+		return err
+	}
+
 	// Set our initial menu state.
 	if err := g.SetState(&MenuState{
 		game: g,
 	}); err != nil {
-		panic(err)
+		return err
 	}
 
 	return
