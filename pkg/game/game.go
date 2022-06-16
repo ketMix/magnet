@@ -9,14 +9,19 @@ import (
 // For now...
 var (
 	// Our internal screen width and height.
+	cellWidth, cellHeight     int
 	screenWidth, screenHeight int
 	normalFace, boldFace      font.Face
+	playerImage               *ebiten.Image
+	grassImage                *ebiten.Image
 )
 
 // Game is our ebiten engine interface compliant type.
 type Game struct {
 	// Our game current game state.
 	state State
+	//
+	players []Player
 }
 
 // Init is used to set up all initial game structures.
@@ -24,6 +29,10 @@ func (g *Game) Init() (err error) {
 	// Default to 640x360 for now.
 	screenWidth = 640
 	screenHeight = 360
+
+	// Set our cell width and height.
+	cellWidth = 16
+	cellHeight = 11
 
 	// Use nearest-neighbor for scaling.
 	ebiten.SetScreenFilterEnabled(false)
@@ -61,6 +70,18 @@ func (g *Game) Init() (err error) {
 		Hinting: font.HintingFull,
 	}); err != nil {
 		return err
+	}
+
+	// Load some images.
+	if img, err := readImage("player.png"); err == nil {
+		playerImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+	if img, err := readImage("grass.png"); err == nil {
+		grassImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
 	}
 
 	// Set our initial menu state.
