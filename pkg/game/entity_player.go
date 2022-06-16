@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,7 +20,7 @@ func NewPlayerEntity(player *Player) *PlayerEntity {
 	}
 }
 
-func (e *PlayerEntity) Update() error {
+func (e *PlayerEntity) Update() (request Request, err error) {
 	speed := 1.0
 	switch a := e.action.(type) {
 	case *EntityActionMove:
@@ -38,14 +37,17 @@ func (e *PlayerEntity) Update() error {
 		e.physics.X -= x
 		e.physics.Y -= y
 	case *EntityActionPlace:
-		fmt.Println("TODO: Place turret @", a.x, a.y)
 		a.complete = true
+		request = SpawnTurretRequest{
+			x: a.x,
+			y: a.y,
+		}
 	}
 	// Separate action removal for now.
 	if e.action != nil && e.action.Complete() {
 		e.action = e.action.Next()
 	}
-	return nil
+	return request, nil
 }
 
 func (e *PlayerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

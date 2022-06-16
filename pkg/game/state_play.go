@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
@@ -75,7 +76,14 @@ func (s *PlayState) Update() error {
 	// For now we're effectively recreating the entities slice per update, so as to allow for entity update followed by entity deletion.
 	t := s.entities[:0]
 	for _, e := range s.entities {
-		e.Update()
+		if request, err := e.Update(); err != nil {
+			panic(err)
+		} else if request != nil {
+			switch r := request.(type) {
+			case SpawnTurretRequest:
+				fmt.Println("SPAWN TURRET @", r.x, r.y)
+			}
+		}
 		if !e.Trashed() {
 			t = append(t, e)
 		}
