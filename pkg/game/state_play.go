@@ -3,6 +3,7 @@ package game
 import (
 	"image/color"
 	"math"
+	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -145,8 +146,14 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	// Make a sorted list of our entities to render.
+	sortedEntities := make([]Entity, len(s.entities))
+	copy(sortedEntities, s.entities)
+	sort.SliceStable(sortedEntities, func(i, j int) bool {
+		return sortedEntities[i].Physics().Y < sortedEntities[j].Physics().Y
+	})
 	// Draw our entities.
-	for _, e := range s.entities {
+	for _, e := range sortedEntities {
 		e.Draw(screen, screenOp)
 	}
 
