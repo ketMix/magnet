@@ -123,6 +123,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 				switch a := p.entity.Action().Next().(type) {
 				case *EntityActionPlace:
 					op := &ebiten.DrawImageOptions{}
+					op.ColorM.Scale(1, 1, 1, 0.5)
 					op.GeoM.Concat(screenOp.GeoM)
 					op.GeoM.Translate(float64(a.x*cellWidth), float64(a.y*cellHeight))
 					screen.DrawImage(turretBaseImage, op)
