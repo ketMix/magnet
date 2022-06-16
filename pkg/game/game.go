@@ -21,7 +21,7 @@ type Game struct {
 	// Our game current game state.
 	state State
 	//
-	players []Player
+	players []*Player
 }
 
 // Init is used to set up all initial game structures.

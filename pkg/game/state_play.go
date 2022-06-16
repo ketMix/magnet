@@ -30,12 +30,16 @@ func (s *PlayState) buildFromLevel() {
 				var target *Player
 				for _, p := range s.game.players {
 					if p.entity == nil {
-						target = &p
+						target = p
 						break
 					}
 				}
 				if target != nil {
 					e := NewPlayerEntity(target)
+					// Tie 'em together.
+					e.player = target
+					target.entity = e
+					// And place.
 					s.PlaceEntity(e, x, y)
 				}
 			case SouthSpawnCell:
@@ -80,10 +84,21 @@ func (s *PlayState) Update() error {
 }
 
 func (s *PlayState) Draw(screen *ebiten.Image) {
+	// Get our "camera" position.
+	screenOp := &ebiten.DrawImageOptions{}
+	// FIXME: Base this on some sort of player lookup or a global self reference.
+	if s.game.players[0].entity != nil {
+		screenOp.GeoM.Translate(
+			-s.game.players[0].entity.Physics().X+float64(screenWidth)/2,
+			-s.game.players[0].entity.Physics().Y+float64(screenHeight)/2,
+		)
+	}
+
 	// Draw the map.
 	for y, r := range s.level.cells {
 		for x := range r {
 			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Concat(screenOp.GeoM)
 			op.GeoM.Translate(float64(x*cellWidth), float64(y*cellHeight))
 			screen.DrawImage(grassImage, op)
 		}
@@ -91,7 +106,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 
 	// Draw our entities.
 	for _, e := range s.entities {
-		e.Draw(screen)
+		e.Draw(screen, screenOp)
 	}
 
 	// Draw level text centered at top of screen for now.

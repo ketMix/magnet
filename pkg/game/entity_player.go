@@ -23,8 +23,9 @@ func (e *PlayerEntity) Update() error {
 	return nil
 }
 
-func (e *PlayerEntity) Draw(screen *ebiten.Image) {
+func (e *PlayerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Concat(screenOp.GeoM)
 	op.GeoM.Translate(
 		e.physics.X,
 		e.physics.Y,
