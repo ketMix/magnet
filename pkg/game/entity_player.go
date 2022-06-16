@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -31,13 +32,16 @@ func (e *PlayerEntity) Update() error {
 
 		e.physics.X -= x
 		e.physics.Y -= y
-		if math.Abs(e.physics.X-a.x) < 0.5 && math.Abs(e.physics.Y-a.y) < 0.5 {
+		if math.Abs(e.physics.X-a.x) < a.distance && math.Abs(e.physics.Y-a.y) < a.distance {
 			a.complete = true
 		}
+	case *EntityActionPlace:
+		fmt.Println("TODO: Place turret @", a.x, a.y)
+		a.complete = true
 	}
 	// Separate action removal for now.
 	if e.action != nil && e.action.Complete() {
-		e.action = nil
+		e.action = e.action.Next()
 	}
 	return nil
 }
