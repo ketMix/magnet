@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 
@@ -55,8 +54,8 @@ func (s *PlayState) buildFromLevel() {
 
 // PlaceEntity places the given entity into the game world, aligned by cell and centered within a cell.
 func (s *PlayState) PlaceEntity(e Entity, x, y int) {
-	e.Physics().X = float64(x)*float64(cellWidth) + float64(cellWidth)/2
-	e.Physics().Y = float64(y)*float64(cellHeight) + float64(cellHeight)/2
+	e.Physics().X = float64(x*cellWidth + cellWidth/2)
+	e.Physics().Y = float64(y*cellHeight + cellHeight/2)
 	s.entities = append(s.entities, e)
 }
 
@@ -75,20 +74,29 @@ func (s *PlayState) Update() error {
 
 	// For now we're effectively recreating the entities slice per update, so as to allow for entity update followed by entity deletion.
 	t := s.entities[:0]
+	var requests []Request
 	for _, e := range s.entities {
 		if request, err := e.Update(); err != nil {
 			panic(err)
 		} else if request != nil {
-			switch r := request.(type) {
-			case SpawnTurretRequest:
-				fmt.Println("SPAWN TURRET @", r.x, r.y)
-			}
+			requests = append(requests, request)
 		}
 		if !e.Trashed() {
 			t = append(t, e)
 		}
 	}
 	s.entities = t
+
+	// Iterate through our requests.
+	for _, r := range requests {
+		switch r := r.(type) {
+		case SpawnTurretRequest:
+			// TODO: Check if location is still valid.
+			e := NewTurretEntity()
+			s.PlaceEntity(e, r.x, r.y)
+			// TODO: Mark cell as blocked.
+		}
+	}
 
 	return nil
 }
@@ -125,7 +133,12 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 					op := &ebiten.DrawImageOptions{}
 					op.ColorM.Scale(1, 1, 1, 0.5)
 					op.GeoM.Concat(screenOp.GeoM)
-					op.GeoM.Translate(float64(a.x*cellWidth), float64(a.y*cellHeight))
+					op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
+					// Draw from center.
+					op.GeoM.Translate(
+						-float64(turretBaseImage.Bounds().Dx())/2,
+						-float64(turretBaseImage.Bounds().Dy())/2,
+					)
 					screen.DrawImage(turretBaseImage, op)
 				}
 			}
