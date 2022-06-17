@@ -118,11 +118,19 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 
 	// Draw the map.
 	for y, r := range s.level.cells {
-		for x := range r {
+		for x, c := range r {
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Concat(screenOp.GeoM)
 			op.GeoM.Translate(float64(x*cellWidth), float64(y*cellHeight))
-			screen.DrawImage(grassImage, op)
+			if c.kind == BlockedCell {
+				// Don't mind my magic numbers.
+				op.GeoM.Translate(0, -11)
+				screen.DrawImage(blockedImage, op)
+			} else if c.kind == EmptyCell {
+				// nada
+			} else {
+				screen.DrawImage(grassImage, op)
+			}
 		}
 	}
 

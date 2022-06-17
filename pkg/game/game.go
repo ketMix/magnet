@@ -15,6 +15,7 @@ var (
 	normalFace, boldFace      font.Face
 	playerImage               *ebiten.Image
 	grassImage                *ebiten.Image
+	blockedImage              *ebiten.Image
 	turretBaseImage           *ebiten.Image
 	//
 	turretPlaceSound *Sound
@@ -90,6 +91,12 @@ func (g *Game) Init() (err error) {
 	} else {
 		panic(err)
 	}
+	if img, err := readImage("blocked.png"); err == nil {
+		blockedImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
 	if img, err := readImage("turret-base2.png"); err == nil {
 		turretBaseImage = ebiten.NewImageFromImage(img)
 	} else {

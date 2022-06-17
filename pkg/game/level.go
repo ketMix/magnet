@@ -22,6 +22,7 @@ const (
 	PathCell
 	CoreCell
 	BlockedCell
+	EmptyCell
 	NorthSpawnCell
 	SouthSpawnCell
 )
@@ -45,6 +46,8 @@ func newCell(r rune) (c Cell) {
 		c.kind = PlayerCell
 	case '#': // unbuildable tile
 		c.kind = BlockedCell
+	case ' ': // unpathable tile -- like '#', but no image.
+		c.kind = EmptyCell
 	}
 	return c
 }
