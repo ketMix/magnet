@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -15,6 +16,8 @@ var (
 	playerImage               *ebiten.Image
 	grassImage                *ebiten.Image
 	turretBaseImage           *ebiten.Image
+	//
+	turretPlaceSound *Sound
 )
 
 // Game is our ebiten engine interface compliant type.
@@ -40,6 +43,9 @@ func (g *Game) Init() (err error) {
 
 	// Size our screen.
 	ebiten.SetWindowSize(1280, 720)
+
+	// Setup audio context.
+	audio.NewContext(44100)
 
 	// Load our global fonts.
 	data, err := readFile("fonts/OpenSansPX.ttf")
@@ -86,6 +92,13 @@ func (g *Game) Init() (err error) {
 	}
 	if img, err := readImage("turret-base2.png"); err == nil {
 		turretBaseImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	// Load some sounds.
+	if snd, err := readSound("turret-place.ogg"); err == nil {
+		turretPlaceSound = snd
 	} else {
 		panic(err)
 	}

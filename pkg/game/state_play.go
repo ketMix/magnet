@@ -95,6 +95,7 @@ func (s *PlayState) Update() error {
 			// TODO: Check if location is still valid.
 			e := NewTurretEntity()
 			s.PlaceEntity(e, r.x, r.y)
+			turretPlaceSound.Play(1)
 			// TODO: Mark cell as blocked.
 		}
 	}
