@@ -38,8 +38,8 @@ func (p *Player) Update(s *PlayState) error {
 			x, y := ebiten.CursorPosition()
 			// TODO: Make target the center of the closest intersecting cell.
 			action = &EntityActionMove{
-				x:        float64(x) - s.cameraX,
-				y:        float64(y) - s.cameraY,
+				x:        float64(x) - s.world.cameraX,
+				y:        float64(y) - s.world.cameraY,
 				distance: 0.5,
 			}
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {

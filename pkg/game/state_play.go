@@ -2,76 +2,24 @@ package game
 
 import (
 	"image/color"
-	"math"
-	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
 type PlayState struct {
-	game             *Game
-	level            Level
-	liveCells        [][]Cell // Live cells are a copy of Level's cells that can be freely modified.
-	cameraX, cameraY float64
-	entities         []Entity
-	currentTileset   TileSet
+	game      *Game
+	level     Level
+	world     World
+	liveCells [][]Cell // Live cells are a copy of Level's cells that can be freely modified.
 }
 
 func (s *PlayState) Init() error {
-	s.buildFromLevel()
+	s.world.game = s.game // Eww
+	if err := s.world.BuildFromLevel(s.level); err != nil {
+		return err
+	}
 	return nil
-}
-
-// buildLevel builds the world from the level field.
-func (s *PlayState) buildFromLevel() {
-	s.liveCells = make([][]Cell, 0)
-	for y, r := range s.level.cells {
-		s.liveCells = append(s.liveCells, []Cell{})
-		for x, c := range r {
-			s.liveCells[y] = append(s.liveCells[y], c)
-			switch c.kind {
-			case BlockedCell:
-			case CoreCell:
-			case PlayerCell:
-				// Add entity for player if one does not exist.
-				var target *Player
-				for _, p := range s.game.players {
-					if p.entity == nil {
-						target = p
-						break
-					}
-				}
-				if target != nil {
-					e := NewActorEntity(target)
-					// Tie 'em together.
-					e.player = target
-					target.entity = e
-					// And place.
-					s.PlaceEntity(e, x, y)
-				}
-			case SouthSpawnCell:
-			case NorthSpawnCell:
-			case PathCell:
-			}
-		}
-	}
-	tileset := s.level.tileset
-	if tileset == "" {
-		tileset = "nature"
-	}
-	ts, err := loadTileSet(tileset)
-	if err != nil {
-		panic(err)
-	}
-	s.currentTileset = ts
-}
-
-// PlaceEntity places the given entity into the game world, aligned by cell and centered within a cell.
-func (s *PlayState) PlaceEntity(e Entity, x, y int) {
-	e.Physics().X = float64(x*cellWidth + cellWidth/2)
-	e.Physics().Y = float64(y*cellHeight + cellHeight/2)
-	s.entities = append(s.entities, e)
 }
 
 func (s *PlayState) Dispose() error {
@@ -87,115 +35,17 @@ func (s *PlayState) Update() error {
 		}
 	}
 
-	// For now we're effectively recreating the entities slice per update, so as to allow for entity update followed by entity deletion.
-	t := s.entities[:0]
-	var requests []Request
-	for _, e := range s.entities {
-		if request, err := e.Update(); err != nil {
-			panic(err)
-		} else if request != nil {
-			requests = append(requests, request)
-		}
-		if !e.Trashed() {
-			t = append(t, e)
-		}
-	}
-	s.entities = t
-
-	// Iterate through our requests.
-	for _, r := range requests {
-		switch r := r.(type) {
-		case UseToolRequest:
-			if r.kind == ToolTurret {
-				// TODO: Check if location is valid.
-				if s.isCellOpen(r.x, r.y) {
-					e := NewTurretEntity()
-					s.PlaceEntity(e, r.x, r.y)
-					turretPlaceSound.Play(1)
-					s.setCellEntity(r.x, r.y, e)
-				}
-				// TODO: Mark cell as blocked.
-			} else if r.kind == ToolDestroy {
-				e := s.getCellEntity(r.x, r.y)
-				if e != nil {
-					s.setCellEntity(r.x, r.y, nil)
-					e.Trash()
-				}
-			}
-		}
+	// Update our world.
+	if err := s.world.Update(); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (s *PlayState) Draw(screen *ebiten.Image) {
-	// Get our "camera" position.
-	screenOp := &ebiten.DrawImageOptions{}
-	// FIXME: Base this on some sort of player lookup or a global self reference.
-	if s.game.players[0].entity != nil {
-		s.cameraX = -s.game.players[0].entity.Physics().X + float64(screenWidth)/2
-		s.cameraY = -s.game.players[0].entity.Physics().Y + float64(screenHeight)/2
-	}
-	screenOp.GeoM.Translate(
-		s.cameraX,
-		s.cameraY,
-	)
-
-	// Draw the map.
-	for y, r := range s.liveCells {
-		for x, c := range r {
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Concat(screenOp.GeoM)
-			op.GeoM.Translate(float64(x*cellWidth), float64(y*cellHeight))
-			if c.kind == BlockedCell {
-				// Don't mind my magic numbers.
-				op.GeoM.Translate(0, -11)
-				screen.DrawImage(s.currentTileset.blockedImage, op)
-			} else if c.kind == EmptyCell {
-				// nada
-			} else {
-				if c.alt {
-					screen.DrawImage(s.currentTileset.openImage2, op)
-				} else {
-					screen.DrawImage(s.currentTileset.openImage, op)
-				}
-			}
-		}
-	}
-
-	// Check for any special pending renders, such as move target or pending turret location.
-	for _, p := range s.game.players {
-		if p.entity != nil {
-			if p.entity.Action() != nil && p.entity.Action().Next() != nil {
-				switch a := p.entity.Action().Next().(type) {
-				case *EntityActionPlace:
-					if a.kind == ToolTurret {
-						op := &ebiten.DrawImageOptions{}
-						op.ColorM.Scale(1, 1, 1, 0.5)
-						op.GeoM.Concat(screenOp.GeoM)
-						op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
-						// Draw from center.
-						op.GeoM.Translate(
-							-float64(turretBaseImage.Bounds().Dx())/2,
-							-float64(turretBaseImage.Bounds().Dy())/2,
-						)
-						screen.DrawImage(turretBaseImage, op)
-					}
-				}
-			}
-		}
-	}
-
-	// Make a sorted list of our entities to render.
-	sortedEntities := make([]Entity, len(s.entities))
-	copy(sortedEntities, s.entities)
-	sort.SliceStable(sortedEntities, func(i, j int) bool {
-		return sortedEntities[i].Physics().Y < sortedEntities[j].Physics().Y
-	})
-	// Draw our entities.
-	for _, e := range sortedEntities {
-		e.Draw(screen, screenOp)
-	}
+	// Draw our world.
+	s.world.Draw(screen)
 
 	// Draw level text centered at top of screen for now.
 	bounds := text.BoundString(boldFace, s.level.title)
@@ -209,53 +59,12 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 // getCursorPosition returns the cursor position relative to the map.
 func (s *PlayState) getCursorPosition() (x, y int) {
 	x, y = ebiten.CursorPosition()
-	x -= int(s.cameraX)
-	y -= int(s.cameraY)
+	x -= int(s.world.cameraX)
+	y -= int(s.world.cameraY)
 	return x, y
 }
 
 // getClosestCellPosition returns the closest cell position to the passed x and y coords.
 func (s *PlayState) getClosestCellPosition(x, y int) (int, int) {
-	tx, ty := math.Floor(float64(x)/float64(cellWidth)), math.Floor(float64(y)/float64(cellHeight))
-	return int(tx), int(ty)
-}
-
-// isCellInBounds returns if the given coordinate is within map bounds.
-func (s *PlayState) isCellInBounds(x, y int) bool {
-	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
-		return false
-	}
-	return true
-}
-
-// isCellOpen checks if the cell is open for placing an entity onto.
-func (s *PlayState) isCellOpen(x, y int) bool {
-	if !s.isCellInBounds(x, y) {
-		return false
-	}
-	if s.liveCells[y][x].entity != nil {
-		return false
-	}
-	if s.liveCells[y][x].kind == NoneCell || s.liveCells[y][x].kind == PlayerCell {
-		return true
-	}
-	return false
-}
-
-// setCellEntity sets the given cell's entity to the provided entity or nil value.
-func (s *PlayState) setCellEntity(x, y int, e Entity) {
-	if !s.isCellInBounds(x, y) {
-		return
-	}
-	if e == nil || s.isCellOpen(x, y) {
-		s.liveCells[y][x].entity = e
-	}
-}
-
-// getCellEntity gets the entity reference stored at the given cell.
-func (s *PlayState) getCellEntity(x, y int) Entity {
-	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
-		return nil
-	}
-	return s.liveCells[y][x].entity
+	return s.world.GetClosestCellPosition(x, y)
 }
