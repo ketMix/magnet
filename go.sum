@@ -8,12 +8,16 @@ github.com/hajimehoshi/ebiten/v2 v2.3.4 h1:PEPbid818lZCScgUReBt13r9THPJir/Wc49DG
 github.com/hajimehoshi/ebiten/v2 v2.3.4/go.mod h1:vxwpo0q0oSi1cIll0Q3Ui33TVZgeHuFVYzIRk7FwuVk=
 github.com/hajimehoshi/file2byteslice v0.0.0-20210813153925-5340248a8f41/go.mod h1:CqqAHp7Dk/AqQiwuhV1yT2334qbA/tFWQW0MD2dGqUE=
 github.com/hajimehoshi/go-mp3 v0.3.3/go.mod h1:qMJj/CSDxx6CGHiZeCgbiq2DSUkbK0UbtXShQcnfyMM=
+github.com/hajimehoshi/oto v0.6.1 h1:7cJz/zRQV4aJvMSSRqzN2TImoVVMpE0BCY4nrNJaDOM=
 github.com/hajimehoshi/oto v0.6.1/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2hrh6raOI=
+github.com/hajimehoshi/oto/v2 v2.1.0 h1:/h+UkbKzhD7xBHOQlWgKUplBPZ+J4DK3P2Y7g2UF1X4=
 github.com/hajimehoshi/oto/v2 v2.1.0/go.mod h1:9i0oYbpJ8BhVGkXDKdXKfFthX1JUNfXjeTp944W8TGM=
 github.com/jakecoffman/cp v1.1.0/go.mod h1:JjY/Fp6d8E1CHnu74gWNnU0+b9VzEdUVPoJxg2PsTQg=
 github.com/jezek/xgb v1.0.0 h1:s2rRzAV8KQRlpsYA7Uyxoidv1nodMF0m6dIG6FhhVLQ=
 github.com/jezek/xgb v1.0.0/go.mod h1:nrhwO0FX/enq75I7Y7G8iN1ubpSGZEiA3v9e9GyRFlk=
+github.com/jfreymuth/oggvorbis v1.0.3 h1:MLNGGyhOMiVcvea9Dp5+gbs2SAwqwQbtrWnonYa0M0Y=
 github.com/jfreymuth/oggvorbis v1.0.3/go.mod h1:1U4pqWmghcoVsCJJ4fRBKv9peUJMBHixthRlBeD6uII=
+github.com/jfreymuth/vorbis v1.0.2 h1:m1xH6+ZI4thH927pgKD8JOH4eaGRm18rEE9/0WKjvNE=
 github.com/jfreymuth/vorbis v1.0.2/go.mod h1:DoftRo4AznKnShRl1GxiTFCseHr4zR9BN3TWXyuzrqQ=
 github.com/kettek/gobl v0.1.0 h1:D8RUaV7Xzlmx7UHj0XQL/+mSeSMRrfPG7sSfzBjGCnI=
 github.com/kettek/gobl v0.1.0/go.mod h1:x08Yfd9JU5Xqv69pggE1ieWICu+sZeMphOmhx1TSud4=
