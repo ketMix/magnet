@@ -16,9 +16,9 @@ func NewPlayer() *Player {
 	return &Player{
 		toolbelt: Toolbelt{
 			items: []*ToolbeltItem{
-				{kind: ToolTurret},
-				{kind: ToolWall},
-				{kind: ToolDestroy},
+				{kind: ToolTurret, key: ebiten.Key1},
+				{kind: ToolWall, key: ebiten.Key2},
+				{kind: ToolDestroy, key: ebiten.Key3},
 			},
 		},
 	}

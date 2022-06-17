@@ -74,18 +74,23 @@ const (
 type ToolbeltItem struct {
 	kind   ToolKind
 	x, y   int
+	key    ebiten.Key // Key to check against for activation.
 	active bool
 }
 
 func (t *ToolbeltItem) Update() (request Request) {
-	x, y := ebiten.CursorPosition()
-	x1, x2 := t.x-toolSlotImage.Bounds().Dx()/2, t.x+toolSlotImage.Bounds().Dx()/2
-	y1, y2 := t.y-toolSlotImage.Bounds().Dy()/2, t.y+toolSlotImage.Bounds().Dy()/2
-
 	// Does the cursor intersect us?
-	if x >= x1 && x <= x2 && y >= y1 && y <= y2 {
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			return SelectToolbeltItemRequest{t.kind}
+	if ebiten.IsKeyPressed(t.key) {
+		return SelectToolbeltItemRequest{t.kind}
+	} else {
+		x, y := ebiten.CursorPosition()
+		x1, x2 := t.x-toolSlotImage.Bounds().Dx()/2, t.x+toolSlotImage.Bounds().Dx()/2
+		y1, y2 := t.y-toolSlotImage.Bounds().Dy()/2, t.y+toolSlotImage.Bounds().Dy()/2
+
+		if x >= x1 && x <= x2 && y >= y1 && y <= y2 {
+			if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+				return SelectToolbeltItemRequest{t.kind}
+			}
 		}
 	}
 	return nil
