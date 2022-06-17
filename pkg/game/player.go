@@ -80,6 +80,7 @@ func (p *Player) Update(s *PlayState) error {
 			}
 		}
 		if action != nil && (p.entity.Action() == nil || p.entity.Action().Replaceable()) {
+			// TODO: Add a "chainable" action field that will instead add a new action as the next action in the deepest nested next action.
 			p.entity.SetAction(action)
 		}
 	}
