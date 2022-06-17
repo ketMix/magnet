@@ -23,3 +23,12 @@ func readImage(p string) (image.Image, error) {
 	img, _, err := image.Decode(bytes.NewReader(data))
 	return img, err
 }
+
+func readSound(p string) (*Sound, error) {
+	data, err := readFile(path.Join("sounds", p))
+	if err != nil {
+		return nil, err
+	}
+	snd, err := NewSound(data)
+	return snd, err
+}
