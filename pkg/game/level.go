@@ -8,10 +8,11 @@ import (
 )
 
 type Level struct {
-	title  string
-	width  int
-	height int
-	cells  [][]Cell
+	title   string
+	tileset string
+	width   int
+	height  int
+	cells   [][]Cell
 }
 
 type CellKind int
@@ -68,6 +69,8 @@ func loadLevel(p string) (l Level, err error) {
 				parsingHeader = false
 			} else if t[0] == 'T' {
 				l.title = strings.TrimSpace(t[1:])
+			} else if t[0] == 'S' {
+				l.tileset = strings.TrimSpace(t[1:])
 			}
 		} else {
 			if len(t) > l.width {

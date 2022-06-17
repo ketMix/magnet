@@ -14,8 +14,6 @@ var (
 	screenWidth, screenHeight int
 	normalFace, boldFace      font.Face
 	playerImage               *ebiten.Image
-	grassImage                *ebiten.Image
-	blockedImage              *ebiten.Image
 	turretBaseImage           *ebiten.Image
 	//
 	turretPlaceSound *Sound
@@ -83,16 +81,6 @@ func (g *Game) Init() (err error) {
 	// Load some images.
 	if img, err := readImage("player.png"); err == nil {
 		playerImage = ebiten.NewImageFromImage(img)
-	} else {
-		panic(err)
-	}
-	if img, err := readImage("grass.png"); err == nil {
-		grassImage = ebiten.NewImageFromImage(img)
-	} else {
-		panic(err)
-	}
-	if img, err := readImage("blocked.png"); err == nil {
-		blockedImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}

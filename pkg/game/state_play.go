@@ -14,6 +14,7 @@ type PlayState struct {
 	level            Level
 	cameraX, cameraY float64
 	entities         []Entity
+	currentTileset   TileSet
 }
 
 func (s *PlayState) Init() error {
@@ -51,6 +52,15 @@ func (s *PlayState) buildFromLevel() {
 			}
 		}
 	}
+	tileset := s.level.tileset
+	if tileset == "" {
+		tileset = "nature"
+	}
+	ts, err := loadTileSet(tileset)
+	if err != nil {
+		panic(err)
+	}
+	s.currentTileset = ts
 }
 
 // PlaceEntity places the given entity into the game world, aligned by cell and centered within a cell.
@@ -125,11 +135,11 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 			if c.kind == BlockedCell {
 				// Don't mind my magic numbers.
 				op.GeoM.Translate(0, -11)
-				screen.DrawImage(blockedImage, op)
+				screen.DrawImage(s.currentTileset.blockedImage, op)
 			} else if c.kind == EmptyCell {
 				// nada
 			} else {
-				screen.DrawImage(grassImage, op)
+				screen.DrawImage(s.currentTileset.openImage, op)
 			}
 		}
 	}
