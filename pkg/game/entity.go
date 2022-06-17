@@ -5,6 +5,7 @@ import "github.com/hajimehoshi/ebiten/v2"
 type Entity interface {
 	Physics() *PhysicsObject
 	Trashed() bool
+	Trash()
 	Update() (Request, error)
 	Draw(screen *ebiten.Image, op *ebiten.DrawImageOptions) // Eh, might as well allow the entities to draw themselves.
 	Action() EntityAction
