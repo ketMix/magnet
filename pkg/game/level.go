@@ -30,6 +30,7 @@ const (
 
 type Cell struct {
 	kind CellKind
+	alt  bool
 	// ???
 }
 
@@ -37,6 +38,7 @@ func newCell(r rune) (c Cell) {
 	switch r {
 	case 'N': // north spawn
 		c.kind = NorthSpawnCell
+		c.alt = true
 	case 'S': // south spawn
 		c.kind = SouthSpawnCell
 	case 'v': // pathing node
@@ -47,6 +49,8 @@ func newCell(r rune) (c Cell) {
 		c.kind = PlayerCell
 	case '#': // unbuildable tile
 		c.kind = BlockedCell
+	case ',': // alternative open cell
+		c.alt = true
 	case ' ': // unpathable tile -- like '#', but no image.
 		c.kind = EmptyCell
 	}

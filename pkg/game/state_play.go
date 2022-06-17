@@ -139,7 +139,11 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 			} else if c.kind == EmptyCell {
 				// nada
 			} else {
-				screen.DrawImage(s.currentTileset.openImage, op)
+				if c.alt {
+					screen.DrawImage(s.currentTileset.openImage2, op)
+				} else {
+					screen.DrawImage(s.currentTileset.openImage, op)
+				}
 			}
 		}
 	}
