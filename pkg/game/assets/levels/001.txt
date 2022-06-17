@@ -1,4 +1,5 @@
 T The Start
+S magnet
 
 ###   ###
 #N#   #S#
