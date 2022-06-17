@@ -15,6 +15,7 @@ var (
 	normalFace, boldFace               font.Face
 	playerImage                        *ebiten.Image
 	turretBaseImage                    *ebiten.Image
+	spawnerImage, spawnerShadowImage   *ebiten.Image
 	toolSlotImage, toolSlotActiveImage *ebiten.Image
 	toolDestroyImage                   *ebiten.Image
 	//
@@ -89,6 +90,18 @@ func (g *Game) Init() (err error) {
 
 	if img, err := readImage("turret-base2.png"); err == nil {
 		turretBaseImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("spawner.png"); err == nil {
+		spawnerImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("spawner-shadow.png"); err == nil {
+		spawnerShadowImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}

@@ -54,6 +54,9 @@ func (w *World) BuildFromLevel(level Level) error {
 					// And place.
 					w.PlaceEntity(e, x, y)
 				}
+			} else if c.kind == SouthSpawnCell || c.kind == NorthSpawnCell {
+				e := NewSpawnerEntity()
+				w.PlaceEntity(e, x, y)
 			}
 			// Create the cell.
 			cell := LiveCell{
