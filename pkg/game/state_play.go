@@ -62,8 +62,3 @@ func (s *PlayState) getCursorPosition() (x, y int) {
 	y -= int(s.world.cameraY)
 	return x, y
 }
-
-// getClosestCellPosition returns the closest cell position to the passed x and y coords.
-func (s *PlayState) getClosestCellPosition(x, y int) (int, int) {
-	return s.world.GetClosestCellPosition(x, y)
-}

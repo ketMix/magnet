@@ -45,7 +45,7 @@ func (p *Player) Update(s *PlayState) error {
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			// Send turret placement request at the cell closest to the mouse.
 			cx, cy := s.getCursorPosition()
-			tx, ty := s.getClosestCellPosition(cx, cy)
+			tx, ty := s.world.GetClosestCellPosition(cx, cy)
 			// We wrap the place action as a move action's next step.
 			action = &EntityActionMove{
 				x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
