@@ -8,10 +8,9 @@ import (
 )
 
 type PlayState struct {
-	game      *Game
-	level     Level
-	world     World
-	liveCells [][]Cell // Live cells are a copy of Level's cells that can be freely modified.
+	game  *Game
+	level Level
+	world World
 }
 
 func (s *PlayState) Init() error {
