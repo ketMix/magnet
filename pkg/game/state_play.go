@@ -108,14 +108,19 @@ func (s *PlayState) Update() error {
 		case UseToolRequest:
 			if r.kind == ToolTurret {
 				// TODO: Check if location is valid.
-				e := NewTurretEntity()
-				s.PlaceEntity(e, r.x, r.y)
-				turretPlaceSound.Play(1)
+				if s.isCellOpen(r.x, r.y) {
+					e := NewTurretEntity()
+					s.PlaceEntity(e, r.x, r.y)
+					turretPlaceSound.Play(1)
+					s.setCellEntity(r.x, r.y, e)
+				}
 				// TODO: Mark cell as blocked.
 			} else if r.kind == ToolDestroy {
-				// TODO: Check if location is valid.
-				// TODO: If location cell is marked as blocked, check if it has an associated entity. If it does and we own it, destroy it.
-				// TODO: Mark cell as open.
+				e := s.getCellEntity(r.x, r.y)
+				if e != nil {
+					s.clearCellEntity(r.x, r.y)
+					e.Trash()
+				}
 			}
 		}
 	}
@@ -213,4 +218,38 @@ func (s *PlayState) getCursorPosition() (x, y int) {
 func (s *PlayState) getClosestCellPosition(x, y int) (int, int) {
 	tx, ty := math.Floor(float64(x)/float64(cellWidth)), math.Floor(float64(y)/float64(cellHeight))
 	return int(tx), int(ty)
+}
+
+func (s *PlayState) isCellOpen(x, y int) bool {
+	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
+		return false
+	}
+	if s.liveCells[y][x].entity != nil {
+		return false
+	}
+	if s.liveCells[y][x].kind == NoneCell || s.liveCells[y][x].kind == PlayerCell {
+		return true
+	}
+	return false
+}
+
+func (s *PlayState) setCellEntity(x, y int, e Entity) {
+	if !s.isCellOpen(x, y) {
+		return
+	}
+	s.liveCells[y][x].entity = e
+}
+
+func (s *PlayState) clearCellEntity(x, y int) {
+	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
+		return
+	}
+	s.liveCells[y][x].entity = nil
+}
+
+func (s *PlayState) getCellEntity(x, y int) Entity {
+	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
+		return nil
+	}
+	return s.liveCells[y][x].entity
 }
