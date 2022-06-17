@@ -118,7 +118,7 @@ func (s *PlayState) Update() error {
 			} else if r.kind == ToolDestroy {
 				e := s.getCellEntity(r.x, r.y)
 				if e != nil {
-					s.clearCellEntity(r.x, r.y)
+					s.setCellEntity(r.x, r.y, nil)
 					e.Trash()
 				}
 			}
@@ -220,8 +220,17 @@ func (s *PlayState) getClosestCellPosition(x, y int) (int, int) {
 	return int(tx), int(ty)
 }
 
-func (s *PlayState) isCellOpen(x, y int) bool {
+// isCellInBounds returns if the given coordinate is within map bounds.
+func (s *PlayState) isCellInBounds(x, y int) bool {
 	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
+		return false
+	}
+	return true
+}
+
+// isCellOpen checks if the cell is open for placing an entity onto.
+func (s *PlayState) isCellOpen(x, y int) bool {
+	if !s.isCellInBounds(x, y) {
 		return false
 	}
 	if s.liveCells[y][x].entity != nil {
@@ -233,20 +242,17 @@ func (s *PlayState) isCellOpen(x, y int) bool {
 	return false
 }
 
+// setCellEntity sets the given cell's entity to the provided entity or nil value.
 func (s *PlayState) setCellEntity(x, y int, e Entity) {
-	if !s.isCellOpen(x, y) {
+	if !s.isCellInBounds(x, y) {
 		return
 	}
-	s.liveCells[y][x].entity = e
-}
-
-func (s *PlayState) clearCellEntity(x, y int) {
-	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
-		return
+	if e == nil || s.isCellOpen(x, y) {
+		s.liveCells[y][x].entity = e
 	}
-	s.liveCells[y][x].entity = nil
 }
 
+// getCellEntity gets the entity reference stored at the given cell.
 func (s *PlayState) getCellEntity(x, y int) Entity {
 	if x < 0 || x >= s.level.width || y < 0 || y >= s.level.height {
 		return nil
