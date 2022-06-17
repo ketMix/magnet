@@ -39,6 +39,7 @@ type EntityActionPlace struct {
 	// x and y are cell positions to place at.
 	x, y     int
 	complete bool
+	kind     ToolKind
 }
 
 func (a *EntityActionPlace) Replaceable() bool {

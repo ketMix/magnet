@@ -101,12 +101,18 @@ func (s *PlayState) Update() error {
 	// Iterate through our requests.
 	for _, r := range requests {
 		switch r := r.(type) {
-		case SpawnTurretRequest:
-			// TODO: Check if location is still valid.
-			e := NewTurretEntity()
-			s.PlaceEntity(e, r.x, r.y)
-			turretPlaceSound.Play(1)
-			// TODO: Mark cell as blocked.
+		case UseToolRequest:
+			if r.kind == ToolTurret {
+				// TODO: Check if location is valid.
+				e := NewTurretEntity()
+				s.PlaceEntity(e, r.x, r.y)
+				turretPlaceSound.Play(1)
+				// TODO: Mark cell as blocked.
+			} else if r.kind == ToolDestroy {
+				// TODO: Check if location is valid.
+				// TODO: If location cell is marked as blocked, check if it has an associated entity. If it does and we own it, destroy it.
+				// TODO: Mark cell as open.
+			}
 		}
 	}
 
@@ -154,16 +160,18 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 			if p.entity.Action() != nil && p.entity.Action().Next() != nil {
 				switch a := p.entity.Action().Next().(type) {
 				case *EntityActionPlace:
-					op := &ebiten.DrawImageOptions{}
-					op.ColorM.Scale(1, 1, 1, 0.5)
-					op.GeoM.Concat(screenOp.GeoM)
-					op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
-					// Draw from center.
-					op.GeoM.Translate(
-						-float64(turretBaseImage.Bounds().Dx())/2,
-						-float64(turretBaseImage.Bounds().Dy())/2,
-					)
-					screen.DrawImage(turretBaseImage, op)
+					if a.kind == ToolTurret {
+						op := &ebiten.DrawImageOptions{}
+						op.ColorM.Scale(1, 1, 1, 0.5)
+						op.GeoM.Concat(screenOp.GeoM)
+						op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
+						// Draw from center.
+						op.GeoM.Translate(
+							-float64(turretBaseImage.Bounds().Dx())/2,
+							-float64(turretBaseImage.Bounds().Dy())/2,
+						)
+						screen.DrawImage(turretBaseImage, op)
+					}
 				}
 			}
 		}
@@ -184,6 +192,9 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	bounds := text.BoundString(boldFace, s.level.title)
 	centeredX := screenWidth/2 - bounds.Min.X - bounds.Dx()/2
 	text.Draw(screen, s.level.title, boldFace, centeredX, bounds.Dy()+1, color.White)
+
+	// Draw our player's belt!
+	s.game.players[0].toolbelt.Draw(screen)
 }
 
 // getCursorPosition returns the cursor position relative to the map.

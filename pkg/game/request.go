@@ -4,8 +4,15 @@ package game
 type Request interface {
 }
 
-// SpawnTurretRequest attempts to spawn a turret of a type at a given cell.
-type SpawnTurretRequest struct {
+// UseToolRequest attempts to use the tool at a given cell.
+type UseToolRequest struct {
 	x, y int
-	kind int // ???
+	kind ToolKind // ???
+}
+
+// Belt-related requests.
+
+// SelectToolbeltItemRequest selects a given toolbelt item
+type SelectToolbeltItemRequest struct {
+	kind ToolKind
 }

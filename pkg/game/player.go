@@ -8,14 +8,30 @@ import (
 type Player struct {
 	// entity is the player-controlled entity.
 	entity Entity
+	// I suppose the toolbelt should be here.
+	toolbelt Toolbelt
 }
 
 func NewPlayer() *Player {
-	return &Player{}
+	return &Player{
+		toolbelt: Toolbelt{
+			items: []*ToolbeltItem{
+				{kind: ToolTurret},
+				{kind: ToolWall},
+				{kind: ToolDestroy},
+			},
+		},
+	}
 }
 
 // It's kind of weird to pass the play state, but oh well.
 func (p *Player) Update(s *PlayState) error {
+	// FIXME: This should be only be called when the window is changed.
+	p.toolbelt.Position()
+	// Handle our toolbelt first.
+	if req := p.toolbelt.Update(); req != nil {
+		return nil
+	}
 	if p.entity != nil {
 		var action EntityAction
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
@@ -36,8 +52,9 @@ func (p *Player) Update(s *PlayState) error {
 				y:        float64(ty+1)*float64(cellHeight) + float64(cellHeight)/2,
 				distance: 8,
 				next: &EntityActionPlace{
-					x: tx,
-					y: ty,
+					x:    tx,
+					y:    ty,
+					kind: p.toolbelt.activeItem.kind,
 				},
 			}
 		} else if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyD) {

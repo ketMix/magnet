@@ -38,9 +38,10 @@ func (e *ActorEntity) Update() (request Request, err error) {
 		e.physics.Y -= y
 	case *EntityActionPlace:
 		a.complete = true
-		request = SpawnTurretRequest{
-			x: a.x,
-			y: a.y,
+		request = UseToolRequest{
+			x:    a.x,
+			y:    a.y,
+			kind: a.kind,
 		}
 	}
 	// Separate action removal for now.

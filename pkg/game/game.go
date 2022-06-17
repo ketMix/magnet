@@ -10,11 +10,13 @@ import (
 // For now...
 var (
 	// Our internal screen width and height.
-	cellWidth, cellHeight     int
-	screenWidth, screenHeight int
-	normalFace, boldFace      font.Face
-	playerImage               *ebiten.Image
-	turretBaseImage           *ebiten.Image
+	cellWidth, cellHeight              int
+	screenWidth, screenHeight          int
+	normalFace, boldFace               font.Face
+	playerImage                        *ebiten.Image
+	turretBaseImage                    *ebiten.Image
+	toolSlotImage, toolSlotActiveImage *ebiten.Image
+	toolDestroyImage                   *ebiten.Image
 	//
 	turretPlaceSound *Sound
 )
@@ -87,6 +89,24 @@ func (g *Game) Init() (err error) {
 
 	if img, err := readImage("turret-base2.png"); err == nil {
 		turretBaseImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("toolslot.png"); err == nil {
+		toolSlotImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("toolslot-active.png"); err == nil {
+		toolSlotActiveImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("tool-destroy.png"); err == nil {
+		toolDestroyImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
