@@ -12,6 +12,7 @@ import (
 type PlayState struct {
 	game             *Game
 	level            Level
+	liveCells        [][]Cell // Live cells are a copy of Level's cells that can be freely modified.
 	cameraX, cameraY float64
 	entities         []Entity
 	currentTileset   TileSet
@@ -24,8 +25,11 @@ func (s *PlayState) Init() error {
 
 // buildLevel builds the world from the level field.
 func (s *PlayState) buildFromLevel() {
+	s.liveCells = make([][]Cell, 0)
 	for y, r := range s.level.cells {
+		s.liveCells = append(s.liveCells, []Cell{})
 		for x, c := range r {
+			s.liveCells[y] = append(s.liveCells[y], c)
 			switch c.kind {
 			case BlockedCell:
 			case CoreCell:
@@ -133,7 +137,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	)
 
 	// Draw the map.
-	for y, r := range s.level.cells {
+	for y, r := range s.liveCells {
 		for x, c := range r {
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Concat(screenOp.GeoM)
