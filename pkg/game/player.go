@@ -62,7 +62,9 @@ func (p *Player) Update(s *PlayState) error {
 
 			switch p.toolbelt.activeItem.kind {
 			case ToolTurret:
+				fallthrough
 			case ToolWall:
+				fallthrough
 			case ToolDestroy:
 				action = &EntityActionMove{
 					x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
