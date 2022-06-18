@@ -78,19 +78,9 @@ func (p *Player) Update(s *PlayState) error {
 			case ToolGun:
 				// Check if we can fire
 				if p.turret.CanFire() {
-					// Get direction vector from difference of cursor and player
-					px := p.entity.Physics().X
-					py := p.entity.Physics().Y - float64(playerImage.Bounds().Dy())/2
-					vX, vY := GetNormalizedDirection(px, py, float64(cx), float64(cy))
-					xSide := 1.0
-					if vX < 0 {
-						xSide = -xSide
-					}
 					action = &EntityActionShoot{
-						x:        px + (float64(playerImage.Bounds().Dx()/2) * xSide),
-						y:        py,
-						vX:       vX,
-						vY:       vY,
+						targetX:  float64(cx),
+						targetY:  float64(cy),
 						polarity: p.turret.polarity,
 					}
 				}

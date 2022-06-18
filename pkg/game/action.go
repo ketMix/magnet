@@ -55,13 +55,11 @@ func (a *EntityActionPlace) Next() EntityAction {
 }
 
 type EntityActionShoot struct {
-	// x and y are intial position of projecticle
-	// vX and vY are the movement vectors of the projecticle
-	x, y     float64
-	vX, vY   float64
-	polarity Polarity
-	complete bool
-	next     EntityAction
+	// targetX and targetY represent the position to fire at.
+	targetX, targetY float64
+	polarity         Polarity
+	complete         bool
+	next             EntityAction
 }
 
 func (a *EntityActionShoot) Replaceable() bool {

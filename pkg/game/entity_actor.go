@@ -44,13 +44,24 @@ func (e *ActorEntity) Update() (request Request, err error) {
 			kind: a.kind,
 		}
 	case *EntityActionShoot:
+		// Get our player position for spawning.
+		px := e.Physics().X
+		py := e.Physics().Y - float64(playerImage.Bounds().Dy())/2
+
+		// Get direction vector from difference of player and target.
+		vX, vY := GetNormalizedDirection(px, py, float64(a.targetX), float64(a.targetY))
+		xSide := 1.0
+		if vX < 0 {
+			xSide = -xSide
+		}
+
 		// Can apply player's speed to action vector
 		a.complete = true
 		request = SpawnProjecticleRequest{
-			x:        a.x,
-			y:        a.y,
-			vX:       a.vX,
-			vY:       a.vY,
+			x:        px + (float64(playerImage.Bounds().Dx()/2) * xSide),
+			y:        py,
+			vX:       vX,
+			vY:       vY,
 			polarity: a.polarity,
 		}
 	}
