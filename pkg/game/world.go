@@ -52,11 +52,11 @@ func (w *World) BuildFromLevel(level Level) error {
 					e.player = target
 					target.entity = e
 					// And place.
-					w.PlaceEntity(e, x, y)
+					w.PlaceEntityInCell(e, x, y)
 				}
 			} else if c.kind == SouthSpawnCell || c.kind == NorthSpawnCell {
 				e := NewSpawnerEntity()
-				w.PlaceEntity(e, x, y)
+				w.PlaceEntityInCell(e, x, y)
 			}
 			// Create the cell.
 			cell := LiveCell{
@@ -104,7 +104,7 @@ func (w *World) Update() error {
 				if c != nil {
 					if c.IsOpen() {
 						e := NewTurretEntity()
-						w.PlaceEntity(e, r.x, r.y)
+						w.PlaceEntityInCell(e, r.x, r.y)
 						turretPlaceSound.Play(1)
 						c.entity = e
 					}
@@ -120,13 +120,11 @@ func (w *World) Update() error {
 				}
 			}
 		case SpawnProjecticleRequest:
-			// Don't attach projecticle to cell
 			e := NewProjecticleEntity()
-			e.physics.X = r.x
-			e.physics.Y = r.y
 			e.physics.vX = r.vX
 			e.physics.vY = r.vY
 			w.entities = append(w.entities, e)
+			w.PlaceEntityAt(e, r.x, r.y)
 		}
 	}
 
@@ -206,10 +204,15 @@ func (w *World) Draw(screen *ebiten.Image) {
 
 /** ENTITIES **/
 
-// PlaceEntity places the given entity into the level, aligned by cell and centered within a cell.
-func (w *World) PlaceEntity(e Entity, x, y int) {
-	e.Physics().X = float64(x*cellWidth + cellWidth/2)
-	e.Physics().Y = float64(y*cellHeight + cellHeight/2)
+// PlaceEntity places the entity into the world, aligned by cell and centered within a cell.
+func (w *World) PlaceEntityInCell(e Entity, x, y int) {
+	w.PlaceEntityAt(e, float64(x*cellWidth+cellWidth/2), float64(y*cellHeight+cellHeight/2))
+}
+
+// PlaceEntityAt places the entity into the world at the given specific coordinates.
+func (w *World) PlaceEntityAt(e Entity, x, y float64) {
+	e.Physics().X = x
+	e.Physics().Y = y
 	w.entities = append(w.entities, e)
 }
 
