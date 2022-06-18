@@ -53,3 +53,25 @@ func (a *EntityActionPlace) Complete() bool {
 func (a *EntityActionPlace) Next() EntityAction {
 	return nil
 }
+
+type EntityActionShoot struct {
+	// x and y are intial position of projecticle
+	// vX and vY are the movement vectors of the projecticle
+	x, y     float64
+	vX, vY   float64
+	polarity Polarity
+	complete bool
+	next     EntityAction
+}
+
+func (a *EntityActionShoot) Replaceable() bool {
+	return false
+}
+
+func (a *EntityActionShoot) Complete() bool {
+	return a.complete
+}
+
+func (a *EntityActionShoot) Next() EntityAction {
+	return a.next
+}

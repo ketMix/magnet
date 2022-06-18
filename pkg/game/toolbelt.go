@@ -65,6 +65,7 @@ type ToolKind int
 
 const (
 	ToolNone ToolKind = iota
+	ToolGun
 	ToolTurret
 	ToolWall
 	ToolDestroy
@@ -122,13 +123,19 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 	// Move to the center of our item.
 	op.GeoM.Translate(float64(t.x), float64(t.y))
 
+	var image *ebiten.Image
 	if t.kind == ToolTurret {
-		op.GeoM.Translate(-float64(turretBaseImage.Bounds().Dx()/2), -float64(turretBaseImage.Bounds().Dy()/2))
-		screen.DrawImage(turretBaseImage, &op)
+		image = turretBaseImage
 	} else if t.kind == ToolDestroy {
-		op.GeoM.Translate(-float64(toolDestroyImage.Bounds().Dx()/2), -float64(toolDestroyImage.Bounds().Dy()/2))
-		screen.DrawImage(toolDestroyImage, &op)
+		image = toolDestroyImage
+	} else if t.kind == ToolGun {
+		image = toolGunImage
 	} else {
 		// nada
+	}
+
+	if image != nil {
+		op.GeoM.Translate(-float64(image.Bounds().Dx()/2), -float64(image.Bounds().Dy()/2))
+		screen.DrawImage(image, &op)
 	}
 }

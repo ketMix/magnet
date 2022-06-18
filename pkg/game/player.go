@@ -10,16 +10,25 @@ type Player struct {
 	entity Entity
 	// I suppose the toolbelt should be here.
 	toolbelt Toolbelt
+	turret   Turret
 }
 
 func NewPlayer() *Player {
 	return &Player{
 		toolbelt: Toolbelt{
 			items: []*ToolbeltItem{
-				{kind: ToolTurret, key: ebiten.Key1},
-				{kind: ToolWall, key: ebiten.Key2},
-				{kind: ToolDestroy, key: ebiten.Key3},
+				{kind: ToolGun, key: ebiten.Key1},
+				{kind: ToolTurret, key: ebiten.Key2},
+				{kind: ToolWall, key: ebiten.Key3},
+				{kind: ToolDestroy, key: ebiten.Key4},
 			},
+		},
+
+		// Players turret stats
+		turret: Turret{
+			speed:    1.0,
+			rate:     1,
+			polarity: NEUTRAL,
 		},
 	}
 }
@@ -28,6 +37,10 @@ func NewPlayer() *Player {
 func (p *Player) Update(s *PlayState) error {
 	// FIXME: This should be only be called when the window is changed.
 	p.toolbelt.Position()
+
+	// Increment turret tick
+	p.turret.Tick()
+
 	// Handle our toolbelt first.
 	if req := p.toolbelt.Update(); req != nil {
 		return nil
@@ -46,16 +59,41 @@ func (p *Player) Update(s *PlayState) error {
 			// Send turret placement request at the cell closest to the mouse.
 			cx, cy := s.getCursorPosition()
 			tx, ty := s.world.GetClosestCellPosition(cx, cy)
-			// We wrap the place action as a move action's next step.
-			action = &EntityActionMove{
-				x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
-				y:        float64(ty+1)*float64(cellHeight) + float64(cellHeight)/2,
-				distance: 8,
-				next: &EntityActionPlace{
-					x:    tx,
-					y:    ty,
-					kind: p.toolbelt.activeItem.kind,
-				},
+
+			switch p.toolbelt.activeItem.kind {
+			case ToolTurret:
+			case ToolWall:
+			case ToolDestroy:
+				action = &EntityActionMove{
+					x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
+					y:        float64(ty+1)*float64(cellHeight) + float64(cellHeight)/2,
+					distance: 8,
+					// We wrap the place action as a move action's next step.
+					next: &EntityActionPlace{
+						x:    tx,
+						y:    ty,
+						kind: p.toolbelt.activeItem.kind,
+					},
+				}
+			case ToolGun:
+				// Check if we can fire
+				if p.turret.CanFire() {
+					// Get direction vector from difference of cursor and player
+					px := p.entity.Physics().X
+					py := p.entity.Physics().Y - float64(playerImage.Bounds().Dy())/2
+					vX, vY := GetNormalizedDirection(px, py, float64(cx), float64(cy))
+					xSide := 1.0
+					if vX < 0 {
+						xSide = -xSide
+					}
+					action = &EntityActionShoot{
+						x:        px + (float64(playerImage.Bounds().Dx()/2) * xSide),
+						y:        py,
+						vX:       vX,
+						vY:       vY,
+						polarity: p.turret.polarity,
+					}
+				}
 			}
 		} else if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyD) {
 			// Sloppy/lazy keyboard movement. FIXME: We should probably abstract this out to a keybinds system where a slice of keys can be matched to make a "command". This command would automatically be added to some sort of current commands queue that would then be used to generate the appropriate player->entity action.
@@ -73,6 +111,7 @@ func (p *Player) Update(s *PlayState) error {
 			if ebiten.IsKeyPressed(ebiten.KeyS) {
 				y++
 			}
+
 			action = &EntityActionMove{
 				x:        p.entity.Physics().X + x,
 				y:        p.entity.Physics().Y + y,

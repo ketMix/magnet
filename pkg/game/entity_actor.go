@@ -43,7 +43,18 @@ func (e *ActorEntity) Update() (request Request, err error) {
 			y:    a.y,
 			kind: a.kind,
 		}
+	case *EntityActionShoot:
+		// Can apply player's speed to action vector
+		a.complete = true
+		request = SpawnProjecticleRequest{
+			x:        a.x,
+			y:        a.y,
+			vX:       a.vX,
+			vY:       a.vY,
+			polarity: a.polarity,
+		}
 	}
+
 	// Separate action removal for now.
 	if e.action != nil && e.action.Complete() {
 		e.action = e.action.Next()

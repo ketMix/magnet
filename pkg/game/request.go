@@ -10,6 +10,13 @@ type UseToolRequest struct {
 	kind ToolKind // ???
 }
 
+// SpawnProjecticleRequest attempts to spawn a projecticle at given location with given direction
+type SpawnProjecticleRequest struct {
+	x, y     float64 // Position
+	vX, vY   float64 // Momentum
+	polarity Polarity
+}
+
 // Belt-related requests.
 
 // SelectToolbeltItemRequest selects a given toolbelt item

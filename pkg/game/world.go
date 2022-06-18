@@ -119,6 +119,14 @@ func (w *World) Update() error {
 					}
 				}
 			}
+		case SpawnProjecticleRequest:
+			// Don't attach projecticle to cell
+			e := NewProjecticleEntity()
+			e.physics.X = r.x
+			e.physics.Y = r.y
+			e.physics.vX = r.vX
+			e.physics.vY = r.vY
+			w.entities = append(w.entities, e)
 		}
 	}
 

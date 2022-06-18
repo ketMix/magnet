@@ -18,6 +18,10 @@ var (
 	spawnerImage, spawnerShadowImage   *ebiten.Image
 	toolSlotImage, toolSlotActiveImage *ebiten.Image
 	toolDestroyImage                   *ebiten.Image
+	toolGunImage                       *ebiten.Image
+	projecticlePositiveImage           *ebiten.Image
+	projecticleNegativeImage           *ebiten.Image
+	projecticleNeutralImage            *ebiten.Image
 	//
 	turretPlaceSound *Sound
 )
@@ -81,7 +85,7 @@ func (g *Game) Init() (err error) {
 		return err
 	}
 
-	// Load some images.
+	// IMAGES //
 	if img, err := readImage("player.png"); err == nil {
 		playerImage = ebiten.NewImageFromImage(img)
 	} else {
@@ -106,6 +110,7 @@ func (g *Game) Init() (err error) {
 		panic(err)
 	}
 
+	// Tools
 	if img, err := readImage("toolslot.png"); err == nil {
 		toolSlotImage = ebiten.NewImageFromImage(img)
 	} else {
@@ -124,7 +129,32 @@ func (g *Game) Init() (err error) {
 		panic(err)
 	}
 
-	// Load some sounds.
+	if img, err := readImage("tool-gun.png"); err == nil {
+		toolGunImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	// Projecticles
+	if img, err := readImage("projecticle-positive.png"); err == nil {
+		projecticlePositiveImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("projecticle-negative.png"); err == nil {
+		projecticleNegativeImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("projecticle-neutral.png"); err == nil {
+		projecticleNeutralImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	// SOUNDS //
 	if snd, err := readSound("turret-place.ogg"); err == nil {
 		turretPlaceSound = snd
 	} else {
