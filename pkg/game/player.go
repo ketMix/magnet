@@ -28,7 +28,7 @@ func NewPlayer() *Player {
 		turret: Turret{
 			speed:    1.0,
 			rate:     1,
-			polarity: NEUTRAL,
+			polarity: NeutralPolarity,
 		},
 	}
 }

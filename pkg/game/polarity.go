@@ -3,7 +3,7 @@ package game
 type Polarity int
 
 const (
-	NEGATIVE Polarity = -1
-	NEUTRAL           = 0
-	POSITIVE          = 1
+	NegativePolarity Polarity = -1
+	NeutralPolarity           = 0
+	PositivePolarity          = 1
 )

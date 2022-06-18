@@ -43,11 +43,11 @@ func (e *ProjecticleEntity) Update() (request Request, err error) {
 func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 	var image *ebiten.Image
 	switch e.polarity {
-	case POSITIVE:
+	case PositivePolarity:
 		image = projecticlePositiveImage
-	case NEGATIVE:
+	case NegativePolarity:
 		image = projecticleNegativeImage
-	case NEUTRAL:
+	case NeutralPolarity:
 		image = projecticleNeutralImage
 	}
 
