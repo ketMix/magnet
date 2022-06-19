@@ -14,13 +14,15 @@ type ActorEntity struct {
 func NewActorEntity(player *Player) *ActorEntity {
 	return &ActorEntity{
 		BaseEntity: BaseEntity{
-			physics: PhysicsObject{},
+			physics: PhysicsObject{
+				polarity: NegativePolarity,
+			},
 		},
 		player: player,
 	}
 }
 
-func (e *ActorEntity) Update() (request Request, err error) {
+func (e *ActorEntity) Update(world *World) (request Request, err error) {
 	speed := 1.0
 	switch a := e.action.(type) {
 	case *EntityActionMove:
@@ -49,7 +51,7 @@ func (e *ActorEntity) Update() (request Request, err error) {
 		py := e.Physics().Y - float64(playerImage.Bounds().Dy())/2
 
 		// Get direction vector from difference of player and target.
-		vX, vY := GetNormalizedDirection(px, py, float64(a.targetX), float64(a.targetY))
+		vX, vY := GetDirection(px, py, float64(a.targetX), float64(a.targetY))
 		xSide := 1.0
 		if vX < 0 {
 			xSide = -xSide
@@ -60,8 +62,8 @@ func (e *ActorEntity) Update() (request Request, err error) {
 		request = SpawnProjecticleRequest{
 			x:        px + (float64(playerImage.Bounds().Dx()/2) * xSide),
 			y:        py,
-			vX:       vX,
-			vY:       vY,
+			vX:       vX * e.player.turret.speed,
+			vY:       vY * e.player.turret.speed,
 			polarity: a.polarity,
 		}
 	}

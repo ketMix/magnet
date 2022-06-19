@@ -57,6 +57,12 @@ func (w *World) BuildFromLevel(level Level) error {
 			} else if c.kind == SouthSpawnCell || c.kind == NorthSpawnCell {
 				e := NewSpawnerEntity()
 				w.PlaceEntityInCell(e, x, y)
+			} else if c.kind == EnemyPositiveCell {
+				e := NewEnemyEntity(PositivePolarity)
+				w.PlaceEntityInCell(e, x, y)
+			} else if c.kind == EnemyNegativeCell {
+				e := NewEnemyEntity(NegativePolarity)
+				w.PlaceEntityInCell(e, x, y)
 			}
 			// Create the cell.
 			cell := LiveCell{
@@ -83,7 +89,7 @@ func (w *World) Update() error {
 	t := w.entities[:0]
 	var requests []Request
 	for _, e := range w.entities {
-		if request, err := e.Update(); err != nil {
+		if request, err := e.Update(w); err != nil {
 			return err
 		} else if request != nil {
 			requests = append(requests, request)
@@ -123,7 +129,7 @@ func (w *World) Update() error {
 			e := NewProjecticleEntity()
 			e.physics.vX = r.vX
 			e.physics.vY = r.vY
-			w.entities = append(w.entities, e)
+			e.physics.polarity = r.polarity
 			w.PlaceEntityAt(e, r.x, r.y)
 		}
 	}

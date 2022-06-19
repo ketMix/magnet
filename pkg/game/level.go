@@ -26,6 +26,8 @@ const (
 	EmptyCell
 	NorthSpawnCell
 	SouthSpawnCell
+	EnemyPositiveCell // for testing
+	EnemyNegativeCell // for testing
 )
 
 type Cell struct {
@@ -54,7 +56,12 @@ func newCell(r rune) (c Cell) {
 		c.alt = true
 	case ' ': // unpathable tile -- like '#', but no image.
 		c.kind = EmptyCell
+	case '+': // TEST - positive enemy cell
+		c.kind = EnemyPositiveCell
+	case '-': // TEST - negative enemy cell
+		c.kind = EnemyNegativeCell
 	}
+
 	return c
 }
 

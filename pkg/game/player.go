@@ -26,9 +26,8 @@ func NewPlayer() *Player {
 
 		// Players turret stats
 		turret: Turret{
-			speed:    1.0,
-			rate:     1,
-			polarity: NeutralPolarity,
+			speed: 2.0,
+			rate:  0.25,
 		},
 	}
 }
@@ -83,7 +82,7 @@ func (p *Player) Update(s *PlayState) error {
 					action = &EntityActionShoot{
 						targetX:  float64(cx),
 						targetY:  float64(cy),
-						polarity: p.turret.polarity,
+						polarity: p.entity.Physics().polarity,
 					}
 				}
 			}

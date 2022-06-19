@@ -6,7 +6,6 @@ import (
 
 type ProjecticleEntity struct {
 	BaseEntity
-	polarity Polarity
 	elapsed  int
 	lifetime int
 }
@@ -20,17 +19,28 @@ func NewProjecticleEntity() *ProjecticleEntity {
 	}
 }
 
-func (e *ProjecticleEntity) Update() (request Request, err error) {
+func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 	e.elapsed++
-	// Grab initial vector
-	// Grab set of physics objects from entities where projecticle collides with magnet radius
-	// For each collision
-	//  - get vector direction of projecticle to object
-	//  - get magnet factor by multiplying magnet strength by distance // 2 (magnetic effect drops with inverse square relationship)
-	//  - add to initial vector
-	// Update projecticle's position by resulting vector
 
-	// For now, just continue in straight line
+	// If our projecticle is magnetic, we need to potentially update projecticle vector
+	if e.physics.polarity != NeutralPolarity {
+		// Grab set of physics objects from entities where projecticle collides with magnet radius
+		// For each collision
+		//  - get magnetic vector
+		//  - add to initial vector
+		for _, entity := range world.entities {
+			if entity.IsCollided(e.BaseEntity) {
+				e.Trash()
+			}
+			if entity.IsWithinMagneticField(e.BaseEntity) {
+				mX, mY := entity.Physics().GetMagneticVector(e.physics)
+				e.physics.vX = e.physics.vX + mX
+				e.physics.vY = e.physics.vY + mY
+			}
+		}
+	}
+
+	// Update projecticle's position by resulting vector
 	e.physics.X += e.physics.vX
 	e.physics.Y += e.physics.vY
 
@@ -44,7 +54,7 @@ func (e *ProjecticleEntity) Update() (request Request, err error) {
 
 func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 	var image *ebiten.Image
-	switch e.polarity {
+	switch e.physics.polarity {
 	case PositivePolarity:
 		image = projecticlePositiveImage
 	case NegativePolarity:

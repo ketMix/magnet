@@ -23,7 +23,7 @@ func NewSpawnerEntity() *SpawnerEntity {
 	}
 }
 
-func (e *SpawnerEntity) Update() (request Request, err error) {
+func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 	// TODO: after some duration, attempt a spawn. The request should be handled such that it uses pathfinding to find the best spot towards the player's core.
 	e.floatTick++
 	return request, nil

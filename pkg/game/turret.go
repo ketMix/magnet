@@ -1,10 +1,9 @@
 package game
 
 type Turret struct {
-	speed    int      // speed of projecticle
-	rate     float64  // projecticles per second
-	tick     int      // counter for fire rate
-	polarity Polarity // polarity of created projectiles
+	speed float64 // speed of projecticle
+	rate  float64 // projecticles per second
+	tick  int     // counter for fire rate
 }
 
 // Keep track of ticks for fire rate

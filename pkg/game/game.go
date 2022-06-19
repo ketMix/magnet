@@ -22,6 +22,10 @@ var (
 	projecticlePositiveImage           *ebiten.Image
 	projecticleNegativeImage           *ebiten.Image
 	projecticleNeutralImage            *ebiten.Image
+	enemyPositive1Image                *ebiten.Image
+	enemyPositive2Image                *ebiten.Image
+	enemyNegative1Image                *ebiten.Image
+	enemyNegative2Image                *ebiten.Image
 	//
 	turretPlaceSound *Sound
 )
@@ -150,6 +154,31 @@ func (g *Game) Init() (err error) {
 
 	if img, err := readImage("projecticle-neutral.png"); err == nil {
 		projecticleNeutralImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	// Enemies
+	if img, err := readImage("enemy-positive-1.png"); err == nil {
+		enemyPositive1Image = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("enemy-positive-2.png"); err == nil {
+		enemyPositive2Image = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("enemy-negative-1.png"); err == nil {
+		enemyNegative1Image = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("enemy-negative-2.png"); err == nil {
+		enemyNegative2Image = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
