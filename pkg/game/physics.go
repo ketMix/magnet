@@ -56,7 +56,7 @@ func GetDistanceVector(sx, sy, tx, ty float64) (float64, float64) {
 }
 
 // Calculates the magnitude of a vector
-func GetMagnitude(x, y float64) (mag float64) {
+func GetMagnitude(x, y float64) float64 {
 	return math.Hypot(x, y)
 }
 
