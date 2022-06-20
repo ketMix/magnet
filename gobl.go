@@ -16,7 +16,7 @@ func main() {
 		Exec("go", "build", "./cmd/magnet")
 
 	Task("watch").
-		Watch("cmd/*/*", "cmd/*/*/*", "pkg/*/*", "pkg/*/*/*").
+		Watch("cmd/*/*", "cmd/*/*/*", "pkg/*/*", "pkg/*/*/*", "pkg/*/*/*/*").
 		Signaler(SigQuit).
 		Run("build").
 		Run("run")
