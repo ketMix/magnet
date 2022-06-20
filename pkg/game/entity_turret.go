@@ -56,13 +56,23 @@ func (e *TurretEntity) Update(world *World) (request Request, err error) {
 		tx, ty := e.target.Physics().X, e.target.Physics().Y
 
 		vX, vY := GetDirection(px, py, tx, ty)
-		println(e.physics.polarity)
+
+		projectile := &ProjecticleEntity{
+			BaseEntity: BaseEntity{
+				physics: PhysicsObject{
+					vX:       vX * e.turret.speed,
+					vY:       vY * e.turret.speed,
+					polarity: e.physics.polarity,
+				},
+			},
+			lifetime: 500,
+			damage:   e.turret.damage,
+		}
+
 		request = SpawnProjecticleRequest{
-			x:        px,
-			y:        py,
-			vX:       vX * e.turret.speed,
-			vY:       vY * e.turret.speed,
-			polarity: e.physics.polarity,
+			x:          px,
+			y:          py,
+			projectile: projectile,
 		}
 	}
 

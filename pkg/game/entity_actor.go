@@ -72,11 +72,19 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		// Can apply player's speed to action vector
 		a.complete = true
 		request = SpawnProjecticleRequest{
-			x:        px + (float64(image.Bounds().Dx()/2) * xSide),
-			y:        py,
-			vX:       vX * e.turret.speed,
-			vY:       vY * e.turret.speed,
-			polarity: a.polarity,
+			x: px + (float64(image.Bounds().Dx()/2) * xSide),
+			y: py,
+			projectile: &ProjecticleEntity{
+				BaseEntity: BaseEntity{
+					physics: PhysicsObject{
+						vX:       vX * e.turret.speed,
+						vY:       vY * e.turret.speed,
+						polarity: a.polarity,
+					},
+				},
+				lifetime: 500,
+				damage:   e.turret.damage,
+			},
 		}
 	}
 

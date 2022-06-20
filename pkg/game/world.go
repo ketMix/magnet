@@ -141,11 +141,7 @@ func (w *World) Update() error {
 				}
 			}
 		case SpawnProjecticleRequest:
-			e := NewProjecticleEntity()
-			e.physics.vX = r.vX
-			e.physics.vY = r.vY
-			e.physics.polarity = r.polarity
-			w.PlaceEntityAt(e, r.x, r.y)
+			w.PlaceEntityAt(r.projectile, r.x, r.y)
 		case SpawnEnemyRequest:
 			e := NewEnemyEntity(r.enemyConfig)
 			w.PlaceEntityAt(e, r.x, r.y)
