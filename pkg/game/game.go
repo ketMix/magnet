@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -194,6 +195,9 @@ func (g *Game) Init() (err error) {
 
 // Update updates, how about that.
 func (g *Game) Update() error {
+	if inpututil.IsKeyJustReleased(ebiten.KeyF) {
+		ebiten.SetFullscreen(!ebiten.IsFullscreen())
+	}
 	return g.state.Update()
 }
 
