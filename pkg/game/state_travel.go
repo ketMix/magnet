@@ -14,10 +14,6 @@ func (s *TravelState) Init() (err error) {
 	if err != nil {
 		return err
 	}
-	// Remove player entity reference. Should this be moved to our play state's Dispose?
-	for _, p := range s.game.players {
-		p.entity = nil
-	}
 
 	return nil
 }

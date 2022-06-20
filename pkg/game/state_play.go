@@ -23,7 +23,10 @@ func (s *PlayState) Init() error {
 }
 
 func (s *PlayState) Dispose() error {
-	// Delete current entities.
+	// Remove player entity reference.
+	for _, p := range s.game.players {
+		p.entity = nil
+	}
 	return nil
 }
 
