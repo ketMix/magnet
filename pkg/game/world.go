@@ -222,6 +222,17 @@ func (w *World) PlaceEntityAt(e Entity, x, y float64) {
 	w.entities = append(w.entities, e)
 }
 
+// EntitiesWithinRadius returns a slice of all entities within the radius of x, y
+func (w *World) EntitiesWithinRadius(x, y float64, radius float64) []Entity {
+	var entities []Entity
+	for _, entity := range w.entities {
+		if IsWithinRadius(x, y, entity.Physics().X, entity.Physics().Y, radius) {
+			entities = append(entities, entity)
+		}
+	}
+	return entities
+}
+
 /** CELLS **/
 
 func (w *World) GetCell(x, y int) *LiveCell {

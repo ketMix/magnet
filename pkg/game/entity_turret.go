@@ -1,6 +1,8 @@
 package game
 
 import (
+	"sort"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -32,10 +34,10 @@ func (e *TurretEntity) Update(world *World) (request Request, err error) {
 	e.turret.Tick()
 
 	// Attempt to acquire target
-	e.AcquireTarget(&world.entities)
+	e.AcquireTarget(world)
 
 	// Make request to fire if we have target and can fire
-	if e.target != nil && e.turret.CanFire() {
+	if e.target != nil && !e.target.Trashed() && e.turret.CanFire() {
 		px, py := e.physics.X, e.physics.Y
 		tx, ty := e.target.Physics().X, e.target.Physics().Y
 
@@ -69,24 +71,30 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 
 // Finds the closest entity within attack radius and sets the current target if found
 // !! Iterates through world entity list, could probably be optimized !!
-func (e *TurretEntity) AcquireTarget(entities *[]Entity) {
-	// hmm...
-	minDistance := 100000.0
-	var target Entity
+func (e *TurretEntity) AcquireTarget(world *World) {
+	// Collect our entities within our attack radius.
+	entities := world.EntitiesWithinRadius(e.physics.X, e.physics.Y, e.attackRadius)
 
-	x, y := e.physics.X, e.physics.Y
-	for _, entity := range *entities {
+	// Filter out non-enemies.
+	var filtered []Entity
+	for _, entity := range entities {
 		switch entity.(type) {
 		case *EnemyEntity:
-			tx, ty := entity.Physics().X, entity.Physics().Y
-			if IsWithinRadius(x, y, tx, ty, e.attackRadius) {
-				magnitude := GetMagnitude(GetDistanceVector(x, y, tx, ty))
-				if magnitude < minDistance {
-					minDistance = magnitude
-					target = entity
-				}
-			}
+			filtered = append(filtered, entity)
 		}
 	}
-	e.target = target
+
+	// Sort from closest to further. This is a bit inefficient but I don't care.
+	sort.Slice(filtered, func(i, j int) bool {
+		a := GetMagnitude(GetDistanceVector(e.physics.X, e.physics.Y, entities[i].Physics().X, entities[i].Physics().Y))
+		b := GetMagnitude(GetDistanceVector(e.physics.X, e.physics.Y, entities[j].Physics().X, entities[j].Physics().Y))
+		return a < b
+	})
+
+	// Set it to the first entry, as it should be the closest.
+	if len(filtered) > 0 {
+		e.target = filtered[0]
+	} else {
+		e.target = nil
+	}
 }
