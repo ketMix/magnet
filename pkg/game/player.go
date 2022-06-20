@@ -40,12 +40,19 @@ func (p *Player) Update(s *PlayState) error {
 	if p.entity != nil {
 		var action EntityAction
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
-			x, y := ebiten.CursorPosition()
-			// TODO: Make target the center of the closest intersecting cell.
+			// Right-click to delete.
+			cx, cy := s.getCursorPosition()
+			tx, ty := s.world.GetClosestCellPosition(cx, cy)
 			action = &EntityActionMove{
-				x:        float64(x) - s.world.cameraX,
-				y:        float64(y) - s.world.cameraY,
-				distance: 0.5,
+				x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
+				y:        float64(ty+1)*float64(cellHeight) + float64(cellHeight)/2,
+				distance: 8,
+				// We wrap the place action as a move action's next step.
+				next: &EntityActionPlace{
+					x:    tx,
+					y:    ty,
+					kind: ToolDestroy,
+				},
 			}
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			// Send turret placement request at the cell closest to the mouse.
