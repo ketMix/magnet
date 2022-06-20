@@ -1,7 +1,7 @@
 T BASIC
 H 1
 D 1
-R 100
+R 50
 X 1
 O 1
 S 1
