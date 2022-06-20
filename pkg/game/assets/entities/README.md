@@ -14,6 +14,14 @@ For players and enemies, this is the amount of damage they can sustain before pe
 
 Ignored for turrets as they are not subject to damage (yet?)
 
+## r (Hitbox Range) **float**
+
+### *The distance used to judge collision*
+
+For enemies, this determines the range within which a collision is detected.
+
+Ignored for turrets and players.
+
 ## D (Damage) **int**
 
 ### *The damage the entity does*
@@ -86,3 +94,9 @@ For all entities, this sets the radius of their magnetic field
 ### *The prefix used to identify an entity's images*
 
 For all entities, this prefix is used to identify the entity's images located in the `assets/images/` folder.
+
+## i (SubImage Prefix) **string**
+
+### *The prefix used to identify an entity's subimages*
+
+For turrets, this is used to set their "barrel" image

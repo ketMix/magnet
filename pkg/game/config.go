@@ -22,7 +22,7 @@ func LoadConfigurations() error {
 		return err
 	}
 
-	// Traverse the turret config folder top-down and load all turret configurations
+	// Traverse the turret config folder and load all turret configurations
 	TurretConfigs = make(map[string]EntityConfig)
 	turretFiles, err := getPathFiles(path.Join("entities", "turrets"))
 	println("Loading turret configs:")
@@ -37,7 +37,7 @@ func LoadConfigurations() error {
 		}
 	}
 
-	// Traverse the enemy config folder top-down and load all enemy configurations
+	// Traverse the enemy config folder and load all enemy configurations
 	EnemyConfigs = make(map[string]EntityConfig)
 	enemyFiles, err := getPathFiles(path.Join("entities", "enemies"))
 	println("Loading enemy configs:")
