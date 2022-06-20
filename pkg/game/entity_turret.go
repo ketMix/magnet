@@ -56,6 +56,7 @@ func (e *TurretEntity) Update(world *World) (request Request, err error) {
 		tx, ty := e.target.Physics().X, e.target.Physics().Y
 
 		vX, vY := GetDirection(px, py, tx, ty)
+		println(e.physics.polarity)
 		request = SpawnProjecticleRequest{
 			x:        px,
 			y:        py,
@@ -78,13 +79,20 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 
 	e.animation.Draw(screen, op)
 
+	red, blue := 1.0, 1.0
+	switch e.physics.polarity {
+	case NegativePolarity:
+		blue = 3
+	case PositivePolarity:
+		red = 3
+	}
 	// Draw da head
 	op.GeoM.Translate(0, -5)
 	for i := float64(0); i < 3; i++ {
 		headOp := &ebiten.DrawImageOptions{}
 		headOp.GeoM.Concat(op.GeoM)
 		headOp.GeoM.Translate(0, -i)
-		headOp.ColorM.Scale(i/3, i/3, i/3, 1)
+		headOp.ColorM.Scale((i/3)*red, (i / 3), (i/3)*blue, 1)
 		e.headAnimation.Draw(screen, headOp)
 	}
 }
