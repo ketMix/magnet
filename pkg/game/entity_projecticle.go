@@ -6,8 +6,9 @@ import (
 
 type ProjecticleEntity struct {
 	BaseEntity
-	elapsed  int
-	lifetime int
+	elapsed   int
+	lifetime  int
+	animation Animation
 }
 
 func NewProjecticleEntity() *ProjecticleEntity {
@@ -16,11 +17,28 @@ func NewProjecticleEntity() *ProjecticleEntity {
 			physics: PhysicsObject{},
 		},
 		lifetime: 500, // Make the default lifetime 500 ticks. This should be set to a value that makes sense for the projectile's speed so it remains alive for however long it needs to.
+		animation: Animation{
+			images: []*ebiten.Image{
+				projecticlePositiveImage,
+				projecticleNegativeImage,
+				projecticleNeutralImage,
+			},
+		},
 	}
 }
 
 func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 	e.elapsed++
+
+	// Set the current animation frame index manually.
+	switch e.physics.polarity {
+	case PositivePolarity:
+		e.animation.index = 0
+	case NegativePolarity:
+		e.animation.index = 1
+	case NeutralPolarity:
+		e.animation.index = 2
+	}
 
 	// If our projecticle is magnetic, we need to potentially update projecticle vector
 	if e.physics.polarity != NeutralPolarity {
@@ -53,16 +71,6 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 }
 
 func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
-	var image *ebiten.Image
-	switch e.physics.polarity {
-	case PositivePolarity:
-		image = projecticlePositiveImage
-	case NegativePolarity:
-		image = projecticleNegativeImage
-	case NeutralPolarity:
-		image = projecticleNeutralImage
-	}
-
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Concat(screenOp.GeoM)
 	op.GeoM.Translate(
@@ -70,10 +78,5 @@ func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImag
 		e.physics.Y,
 	)
 
-	// Draw from center.
-	op.GeoM.Translate(
-		-float64(image.Bounds().Dx())/2,
-		-float64(image.Bounds().Dy())/2,
-	)
-	screen.DrawImage(image, op)
+	e.animation.Draw(screen, op)
 }
