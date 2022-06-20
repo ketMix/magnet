@@ -1,6 +1,9 @@
 package game
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/goro/pathing"
+)
 
 type Entity interface {
 	Physics() *PhysicsObject
@@ -14,6 +17,9 @@ type Entity interface {
 	SetAction(a EntityAction)
 	IsCollided(t Entity) bool
 	IsWithinMagneticField(t Entity) bool
+	// Why not.
+	CanPathfind() bool
+	SetPath(p pathing.Path)
 }
 
 type BaseEntity struct {
@@ -51,6 +57,13 @@ func (e *BaseEntity) Action() EntityAction {
 
 func (e *BaseEntity) SetAction(a EntityAction) {
 	e.action = a
+}
+
+func (e *BaseEntity) CanPathfind() bool {
+	return false
+}
+
+func (e *BaseEntity) SetPath(p pathing.Path) {
 }
 
 // Check whether or not the provided entity collides

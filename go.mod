@@ -11,6 +11,7 @@ require (
 	github.com/jfreymuth/oggvorbis v1.0.3 // indirect
 	github.com/jfreymuth/vorbis v1.0.2 // indirect
 	github.com/kettek/gobl v0.1.1-0.20220312222957-aba683107d7d // indirect
+	github.com/kettek/goro v0.0.0-20220620073715-117f8520bffd // indirect
 	github.com/radovskyb/watcher v1.0.7 // indirect
 	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
 	golang.org/x/image v0.0.0-20220321031419-a8550c1d254a // indirect
