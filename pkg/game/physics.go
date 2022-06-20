@@ -72,7 +72,7 @@ func Normalize(vX, vY, magnitude float64) (float64, float64) {
 }
 
 func IsWithinRadius(sx, sy, tx, ty, radius float64) bool {
-	minX, maxX := sx-radius, sy+radius
+	minX, maxX := sx-radius, sx+radius
 	minY, maxY := sy-radius, sy+radius
 	withinX := minX < tx && tx < maxX
 	withinY := minY < ty && ty < maxY
