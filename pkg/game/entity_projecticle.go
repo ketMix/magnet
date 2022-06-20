@@ -1,14 +1,16 @@
 package game
 
 import (
+	"image/color"
+	"math"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type ProjecticleEntity struct {
 	BaseEntity
-	elapsed   int
-	lifetime  int
-	animation Animation
+	elapsed  int
+	lifetime int
 }
 
 func NewProjecticleEntity() *ProjecticleEntity {
@@ -17,28 +19,11 @@ func NewProjecticleEntity() *ProjecticleEntity {
 			physics: PhysicsObject{},
 		},
 		lifetime: 500, // Make the default lifetime 500 ticks. This should be set to a value that makes sense for the projectile's speed so it remains alive for however long it needs to.
-		animation: Animation{
-			images: []*ebiten.Image{
-				projecticlePositiveImage,
-				projecticleNegativeImage,
-				projecticleNeutralImage,
-			},
-		},
 	}
 }
 
 func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 	e.elapsed++
-
-	// Set the current animation frame index manually.
-	switch e.physics.polarity {
-	case PositivePolarity:
-		e.animation.index = 0
-	case NegativePolarity:
-		e.animation.index = 1
-	case NeutralPolarity:
-		e.animation.index = 2
-	}
 
 	// If our projecticle is magnetic, we need to potentially update projecticle vector
 	if e.physics.polarity != NeutralPolarity {
@@ -78,5 +63,29 @@ func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImag
 		e.physics.Y,
 	)
 
-	e.animation.Draw(screen, op)
+	x1 := op.GeoM.Element(0, 2)
+	y1 := op.GeoM.Element(1, 2)
+	x2 := x1 + e.physics.vX/2
+	y2 := y1 + e.physics.vY/2
+	c := color.RGBA{255, 255, 255, 255}
+	if e.physics.polarity == NegativePolarity {
+		c = color.RGBA{
+			255, 0, 0, 255,
+		}
+	} else if e.physics.polarity == PositivePolarity {
+		c = color.RGBA{
+			0, 0, 255, 255,
+		}
+	}
+
+	length := math.Hypot(x2-x1, y2-y1)
+
+	op2 := &ebiten.DrawImageOptions{}
+	op2.GeoM.Scale(2+length, 2)
+	op2.GeoM.Rotate(math.Atan2(y2-y1, x2-x1))
+	op2.GeoM.Translate(x1, y1)
+	op2.ColorM.ScaleWithColor(c)
+	// Filter must be 'nearest' filter (default).
+	// Linear filtering would make edges blurred.
+	screen.DrawImage(emptySubImage, op2)
 }
