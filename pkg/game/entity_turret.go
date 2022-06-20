@@ -1,6 +1,7 @@
 package game
 
 import (
+	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,6 +11,7 @@ type TurretEntity struct {
 	BaseEntity
 	target Entity
 	// owner ActorEntity // ???
+	headAnimation Animation
 }
 
 func NewTurretEntity(config EntityConfig) *TurretEntity {
@@ -28,6 +30,9 @@ func NewTurretEntity(config EntityConfig) *TurretEntity {
 				attackRange: config.attackRange,
 			},
 		},
+		headAnimation: Animation{
+			images: config.headImages,
+		},
 	}
 }
 
@@ -37,6 +42,13 @@ func (e *TurretEntity) Update(world *World) (request Request, err error) {
 
 	// Attempt to acquire target
 	e.AcquireTarget(world)
+
+	// Rotate head to face target (or just SPEEN)
+	if e.target == nil {
+		e.headAnimation.rotation += 0.02
+	} else {
+		e.headAnimation.rotation = math.Atan2(e.physics.Y-e.target.Physics().Y, e.physics.X-e.target.Physics().X)
+	}
 
 	// Make request to fire if we have target and can fire
 	if e.target != nil && !e.target.Trashed() && e.turret.CanFire() {
@@ -65,6 +77,16 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 	)
 
 	e.animation.Draw(screen, op)
+
+	// Draw da head
+	op.GeoM.Translate(0, -5)
+	for i := float64(0); i < 3; i++ {
+		headOp := &ebiten.DrawImageOptions{}
+		headOp.GeoM.Concat(op.GeoM)
+		headOp.GeoM.Translate(0, -i)
+		headOp.ColorM.Scale(i/3, i/3, i/3, 1)
+		e.headAnimation.Draw(screen, headOp)
+	}
 }
 
 // Finds the closest entity within attack radius and sets the current target if found
