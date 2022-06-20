@@ -20,7 +20,7 @@ func (a *Animation) Image() *ebiten.Image {
 // Update updates the animation's current image index based upon elapsed ticks.
 func (a *Animation) Update() {
 	// Bail if we have no frame time.
-	if a.frameTime == 0 {
+	if a.frameTime == 0 || a.speed == 0 {
 		return
 	}
 
