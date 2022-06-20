@@ -3,12 +3,6 @@ package game
 import "image/color"
 
 type Polarity int
-type PolarityColorScale struct {
-	r float64
-	g float64
-	b float64
-	a float64
-}
 
 const (
 	NegativePolarity Polarity = -1
