@@ -28,6 +28,7 @@ func NewEnemyEntity(config EntityConfig) *EnemyEntity {
 				magnetic:       config.magnetic,
 				magnetStrength: config.magnetStrength,
 				magnetRadius:   config.magnetRadius,
+				radius:         config.radius,
 			},
 		},
 	}
