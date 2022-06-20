@@ -83,7 +83,7 @@ func (p *Player) Update(s *PlayState) error {
 					action = &EntityActionShoot{
 						targetX:  float64(cx),
 						targetY:  float64(cy),
-						polarity: p.entity.Physics().polarity,
+						polarity: p.toolbelt.activeItem.polarity,
 					}
 				}
 			}
