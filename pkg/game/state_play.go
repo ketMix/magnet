@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
@@ -27,6 +28,13 @@ func (s *PlayState) Dispose() error {
 }
 
 func (s *PlayState) Update() error {
+	if inpututil.IsKeyJustReleased(ebiten.KeyR) {
+		s.game.SetState(&TravelState{
+			game:        s.game,
+			targetLevel: "001", // ???
+		})
+		return nil
+	}
 	// Update our players.
 	for _, p := range s.game.players {
 		if err := p.Update(s); err != nil {
