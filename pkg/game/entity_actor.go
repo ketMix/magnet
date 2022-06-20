@@ -9,10 +9,12 @@ import (
 type ActorEntity struct {
 	BaseEntity
 	player *Player
+	speed  float64
 }
 
 func NewActorEntity(player *Player, config EntityConfig) *ActorEntity {
 	return &ActorEntity{
+		speed: config.speed,
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images: config.images,
@@ -32,7 +34,6 @@ func NewActorEntity(player *Player, config EntityConfig) *ActorEntity {
 }
 
 func (e *ActorEntity) Update(world *World) (request Request, err error) {
-	speed := 1.0
 	switch a := e.action.(type) {
 	case *EntityActionMove:
 		if math.Abs(e.physics.X-a.x) < a.distance && math.Abs(e.physics.Y-a.y) < a.distance {
@@ -42,8 +43,8 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 
 		// FIXME: Make this use actual physics resolution!
 		r := math.Atan2(e.physics.Y-a.y, e.physics.X-a.x)
-		x := math.Cos(r) * speed
-		y := math.Sin(r) * speed
+		x := math.Cos(r) * e.speed
+		y := math.Sin(r) * e.speed
 
 		e.physics.X -= x
 		e.physics.Y -= y

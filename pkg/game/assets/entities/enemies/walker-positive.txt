@@ -3,7 +3,7 @@ H 10
 D 1
 R 1
 X 1
-S 1
+S 0.25
 P positive
 M true
 Y 1

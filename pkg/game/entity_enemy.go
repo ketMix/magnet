@@ -10,10 +10,12 @@ import (
 type EnemyEntity struct {
 	BaseEntity
 	steps []pathing.Step
+	speed float64
 }
 
 func NewEnemyEntity(config EntityConfig) *EnemyEntity {
 	return &EnemyEntity{
+		speed: config.speed,
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images:    config.images,
@@ -43,10 +45,9 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 			//
 			e.steps = e.steps[1:]
 		} else {
-
 			r := math.Atan2(e.physics.Y-ty, e.physics.X-tx)
-			x := math.Cos(r) * 0.1
-			y := math.Sin(r) * 0.1
+			x := math.Cos(r) * e.speed
+			y := math.Sin(r) * e.speed
 
 			e.physics.X -= x
 			e.physics.Y -= y
