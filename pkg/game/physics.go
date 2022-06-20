@@ -17,7 +17,8 @@ type PhysicsObject struct {
 	magnetStrength float64
 	magnetRadius   float64
 
-	// TODO: Other stuff, like radius/box or something.
+	// Size
+	radius float64
 }
 
 // Retrieve the attractive/repulsive/neutral vector
