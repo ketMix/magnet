@@ -118,7 +118,6 @@ func (w *World) Update() error {
 		switch r := r.(type) {
 		case UseToolRequest:
 			if r.kind == ToolTurret {
-				// TODO: Check if location is valid.
 				c := w.GetCell(r.x, r.y)
 				if c != nil {
 					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
@@ -129,7 +128,6 @@ func (w *World) Update() error {
 						w.UpdatePathing()
 					}
 				}
-				// TODO: Mark cell as blocked.
 			} else if r.kind == ToolDestroy {
 				c := w.GetCell(r.x, r.y)
 				if c != nil {
@@ -250,7 +248,9 @@ func (w *World) UpdateEntityPathing(e Entity) {
 			}
 			return 0
 		}, pathing.AlgorithmAStar)
-		e.SetPath(path)
+		cx, cy := w.GetClosestCellPosition(int(e.Physics().X), int(e.Physics().Y))
+		steps := path.Compute(cx, cy, w.coreX, w.coreY)
+		e.SetSteps(steps)
 	}
 }
 

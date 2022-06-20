@@ -1,13 +1,14 @@
 package game
 
 import (
+	"math"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/kettek/goro/pathing"
 )
 
 type EnemyEntity struct {
 	BaseEntity
-	path  pathing.Path
 	steps []pathing.Step
 }
 
@@ -35,10 +36,22 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 	e.animation.Update()
 
 	// Attempt to move along path to player's core
-	if e.path != nil && len(e.steps) == 0 {
-		cx, cy := world.GetClosestCellPosition(int(e.physics.X), int(e.physics.Y))
-		e.steps = e.path.Compute(cx, cy, world.coreX, world.coreY)
-	} else {
+	if len(e.steps) != 0 {
+		tx := float64(e.steps[0].X()*cellWidth + cellWidth/2)
+		ty := float64(e.steps[0].Y()*cellHeight + cellHeight/2)
+		if math.Abs(e.physics.X-float64(e.steps[0].X()*cellWidth+cellWidth/2)) < 1 && math.Abs(e.physics.Y-float64(e.steps[0].Y()*cellHeight+cellHeight/2)) < 1 {
+			//
+			e.steps = e.steps[1:]
+		} else {
+
+			r := math.Atan2(e.physics.Y-ty, e.physics.X-tx)
+			x := math.Cos(r) * 0.1
+			y := math.Sin(r) * 0.1
+
+			e.physics.X -= x
+			e.physics.Y -= y
+		}
+
 		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
 	}
 
@@ -49,8 +62,8 @@ func (e *EnemyEntity) CanPathfind() bool {
 	return true
 }
 
-func (e *EnemyEntity) SetPath(p pathing.Path) {
-	e.path = p
+func (e *EnemyEntity) SetSteps(s []pathing.Step) {
+	e.steps = s
 }
 
 func (e *EnemyEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

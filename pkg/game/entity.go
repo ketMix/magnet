@@ -19,7 +19,7 @@ type Entity interface {
 	IsWithinMagneticField(t Entity) bool
 	// Why not.
 	CanPathfind() bool
-	SetPath(p pathing.Path)
+	SetSteps(p []pathing.Step)
 }
 
 type BaseEntity struct {
@@ -63,7 +63,7 @@ func (e *BaseEntity) CanPathfind() bool {
 	return false
 }
 
-func (e *BaseEntity) SetPath(p pathing.Path) {
+func (e *BaseEntity) SetSteps(s []pathing.Step) {
 }
 
 // Check whether or not the provided entity collides
