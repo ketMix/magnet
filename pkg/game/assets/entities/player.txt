@@ -9,4 +9,5 @@ P positive
 M false
 Y 1
 Z 100
-I player
+I player-idle
+W player-walk

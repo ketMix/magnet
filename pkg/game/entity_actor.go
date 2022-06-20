@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -8,13 +9,26 @@ import (
 
 type ActorEntity struct {
 	BaseEntity
-	player *Player
-	speed  float64
+	player        *Player
+	speed         float64
+	walking       bool
+	right         bool
+	walkAnimation Animation
+	idleAnimation Animation
 }
 
 func NewActorEntity(player *Player, config EntityConfig) *ActorEntity {
+	fmt.Println(len(config.walkImages))
 	return &ActorEntity{
 		speed: config.speed,
+		walkAnimation: Animation{
+			images:    config.walkImages,
+			frameTime: 5,
+			speed:     1,
+		},
+		idleAnimation: Animation{
+			images: config.images,
+		},
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images: config.images,
@@ -34,6 +48,7 @@ func NewActorEntity(player *Player, config EntityConfig) *ActorEntity {
 }
 
 func (e *ActorEntity) Update(world *World) (request Request, err error) {
+	e.animation.Update()
 	switch a := e.action.(type) {
 	case *EntityActionMove:
 		if math.Abs(e.physics.X-a.x) < a.distance && math.Abs(e.physics.Y-a.y) < a.distance {
@@ -48,6 +63,12 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 
 		e.physics.X -= x
 		e.physics.Y -= y
+
+		if x < 0 {
+			e.right = true
+		} else {
+			e.right = false
+		}
 	case *EntityActionPlace:
 		a.complete = true
 		request = UseToolRequest{
@@ -92,23 +113,44 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 	if e.action != nil && e.action.Complete() {
 		e.action = e.action.Next()
 	}
+
+	// Set our animation to idle if nothing else is doin.
+	if e.action == nil {
+		if e.walking {
+			e.walking = false
+			e.animation = e.idleAnimation
+		}
+	} else {
+		if !e.walking {
+			e.walking = true
+			e.animation = e.walkAnimation
+		}
+	}
+
 	return request, nil
 }
 
 func (e *ActorEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 	image := e.animation.Image()
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Concat(screenOp.GeoM)
-	op.GeoM.Translate(
-		e.physics.X,
-		e.physics.Y,
-	)
+
 	// Draw from center.
 	// FIXME: We should probably use an explicit "originX" and "originY" variables.
 	op.GeoM.Translate(
 		-float64(image.Bounds().Dx())/2,
 		// Adjust Y to render from the "foot" of the image
 		-float64(image.Bounds().Dy()),
+	)
+
+	// Mirror image if we're moving right
+	if e.right {
+		op.GeoM.Scale(-1, 1)
+	}
+
+	op.GeoM.Concat(screenOp.GeoM)
+	op.GeoM.Translate(
+		e.physics.X,
+		e.physics.Y,
 	)
 	screen.DrawImage(image, op)
 	// NOTE: We _could_ draw something like a target marker for a moving action here.
