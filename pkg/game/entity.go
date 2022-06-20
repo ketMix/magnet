@@ -69,10 +69,9 @@ func (e *BaseEntity) SetSteps(s []pathing.Step) {
 // Check whether or not the provided entity collides
 // Should probably use entity sprites or add hitboxes to physics object
 func (e *BaseEntity) IsCollided(t Entity) bool {
-	hitboxRadius := 0.0 // set this here for now for testing
 	x, y := e.physics.X, e.physics.Y
 	tx, ty := t.Physics().X, t.Physics().Y
-	return IsWithinRadius(x, y, tx, ty, hitboxRadius)
+	return IsWithinRadius(x, y, tx, ty, t.Physics().radius)
 }
 
 // Check whether or not the provided entity is within magnetic field
