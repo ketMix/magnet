@@ -266,6 +266,9 @@ func (w *World) IsPlacementValid(placeX, placeY int) bool {
 
 		canPath := func(x1, y1, x2, y2 int) bool {
 			steps := path.Compute(x1, y1, x2, y2)
+			if x1 == x2 && y1 == y2 {
+				return true
+			}
 			for _, s := range steps {
 				if s.X() == x2 && s.Y() == y2 {
 					return true
@@ -277,12 +280,12 @@ func (w *World) IsPlacementValid(placeX, placeY int) bool {
 		switch e.(type) {
 		case *EnemyEntity:
 			cx, cy := w.GetClosestCellPosition(int(e.Physics().X), int(e.Physics().Y))
-			if !canPath(cx, cy, w.coreX, w.coreY) {
+			if !canPath(cx, cy, w.coreX, w.coreY) || (placeX == cx && placeY == cy) {
 				return false
 			}
 		case *SpawnerEntity:
 			cx, cy := w.GetClosestCellPosition(int(e.Physics().X), int(e.Physics().Y))
-			if !canPath(cx, cy, w.coreX, w.coreY) {
+			if !canPath(cx, cy, w.coreX, w.coreY) || (placeX == cx && placeY == cy) {
 				return false
 			}
 		}
