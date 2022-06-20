@@ -196,6 +196,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) SetState(s State) error {
+	if g.state != nil {
+		if err := s.Dispose(); err != nil {
+			panic(err)
+		}
+	}
 	if err := s.Init(); err != nil {
 		panic(err)
 	}
