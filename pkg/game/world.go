@@ -139,6 +139,17 @@ func (w *World) Update() error {
 						w.UpdatePathing()
 					}
 				}
+			} else if r.kind == ToolWall {
+				c := w.GetCell(r.x, r.y)
+				if c != nil {
+					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
+						e := NewWallEntity()
+						w.PlaceEntityInCell(e, r.x, r.y)
+						turretPlaceSound.Play(1)
+						c.entity = e
+						w.UpdatePathing()
+					}
+				}
 			}
 		case SpawnProjecticleRequest:
 			w.PlaceEntityAt(r.projectile, r.x, r.y)

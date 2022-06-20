@@ -23,6 +23,7 @@ var (
 	emptySubImage *ebiten.Image
 
 	// Images
+	wallImage                          *ebiten.Image
 	turretNegativeImage                *ebiten.Image
 	turretPositiveImage                *ebiten.Image
 	spawnerImage, spawnerShadowImage   *ebiten.Image
@@ -108,6 +109,12 @@ func (g *Game) Init() (err error) {
 	emptyImage.Fill(color.White)
 
 	// IMAGES //
+	if img, err := readImage("wall.png"); err == nil {
+		wallImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
 	if img, err := readImage("turret-negative.png"); err == nil {
 		turretNegativeImage = ebiten.NewImageFromImage(img)
 	} else {
