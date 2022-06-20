@@ -6,10 +6,7 @@ import (
 
 type EnemyEntity struct {
 	BaseEntity
-	animationTick   float64
-	animationSpeed  float64
-	animationIndex  int
-	animationImages []*ebiten.Image
+	animation Animation
 }
 
 func NewEnemyEntity(polarity Polarity) *EnemyEntity {
@@ -32,14 +29,17 @@ func NewEnemyEntity(polarity Polarity) *EnemyEntity {
 				magnetRadius:   100,
 			},
 		},
-		animationSpeed:  0.25,
-		animationImages: images,
+		animation: Animation{
+			images:    images,
+			frameTime: 60,
+			speed:     0.25,
+		},
 	}
 }
 
 func (e *EnemyEntity) Update(world *World) (request Request, err error) {
-	// increment animation tick
-	e.animationTick++
+	// Update animation.
+	e.animation.Update()
 
 	// Attempt to move along path to player's core
 
@@ -47,18 +47,6 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 }
 
 func (e *EnemyEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
-	// Progress animation index
-	if e.animationTick >= (e.animationSpeed * 60) {
-		e.animationTick = 0
-		e.animationIndex += 1
-		if e.animationIndex >= len(e.animationImages) {
-			e.animationIndex = 0
-		}
-	}
-
-	// Set image from animation index
-	image := e.animationImages[e.animationIndex]
-
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Concat(screenOp.GeoM)
 	op.GeoM.Translate(
@@ -66,11 +54,6 @@ func (e *EnemyEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptio
 		e.physics.Y,
 	)
 
-	// Draw from center.
-	// TODO: set enemy image on instatiation?
-	op.GeoM.Translate(
-		-float64(image.Bounds().Dx())/2,
-		-float64(image.Bounds().Dy())/2,
-	)
-	screen.DrawImage(image, op)
+	// Draw animation.
+	e.animation.Draw(screen, op)
 }
