@@ -195,7 +195,7 @@ func (g *Game) Init() (err error) {
 
 // Update updates, how about that.
 func (g *Game) Update() error {
-	if inpututil.IsKeyJustReleased(ebiten.KeyF) {
+	if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
 		ebiten.SetFullscreen(!ebiten.IsFullscreen())
 	}
 	return g.state.Update()
