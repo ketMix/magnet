@@ -25,16 +25,9 @@ func (t *Toolbelt) Update() (request Request) {
 		if r != nil {
 			switch r.(type) {
 			case SelectToolbeltItemRequest:
-				// If we're selecting the same item twice, invert the polarity if it applies.
+				// If we're selecting the same item twice, cycle the toolbelt item
 				if t.activeItem == item {
-					// Presume if polarity is neutral it cannot be toggled.
-					if t.activeItem.polarity != NeutralPolarity {
-						if t.activeItem.polarity == PositivePolarity {
-							t.activeItem.polarity = NegativePolarity
-						} else {
-							t.activeItem.polarity = PositivePolarity
-						}
-					}
+					t.activeItem.Cycle()
 				} else {
 					if t.activeItem != nil {
 						t.activeItem.active = false
@@ -156,5 +149,19 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 		op.ColorM.Scale(GetPolarityColorScale(t.polarity))
 		op.GeoM.Translate(-float64(image.Bounds().Dx()/2), -float64(image.Bounds().Dy()/2))
 		screen.DrawImage(image, &op)
+	}
+}
+
+// Cycles through available selections for the toolbelt item
+func (t *ToolbeltItem) Cycle() {
+	switch t.kind {
+	// Abuse the fact that polarities have value
+	case ToolGun:
+		t.polarity++
+		if t.polarity > PositivePolarity {
+			t.polarity = NegativePolarity
+		}
+	case ToolTurret:
+		t.polarity *= -1
 	}
 }
