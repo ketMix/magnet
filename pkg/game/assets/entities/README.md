@@ -95,8 +95,14 @@ For all entities, this sets the radius of their magnetic field
 
 For all entities, this prefix is used to identify the entity's images located in the `assets/images/` folder.
 
-## i (SubImage Prefix) **string**
+## i (Head Image Prefix) **string**
 
-### *The prefix used to identify an entity's subimages*
+### *The prefix used to identify an entity's head images*
 
 For turrets, this is used to set their "barrel" image
+
+## W (Walk Image Prefix) **string**
+
+### *The prefix used to identify an entity's walk images*
+
+For players, this is to used to identify the images for the walk animation
