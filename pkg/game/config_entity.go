@@ -23,6 +23,7 @@ type EntityConfig struct {
 	magnetStrength   float64
 	magnetRadius     float64
 	images           []*ebiten.Image
+	headImages       []*ebiten.Image
 }
 
 func (e *EntityConfig) LoadFromFile(p string) error {
@@ -76,6 +77,16 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 			for _, image := range images {
 				img := ebiten.NewImageFromImage(image)
 				e.images = append(e.images, img)
+			}
+		case 'i':
+			// Load images using prefix in value
+			images, err := readImagesByPrefix(value)
+			if err != nil {
+				return err
+			}
+			for _, image := range images {
+				img := ebiten.NewImageFromImage(image)
+				e.headImages = append(e.headImages, img)
 			}
 		}
 		if err != nil {
