@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 // Toolbelt is the interface for containing user actions for placing turrets and similar.
@@ -24,11 +25,23 @@ func (t *Toolbelt) Update() (request Request) {
 		if r != nil {
 			switch r.(type) {
 			case SelectToolbeltItemRequest:
-				if t.activeItem != nil {
-					t.activeItem.active = false
+				// If we're selecting the same item twice, invert the polarity if it applies.
+				if t.activeItem == item {
+					// Presume if polarity is neutral it cannot be toggled.
+					if t.activeItem.polarity != NeutralPolarity {
+						if t.activeItem.polarity == PositivePolarity {
+							t.activeItem.polarity = NegativePolarity
+						} else {
+							t.activeItem.polarity = PositivePolarity
+						}
+					}
+				} else {
+					if t.activeItem != nil {
+						t.activeItem.active = false
+					}
+					t.activeItem = item
+					t.activeItem.active = true
 				}
-				t.activeItem = item
-				t.activeItem.active = true
 			}
 			request = r
 			break
@@ -73,15 +86,16 @@ const (
 
 // ToolbeltItem is a toolbelt entry.
 type ToolbeltItem struct {
-	kind   ToolKind
-	x, y   int
-	key    ebiten.Key // Key to check against for activation.
-	active bool
+	kind     ToolKind
+	polarity Polarity
+	x, y     int
+	key      ebiten.Key // Key to check against for activation.
+	active   bool
 }
 
 func (t *ToolbeltItem) Update() (request Request) {
 	// Does the cursor intersect us?
-	if ebiten.IsKeyPressed(t.key) {
+	if inpututil.IsKeyJustPressed(t.key) {
 		return SelectToolbeltItemRequest{t.kind}
 	} else {
 		x, y := ebiten.CursorPosition()
@@ -89,9 +103,11 @@ func (t *ToolbeltItem) Update() (request Request) {
 		y1, y2 := t.y-toolSlotImage.Bounds().Dy()/2, t.y+toolSlotImage.Bounds().Dy()/2
 
 		if x >= x1 && x <= x2 && y >= y1 && y <= y2 {
-			if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 				return SelectToolbeltItemRequest{t.kind}
 			}
+			// Do a dummy return to prevent click through.
+			return DummyRequest{}
 		}
 	}
 	return nil
@@ -125,7 +141,7 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 
 	var image *ebiten.Image
 	if t.kind == ToolTurret {
-		image = turretPositiveImage
+		image = TurretConfigs["basic"].images[0]
 	} else if t.kind == ToolDestroy {
 		image = toolDestroyImage
 	} else if t.kind == ToolGun {
@@ -135,6 +151,11 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 	}
 
 	if image != nil {
+		if t.polarity == NegativePolarity {
+			op.ColorM.Scale(1, .25, .25, 1)
+		} else if t.polarity == PositivePolarity {
+			op.ColorM.Scale(.25, .25, 1, 1)
+		}
 		op.GeoM.Translate(-float64(image.Bounds().Dx()/2), -float64(image.Bounds().Dy()/2))
 		screen.DrawImage(image, &op)
 	}
