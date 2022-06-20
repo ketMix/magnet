@@ -44,6 +44,8 @@ github.com/kettek/gobl v0.1.1-0.20220312222957-aba683107d7d h1:AmiWmD1Ol4oOa4UpX
 github.com/kettek/gobl v0.1.1-0.20220312222957-aba683107d7d/go.mod h1:x08Yfd9JU5Xqv69pggE1ieWICu+sZeMphOmhx1TSud4=
 github.com/kettek/goro v0.0.0-20200124004030-974655123e73 h1:pAmKg4jr0XPp7LFFNQxX0cDQbsZuEn4lUUa852limow=
 github.com/kettek/goro v0.0.0-20200124004030-974655123e73/go.mod h1:fO57DVF4MXRm+AOQWrFN0CFCbihOO36HUn42vjr00fU=
+github.com/kettek/goro v0.0.0-20220620073715-117f8520bffd h1:9Cl0B5mMIpQW519OcBuDFKVQ1WScKZFHaeiOED18gT0=
+github.com/kettek/goro v0.0.0-20220620073715-117f8520bffd/go.mod h1:fO57DVF4MXRm+AOQWrFN0CFCbihOO36HUn42vjr00fU=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
