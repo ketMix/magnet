@@ -47,10 +47,10 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 		//  - get magnetic vector
 		//  - add to initial vector
 		for _, entity := range world.entities {
-			if entity.IsCollided(e.BaseEntity) {
+			if entity.IsCollided(e) {
 				e.Trash()
 			}
-			if entity.IsWithinMagneticField(e.BaseEntity) {
+			if entity.IsWithinMagneticField(e) {
 				mX, mY := entity.Physics().GetMagneticVector(e.physics)
 				e.physics.vX = e.physics.vX + mX
 				e.physics.vY = e.physics.vY + mY
