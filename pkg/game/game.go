@@ -1,6 +1,9 @@
 package game
 
 import (
+	"image"
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"golang.org/x/image/font"
@@ -13,6 +16,10 @@ var (
 	cellWidth, cellHeight     int
 	screenWidth, screenHeight int
 	normalFace, boldFace      font.Face
+
+	// Images for drawing lines.
+	emptyImage    *ebiten.Image
+	emptySubImage *ebiten.Image
 
 	// Images
 	turretNegativeImage                *ebiten.Image
@@ -93,6 +100,11 @@ func (g *Game) Init() (err error) {
 	if err != nil {
 		return err
 	}
+
+	//
+	emptyImage = ebiten.NewImage(3, 3)
+	emptySubImage = emptyImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
+	emptyImage.Fill(color.White)
 
 	// IMAGES //
 	if img, err := readImage("turret-negative.png"); err == nil {
