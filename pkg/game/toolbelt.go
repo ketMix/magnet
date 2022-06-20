@@ -132,18 +132,7 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 	// Move to the center of our item.
 	op.GeoM.Translate(float64(t.x), float64(t.y))
 
-	var image *ebiten.Image
-	if t.kind == ToolTurret {
-		image = TurretConfigs["basic"].images[0]
-	} else if t.kind == ToolDestroy {
-		image = toolDestroyImage
-	} else if t.kind == ToolGun {
-		image = toolGunImage
-	} else if t.kind == ToolWall {
-		image = wallImage
-	} else {
-		// nada
-	}
+	image := GetToolKindImage(t.kind)
 
 	if image != nil {
 		op.ColorM.Scale(GetPolarityColorScale(t.polarity))
@@ -164,4 +153,21 @@ func (t *ToolbeltItem) Cycle() {
 	case ToolTurret:
 		t.polarity *= -1
 	}
+}
+
+// Retrieves the image for a toolkind
+// TODO: perhaps intialize toolbelt items with these instead?
+func GetToolKindImage(k ToolKind) *ebiten.Image {
+	var image *ebiten.Image
+	switch k {
+	case ToolTurret:
+		image = TurretConfigs["basic"].images[0]
+	case ToolDestroy:
+		image = toolDestroyImage
+	case ToolGun:
+		image = toolGunImage
+	case ToolWall:
+		image = wallImage
+	}
+	return image
 }

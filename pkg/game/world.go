@@ -205,17 +205,20 @@ func (w *World) Draw(screen *ebiten.Image) {
 			if p.entity.Action() != nil && p.entity.Action().Next() != nil {
 				switch a := p.entity.Action().Next().(type) {
 				case *EntityActionPlace:
-					if a.kind == ToolTurret {
+					// Draw transparent version of tool for placement
+					if a.kind == ToolTurret || a.kind == ToolWall {
+						image := GetToolKindImage(a.kind)
 						op := &ebiten.DrawImageOptions{}
+						op.ColorM.Scale(GetPolarityColorScale(a.polarity))
 						op.ColorM.Scale(1, 1, 1, 0.5)
 						op.GeoM.Concat(screenOp.GeoM)
 						op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
 						// Draw from center.
 						op.GeoM.Translate(
-							-float64(turretPositiveImage.Bounds().Dx())/2,
-							-float64(turretPositiveImage.Bounds().Dy())/2,
+							-float64(image.Bounds().Dx())/2,
+							-float64(image.Bounds().Dy())/2,
 						)
-						screen.DrawImage(turretPositiveImage, op)
+						screen.DrawImage(image, op)
 					}
 				}
 			}
