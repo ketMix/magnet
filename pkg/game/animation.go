@@ -2,6 +2,7 @@ package game
 
 import "github.com/hajimehoshi/ebiten/v2"
 
+// Animation manages updating and iterating through a slice of images.
 type Animation struct {
 	elapsed   float64
 	speed     float64
