@@ -1,0 +1,12 @@
+T BASIC
+H 1
+D 1
+R 100
+X 1
+O 1
+S 1
+P neutral
+M false
+Y 1
+Z 1
+I turret-basic

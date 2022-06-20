@@ -10,7 +10,7 @@ type TravelState struct {
 }
 
 func (s *TravelState) Init() (err error) {
-	s.loadedLevel, err = loadLevel(s.targetLevel)
+	s.loadedLevel, err = NewLevel(s.targetLevel)
 	if err != nil {
 		return err
 	}

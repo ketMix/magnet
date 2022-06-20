@@ -8,27 +8,25 @@ import (
 
 type TurretEntity struct {
 	BaseEntity
-	attackRadius float64
-	turret       Turret
-	target       Entity
+	target Entity
 	// owner ActorEntity // ???
-	animation Animation
 }
 
-func NewTurretEntity() *TurretEntity {
+func NewTurretEntity(config EntityConfig) *TurretEntity {
 	return &TurretEntity{
 		BaseEntity: BaseEntity{
-			physics: PhysicsObject{
-				polarity: NeutralPolarity,
+			animation: Animation{
+				images: config.images,
 			},
-		},
-		turret: Turret{
-			speed: 1,
-			rate:  1,
-		},
-		attackRadius: 100,
-		animation: Animation{
-			images: []*ebiten.Image{turretPositiveImage, turretNegativeImage},
+			physics: PhysicsObject{
+				polarity: config.polarity,
+			},
+			turret: Turret{
+				damage:      config.damage,
+				speed:       config.projecticleSpeed,
+				rate:        config.attackRate,
+				attackRange: config.attackRange,
+			},
 		},
 	}
 }
@@ -73,7 +71,7 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 // !! Iterates through world entity list, could probably be optimized !!
 func (e *TurretEntity) AcquireTarget(world *World) {
 	// Collect our entities within our attack radius.
-	entities := world.EntitiesWithinRadius(e.physics.X, e.physics.Y, e.attackRadius)
+	entities := world.EntitiesWithinRadius(e.physics.X, e.physics.Y, e.turret.attackRange)
 
 	// Filter out non-enemies.
 	var filtered []Entity

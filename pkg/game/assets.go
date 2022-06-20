@@ -6,6 +6,7 @@ import (
 	"image"
 	_ "image/png"
 	"path"
+	"strings"
 )
 
 //go:embed assets/*
@@ -31,4 +32,30 @@ func readSound(p string) (*Sound, error) {
 	}
 	snd, err := NewSound(data)
 	return snd, err
+}
+
+func readImagesByPrefix(prefix string) ([]image.Image, error) {
+	var images []image.Image
+	fileList, err := assets.ReadDir(path.Join("assets", "images"))
+	for _, file := range fileList {
+		if !file.IsDir() && strings.HasPrefix(file.Name(), prefix) {
+			image, err := readImage(file.Name())
+			if err != nil {
+				return images, err
+			}
+			images = append(images, image)
+		}
+	}
+	return images, err
+}
+
+func getPathFiles(p string) ([]string, error) {
+	var files []string
+	fileList, err := assets.ReadDir(path.Join("assets", p))
+	for _, file := range fileList {
+		if !file.IsDir() {
+			files = append(files, strings.Split(file.Name(), ".")[0])
+		}
+	}
+	return files, err
 }

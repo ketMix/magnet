@@ -6,33 +6,23 @@ import (
 
 type EnemyEntity struct {
 	BaseEntity
-	animation Animation
 }
 
-func NewEnemyEntity(polarity Polarity) *EnemyEntity {
-	images := []*ebiten.Image{
-		enemyPositive1Image,
-		enemyPositive2Image,
-	}
-	if polarity == NegativePolarity {
-		images = []*ebiten.Image{
-			enemyNegative1Image,
-			enemyNegative2Image,
-		}
-	}
+func NewEnemyEntity(config EntityConfig) *EnemyEntity {
 	return &EnemyEntity{
 		BaseEntity: BaseEntity{
-			physics: PhysicsObject{
-				polarity:       polarity,
-				magnetic:       true,
-				magnetStrength: 1,
-				magnetRadius:   100,
+			animation: Animation{
+				images:    config.images,
+				frameTime: 60,
+				speed:     0.25,
 			},
-		},
-		animation: Animation{
-			images:    images,
-			frameTime: 60,
-			speed:     0.25,
+			health: config.health,
+			physics: PhysicsObject{
+				polarity:       config.polarity,
+				magnetic:       config.magnetic,
+				magnetStrength: config.magnetStrength,
+				magnetRadius:   config.magnetRadius,
+			},
 		},
 	}
 }

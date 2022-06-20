@@ -10,7 +10,6 @@ type Player struct {
 	entity Entity
 	// I suppose the toolbelt should be here.
 	toolbelt Toolbelt
-	turret   Turret
 }
 
 func NewPlayer() *Player {
@@ -23,12 +22,6 @@ func NewPlayer() *Player {
 				{kind: ToolDestroy, key: ebiten.Key4},
 			},
 		},
-
-		// Players turret stats
-		turret: Turret{
-			speed: 2.0,
-			rate:  0.25,
-		},
 	}
 }
 
@@ -38,7 +31,7 @@ func (p *Player) Update(s *PlayState) error {
 	p.toolbelt.Position()
 
 	// Increment turret tick
-	p.turret.Tick()
+	p.entity.Turret().Tick()
 
 	// Handle our toolbelt first.
 	if req := p.toolbelt.Update(); req != nil {
@@ -78,7 +71,7 @@ func (p *Player) Update(s *PlayState) error {
 				}
 			case ToolGun:
 				// Check if we can fire
-				if p.turret.CanFire() {
+				if p.entity.Turret().CanFire() {
 					action = &EntityActionShoot{
 						targetX:  float64(cx),
 						targetY:  float64(cy),

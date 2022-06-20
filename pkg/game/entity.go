@@ -4,6 +4,8 @@ import "github.com/hajimehoshi/ebiten/v2"
 
 type Entity interface {
 	Physics() *PhysicsObject
+	Turret() *Turret
+	Animation() *Animation
 	Trashed() bool
 	Trash()
 	Update(world *World) (Request, error)
@@ -15,13 +17,24 @@ type Entity interface {
 }
 
 type BaseEntity struct {
-	physics PhysicsObject
-	trashed bool
-	action  EntityAction
+	physics   PhysicsObject
+	trashed   bool
+	action    EntityAction
+	turret    Turret
+	health    int
+	animation Animation
 }
 
 func (e *BaseEntity) Physics() *PhysicsObject {
 	return &e.physics
+}
+
+func (e *BaseEntity) Turret() *Turret {
+	return &e.turret
+}
+
+func (e *BaseEntity) Animation() *Animation {
+	return &e.animation
 }
 
 func (e *BaseEntity) Trashed() bool {

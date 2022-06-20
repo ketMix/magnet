@@ -10,10 +10,11 @@ import (
 // For now...
 var (
 	// Our internal screen width and height.
-	cellWidth, cellHeight              int
-	screenWidth, screenHeight          int
-	normalFace, boldFace               font.Face
-	playerImage                        *ebiten.Image
+	cellWidth, cellHeight     int
+	screenWidth, screenHeight int
+	normalFace, boldFace      font.Face
+
+	// Images
 	turretNegativeImage                *ebiten.Image
 	turretPositiveImage                *ebiten.Image
 	spawnerImage, spawnerShadowImage   *ebiten.Image
@@ -23,11 +24,8 @@ var (
 	projecticlePositiveImage           *ebiten.Image
 	projecticleNegativeImage           *ebiten.Image
 	projecticleNeutralImage            *ebiten.Image
-	enemyPositive1Image                *ebiten.Image
-	enemyPositive2Image                *ebiten.Image
-	enemyNegative1Image                *ebiten.Image
-	enemyNegative2Image                *ebiten.Image
-	//
+
+	// SFX
 	turretPlaceSound *Sound
 )
 
@@ -90,13 +88,13 @@ func (g *Game) Init() (err error) {
 		return err
 	}
 
-	// IMAGES //
-	if img, err := readImage("player.png"); err == nil {
-		playerImage = ebiten.NewImageFromImage(img)
-	} else {
-		panic(err)
+	// Load configurations
+	err = LoadConfigurations()
+	if err != nil {
+		return err
 	}
 
+	// IMAGES //
 	if img, err := readImage("turret-negative.png"); err == nil {
 		turretNegativeImage = ebiten.NewImageFromImage(img)
 	} else {
@@ -161,31 +159,6 @@ func (g *Game) Init() (err error) {
 
 	if img, err := readImage("projecticle-neutral.png"); err == nil {
 		projecticleNeutralImage = ebiten.NewImageFromImage(img)
-	} else {
-		panic(err)
-	}
-
-	// Enemies
-	if img, err := readImage("enemy-positive-1.png"); err == nil {
-		enemyPositive1Image = ebiten.NewImageFromImage(img)
-	} else {
-		panic(err)
-	}
-
-	if img, err := readImage("enemy-positive-2.png"); err == nil {
-		enemyPositive2Image = ebiten.NewImageFromImage(img)
-	} else {
-		panic(err)
-	}
-
-	if img, err := readImage("enemy-negative-1.png"); err == nil {
-		enemyNegative1Image = ebiten.NewImageFromImage(img)
-	} else {
-		panic(err)
-	}
-
-	if img, err := readImage("enemy-negative-2.png"); err == nil {
-		enemyNegative2Image = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}

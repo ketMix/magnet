@@ -47,7 +47,7 @@ func (w *World) BuildFromLevel(level Level) error {
 					}
 				}
 				if target != nil {
-					e := NewActorEntity(target)
+					e := NewActorEntity(target, PlayerInit)
 					// Tie 'em together.
 					e.player = target
 					target.entity = e
@@ -58,10 +58,10 @@ func (w *World) BuildFromLevel(level Level) error {
 				e := NewSpawnerEntity()
 				w.PlaceEntityInCell(e, x, y)
 			} else if c.kind == EnemyPositiveCell {
-				e := NewEnemyEntity(PositivePolarity)
+				e := NewEnemyEntity(EnemyConfigs["walker-positive"])
 				w.PlaceEntityInCell(e, x, y)
 			} else if c.kind == EnemyNegativeCell {
-				e := NewEnemyEntity(NegativePolarity)
+				e := NewEnemyEntity(EnemyConfigs["walker-negative"])
 				w.PlaceEntityInCell(e, x, y)
 			}
 			// Create the cell.
@@ -109,7 +109,8 @@ func (w *World) Update() error {
 				c := w.GetCell(r.x, r.y)
 				if c != nil {
 					if c.IsOpen() {
-						e := NewTurretEntity()
+						config := TurretConfigs["basic"]
+						e := NewTurretEntity(config)
 						w.PlaceEntityInCell(e, r.x, r.y)
 						turretPlaceSound.Play(1)
 						c.entity = e

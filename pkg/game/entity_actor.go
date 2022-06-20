@@ -11,11 +11,20 @@ type ActorEntity struct {
 	player *Player
 }
 
-func NewActorEntity(player *Player) *ActorEntity {
+func NewActorEntity(player *Player, config EntityConfig) *ActorEntity {
 	return &ActorEntity{
 		BaseEntity: BaseEntity{
+			animation: Animation{
+				images: config.images,
+			},
+			health: config.health,
 			physics: PhysicsObject{
-				polarity: NegativePolarity,
+				polarity: config.polarity,
+			},
+			turret: Turret{
+				damage: config.damage,
+				speed:  config.projecticleSpeed,
+				rate:   config.attackRate,
 			},
 		},
 		player: player,
@@ -46,9 +55,10 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 			kind: a.kind,
 		}
 	case *EntityActionShoot:
+		image := e.animation.Image()
 		// Get our player position for spawning.
 		px := e.Physics().X
-		py := e.Physics().Y - float64(playerImage.Bounds().Dy())/2
+		py := e.Physics().Y - float64(image.Bounds().Dy())/2
 
 		// Get direction vector from difference of player and target.
 		vX, vY := GetDirection(px, py, float64(a.targetX), float64(a.targetY))
@@ -60,10 +70,10 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		// Can apply player's speed to action vector
 		a.complete = true
 		request = SpawnProjecticleRequest{
-			x:        px + (float64(playerImage.Bounds().Dx()/2) * xSide),
+			x:        px + (float64(image.Bounds().Dx()/2) * xSide),
 			y:        py,
-			vX:       vX * e.player.turret.speed,
-			vY:       vY * e.player.turret.speed,
+			vX:       vX * e.turret.speed,
+			vY:       vY * e.turret.speed,
 			polarity: a.polarity,
 		}
 	}
@@ -76,6 +86,7 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 }
 
 func (e *ActorEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
+	image := e.animation.Image()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Concat(screenOp.GeoM)
 	op.GeoM.Translate(
@@ -85,10 +96,10 @@ func (e *ActorEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptio
 	// Draw from center.
 	// FIXME: We should probably use an explicit "originX" and "originY" variables.
 	op.GeoM.Translate(
-		-float64(playerImage.Bounds().Dx())/2,
+		-float64(image.Bounds().Dx())/2,
 		// Adjust Y to render from the "foot" of the image
-		-float64(playerImage.Bounds().Dy()),
+		-float64(image.Bounds().Dy()),
 	)
-	screen.DrawImage(playerImage, op)
+	screen.DrawImage(image, op)
 	// NOTE: We _could_ draw something like a target marker for a moving action here.
 }

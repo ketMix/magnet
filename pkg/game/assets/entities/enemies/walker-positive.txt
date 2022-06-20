@@ -1,0 +1,11 @@
+T WALKER
+H 10
+D 1
+R 1
+X 1
+S 1
+P positive
+M true
+Y 1
+Z 100
+I walker-positive
