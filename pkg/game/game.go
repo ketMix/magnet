@@ -14,7 +14,8 @@ var (
 	screenWidth, screenHeight          int
 	normalFace, boldFace               font.Face
 	playerImage                        *ebiten.Image
-	turretBaseImage                    *ebiten.Image
+	turretNegativeImage                *ebiten.Image
+	turretPositiveImage                *ebiten.Image
 	spawnerImage, spawnerShadowImage   *ebiten.Image
 	toolSlotImage, toolSlotActiveImage *ebiten.Image
 	toolDestroyImage                   *ebiten.Image
@@ -96,8 +97,14 @@ func (g *Game) Init() (err error) {
 		panic(err)
 	}
 
-	if img, err := readImage("turret-base2.png"); err == nil {
-		turretBaseImage = ebiten.NewImageFromImage(img)
+	if img, err := readImage("turret-negative.png"); err == nil {
+		turretNegativeImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	if img, err := readImage("turret-positive.png"); err == nil {
+		turretPositiveImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}

@@ -125,7 +125,7 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 
 	var image *ebiten.Image
 	if t.kind == ToolTurret {
-		image = turretBaseImage
+		image = turretPositiveImage
 	} else if t.kind == ToolDestroy {
 		image = toolDestroyImage
 	} else if t.kind == ToolGun {

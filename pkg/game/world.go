@@ -186,10 +186,10 @@ func (w *World) Draw(screen *ebiten.Image) {
 						op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
 						// Draw from center.
 						op.GeoM.Translate(
-							-float64(turretBaseImage.Bounds().Dx())/2,
-							-float64(turretBaseImage.Bounds().Dy())/2,
+							-float64(turretPositiveImage.Bounds().Dx())/2,
+							-float64(turretPositiveImage.Bounds().Dy())/2,
 						)
-						screen.DrawImage(turretBaseImage, op)
+						screen.DrawImage(turretPositiveImage, op)
 					}
 				}
 			}

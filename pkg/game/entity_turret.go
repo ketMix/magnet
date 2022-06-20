@@ -12,6 +12,7 @@ type TurretEntity struct {
 	turret       Turret
 	target       Entity
 	// owner ActorEntity // ???
+	animation Animation
 }
 
 func NewTurretEntity() *TurretEntity {
@@ -26,6 +27,9 @@ func NewTurretEntity() *TurretEntity {
 			rate:  1,
 		},
 		attackRadius: 100,
+		animation: Animation{
+			images: []*ebiten.Image{turretPositiveImage, turretNegativeImage},
+		},
 	}
 }
 
@@ -61,12 +65,8 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 		e.physics.X,
 		e.physics.Y,
 	)
-	// Draw from center.
-	op.GeoM.Translate(
-		-float64(turretBaseImage.Bounds().Dx())/2,
-		-float64(turretBaseImage.Bounds().Dy())/2,
-	)
-	screen.DrawImage(turretBaseImage, op)
+
+	e.animation.Draw(screen, op)
 }
 
 // Finds the closest entity within attack radius and sets the current target if found
