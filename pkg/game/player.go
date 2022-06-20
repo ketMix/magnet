@@ -17,7 +17,7 @@ func NewPlayer() *Player {
 		toolbelt: Toolbelt{
 			items: []*ToolbeltItem{
 				{kind: ToolGun, key: ebiten.Key1},
-				{kind: ToolTurret, key: ebiten.Key2},
+				{kind: ToolTurret, key: ebiten.Key2, polarity: NegativePolarity},
 				{kind: ToolWall, key: ebiten.Key3},
 				{kind: ToolDestroy, key: ebiten.Key4},
 			},
@@ -64,9 +64,10 @@ func (p *Player) Update(s *PlayState) error {
 					distance: 8,
 					// We wrap the place action as a move action's next step.
 					next: &EntityActionPlace{
-						x:    tx,
-						y:    ty,
-						kind: p.toolbelt.activeItem.kind,
+						x:        tx,
+						y:        ty,
+						kind:     p.toolbelt.activeItem.kind,
+						polarity: p.toolbelt.activeItem.polarity,
 					},
 				}
 			case ToolGun:
