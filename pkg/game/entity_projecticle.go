@@ -11,13 +11,11 @@ type ProjecticleEntity struct {
 	BaseEntity
 	elapsed  int
 	lifetime int
+	damage   int
 }
 
 func NewProjecticleEntity() *ProjecticleEntity {
 	return &ProjecticleEntity{
-		BaseEntity: BaseEntity{
-			physics: PhysicsObject{},
-		},
 		lifetime: 500, // Make the default lifetime 500 ticks. This should be set to a value that makes sense for the projectile's speed so it remains alive for however long it needs to.
 	}
 }
@@ -35,6 +33,7 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 			switch entity := entity.(type) {
 			case *EnemyEntity:
 				if e.IsCollided(entity) {
+					entity.health -= e.damage
 					e.Trash()
 					break
 				}
