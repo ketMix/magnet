@@ -68,8 +68,8 @@ func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImag
 
 	x1 := op.GeoM.Element(0, 2)
 	y1 := op.GeoM.Element(1, 2)
-	x2 := x1 + e.physics.vX/2
-	y2 := y1 + e.physics.vY/2
+	x2 := x1 + e.physics.vX
+	y2 := y1 + e.physics.vY
 	c := color.RGBA{255, 255, 255, 255}
 	if e.physics.polarity == NegativePolarity {
 		c = color.RGBA{
