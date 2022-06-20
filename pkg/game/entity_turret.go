@@ -79,20 +79,22 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 
 	e.animation.Draw(screen, op)
 
-	red, blue := 1.0, 1.0
+	headColor := ebiten.ColorM{}
 	switch e.physics.polarity {
 	case NegativePolarity:
-		blue = 3
+		headColor.Scale(1, .25, .25, 1)
 	case PositivePolarity:
-		red = 3
+		headColor.Scale(.25, .25, 1, 1)
 	}
 	// Draw da head
 	op.GeoM.Translate(0, -5)
 	for i := float64(0); i < 3; i++ {
+		darken := i - (i / 3)
 		headOp := &ebiten.DrawImageOptions{}
 		headOp.GeoM.Concat(op.GeoM)
 		headOp.GeoM.Translate(0, -i)
-		headOp.ColorM.Scale((i/3)*red, (i / 3), (i/3)*blue, 1)
+		headOp.ColorM.Scale(darken, darken, darken, 1)
+		headOp.ColorM.Concat(headColor)
 		e.headAnimation.Draw(screen, headOp)
 	}
 }
