@@ -146,6 +146,8 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 		image = toolDestroyImage
 	} else if t.kind == ToolGun {
 		image = toolGunImage
+	} else if t.kind == ToolWall {
+		image = wallImage
 	} else {
 		// nada
 	}
