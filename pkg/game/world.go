@@ -1,12 +1,10 @@
 package game
 
 import (
-	"image/color"
 	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/kettek/goro/pathing"
 )
 
@@ -125,6 +123,7 @@ func (w *World) Update() error {
 				if c != nil {
 					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
 						e := NewTurretEntity(TurretConfigs["basic"])
+						e.physics.polarity = r.polarity
 						w.PlaceEntityInCell(e, r.x, r.y)
 						turretPlaceSound.Play(1)
 						c.entity = e
@@ -228,14 +227,13 @@ func (w *World) Draw(screen *ebiten.Image) {
 	}
 
 	// Pathing debug.
-	for y, r := range w.cells {
+	/*for y, r := range w.cells {
 		for x, c := range r {
-			// Debug
 			if c.IsOpen() {
 				ebitenutil.DrawRect(screen, w.cameraX+float64(x*cellWidth+cellWidth/2), w.cameraY+float64(y*cellHeight+cellHeight/2), 2, 2, color.White)
 			}
 		}
-	}
+	}*/
 }
 
 /** PATHING **/
