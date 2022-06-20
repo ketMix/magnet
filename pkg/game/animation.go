@@ -17,16 +17,28 @@ func (a *Animation) Image() *ebiten.Image {
 
 // Update updates the animation's current image index based upon elapsed ticks.
 func (a *Animation) Update() {
+	// Bail if we have no frame time.
+	if a.frameTime == 0 {
+		return
+	}
+
+	// Add elapsed time and iterate the frames when needed.
 	a.elapsed++
 	for a.elapsed >= a.frameTime*a.speed {
 		a.elapsed -= a.frameTime * a.speed
-		a.index++
-		if a.index >= len(a.images) {
-			a.index = 0
-		}
+		a.Iterate()
 	}
 }
 
+// Iterate steps through frames and updates the current image index.
+func (a *Animation) Iterate() {
+	a.index++
+	if a.index >= len(a.images) {
+		a.index = 0
+	}
+}
+
+// Draw draws the current animation image to screen.
 func (a *Animation) Draw(screen *ebiten.Image, op *ebiten.DrawImageOptions) {
 	// Draw from center.
 	op.GeoM.Translate(
