@@ -1,10 +1,13 @@
 package game
 
 import (
+	"image/color"
 	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/kettek/goro/pathing"
 )
 
 // World is a struct for our cells and entities.
@@ -15,6 +18,9 @@ type World struct {
 	entities         []Entity
 	currentTileset   TileSet
 	cameraX, cameraY float64
+	path             pathing.Path
+	// Might as well store the core's position.
+	coreX, coreY int
 }
 
 // BuildFromLevel builds the world's cells and entities from a given base level.
@@ -55,21 +61,27 @@ func (w *World) BuildFromLevel(level Level) error {
 					w.PlaceEntityInCell(e, x, y)
 				}
 			} else if c.kind == SouthSpawnCell || c.kind == NorthSpawnCell {
-				e := NewSpawnerEntity()
-				w.PlaceEntityInCell(e, x, y)
+				//e := NewSpawnerEntity()
+				//w.PlaceEntityInCell(e, x, y)
 			} else if c.kind == EnemyPositiveCell {
 				e := NewEnemyEntity(PositivePolarity)
 				w.PlaceEntityInCell(e, x, y)
 			} else if c.kind == EnemyNegativeCell {
 				e := NewEnemyEntity(NegativePolarity)
 				w.PlaceEntityInCell(e, x, y)
+			} else if c.kind == CoreCell {
+				// Do we want more than 1 core...?
+				e := NewCoreEntity()
+				w.PlaceEntityInCell(e, x, y)
+				w.coreX = x
+				w.coreY = y
 			}
 			// Create the cell.
 			cell := LiveCell{
 				kind: c.kind,
 				alt:  c.alt,
 			}
-			if c.kind != NoneCell && c.kind != PlayerCell {
+			if c.kind == BlockedCell || c.kind == EmptyCell {
 				cell.blocked = true
 			}
 			w.cells[y] = append(w.cells[y], cell)
@@ -78,6 +90,7 @@ func (w *World) BuildFromLevel(level Level) error {
 			}
 		}
 	}
+	w.UpdatePathing()
 	return nil
 }
 
@@ -108,11 +121,12 @@ func (w *World) Update() error {
 				// TODO: Check if location is valid.
 				c := w.GetCell(r.x, r.y)
 				if c != nil {
-					if c.IsOpen() {
+					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
 						e := NewTurretEntity()
 						w.PlaceEntityInCell(e, r.x, r.y)
 						turretPlaceSound.Play(1)
 						c.entity = e
+						w.UpdatePathing()
 					}
 				}
 				// TODO: Mark cell as blocked.
@@ -122,6 +136,7 @@ func (w *World) Update() error {
 					if c.entity != nil {
 						c.entity.Trash()
 						c.entity = nil
+						w.UpdatePathing()
 					}
 				}
 			}
@@ -206,6 +221,73 @@ func (w *World) Draw(screen *ebiten.Image) {
 	for _, e := range sortedEntities {
 		e.Draw(screen, screenOp)
 	}
+
+	// Pathing debug.
+	for y, r := range w.cells {
+		for x, c := range r {
+			// Debug
+			if c.IsOpen() {
+				ebitenutil.DrawRect(screen, w.cameraX+float64(x*cellWidth+cellWidth/2), w.cameraY+float64(y*cellHeight+cellHeight/2), 2, 2, color.White)
+			}
+		}
+	}
+}
+
+/** PATHING **/
+func (w *World) UpdatePathing() {
+	// Hmm.
+	for _, e := range w.entities {
+		w.UpdateEntityPathing(e)
+	}
+}
+
+func (w *World) UpdateEntityPathing(e Entity) {
+	if e.CanPathfind() {
+		path := pathing.NewPathFromFunc(w.width, w.height, func(x, y int) uint32 {
+			c := w.GetCell(x, y)
+			if !c.IsOpen() {
+				return pathing.MaximumCost
+			}
+			return 0
+		}, pathing.AlgorithmAStar)
+		e.SetPath(path)
+	}
+}
+
+func (w *World) IsPlacementValid(placeX, placeY int) bool {
+	for _, e := range w.entities {
+		path := pathing.NewPathFromFunc(w.width, w.height, func(x, y int) uint32 {
+			c := w.GetCell(x, y)
+			if !c.IsOpen() || (placeX == x && placeY == y) {
+				return pathing.MaximumCost
+			}
+			return 1
+		}, pathing.AlgorithmAStar)
+
+		canPath := func(x1, y1, x2, y2 int) bool {
+			steps := path.Compute(x1, y1, x2, y2)
+			for _, s := range steps {
+				if s.X() == x2 && s.Y() == y2 {
+					return true
+				}
+			}
+			return false
+		}
+
+		switch e.(type) {
+		case *EnemyEntity:
+			cx, cy := w.GetClosestCellPosition(int(e.Physics().X), int(e.Physics().Y))
+			if !canPath(cx, cy, w.coreX, w.coreY) {
+				return false
+			}
+		case *SpawnerEntity:
+			cx, cy := w.GetClosestCellPosition(int(e.Physics().X), int(e.Physics().Y))
+			if !canPath(cx, cy, w.coreX, w.coreY) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 /** ENTITIES **/
