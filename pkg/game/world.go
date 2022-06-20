@@ -60,9 +60,12 @@ func (w *World) BuildFromLevel(level Level) error {
 					// And place.
 					w.PlaceEntityInCell(e, x, y)
 				}
-			} else if c.kind == SouthSpawnCell || c.kind == NorthSpawnCell {
-				//e := NewSpawnerEntity()
-				//w.PlaceEntityInCell(e, x, y)
+			} else if c.kind == SouthSpawnCell {
+				e := NewSpawnerEntity(NegativePolarity)
+				w.PlaceEntityInCell(e, x, y)
+			} else if c.kind == NorthSpawnCell {
+				e := NewSpawnerEntity(PositivePolarity)
+				w.PlaceEntityInCell(e, x, y)
 			} else if c.kind == EnemyPositiveCell {
 				e := NewEnemyEntity(EnemyConfigs["walker-positive"])
 				w.PlaceEntityInCell(e, x, y)
@@ -144,6 +147,10 @@ func (w *World) Update() error {
 			e.physics.vY = r.vY
 			e.physics.polarity = r.polarity
 			w.PlaceEntityAt(e, r.x, r.y)
+		case SpawnEnemyRequest:
+			e := NewEnemyEntity(r.enemyConfig)
+			w.PlaceEntityAt(e, r.x, r.y)
+			w.UpdatePathing()
 		}
 	}
 
@@ -342,5 +349,5 @@ type LiveCell struct {
 
 // IsOpen does what you think it does.
 func (c *LiveCell) IsOpen() bool {
-	return c.entity == nil && c.blocked == false
+	return c.kind == NorthSpawnCell || c.kind == SouthSpawnCell || (c.entity == nil && c.blocked == false)
 }
