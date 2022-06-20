@@ -7,6 +7,7 @@ type Animation struct {
 	elapsed   float64
 	speed     float64
 	frameTime float64
+	rotation  float64
 	index     int
 	images    []*ebiten.Image
 }
@@ -41,11 +42,26 @@ func (a *Animation) Iterate() {
 
 // Draw draws the current animation image to screen.
 func (a *Animation) Draw(screen *ebiten.Image, op *ebiten.DrawImageOptions) {
+	aop := &ebiten.DrawImageOptions{}
+
+	aop.GeoM.Translate(
+		-float64(a.Image().Bounds().Dx())/2,
+		-float64(a.Image().Bounds().Dy())/2,
+	)
+	aop.GeoM.Rotate(a.rotation)
+	aop.GeoM.Translate(
+		float64(a.Image().Bounds().Dx())/2,
+		float64(a.Image().Bounds().Dy())/2,
+	)
+
+	aop.GeoM.Concat(op.GeoM)
+	aop.ColorM.Concat(op.ColorM)
+
 	// Draw from center.
-	op.GeoM.Translate(
+	aop.GeoM.Translate(
 		-float64(a.Image().Bounds().Dx())/2,
 		-float64(a.Image().Bounds().Dy())/2,
 	)
 	// Draw to screen.
-	screen.DrawImage(a.Image(), op)
+	screen.DrawImage(a.Image(), aop)
 }
