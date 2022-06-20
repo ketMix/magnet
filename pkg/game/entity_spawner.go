@@ -9,23 +9,46 @@ import (
 
 type SpawnerEntity struct {
 	BaseEntity
-	floatTick int
-	active    bool
+	floatTick   int
+	active      bool
+	shouldSpawn bool
 	// spawnTargets []EnemyKind ???
 }
 
-func NewSpawnerEntity() *SpawnerEntity {
+func NewSpawnerEntity(p Polarity) *SpawnerEntity {
 	return &SpawnerEntity{
 		BaseEntity: BaseEntity{
-			physics: PhysicsObject{},
+			physics: PhysicsObject{
+				polarity: p,
+			},
 		},
-		floatTick: rand.Intn(60), // Lightly randomize that start.
+		floatTick:   rand.Intn(60), // Lightly randomize that start.
+		shouldSpawn: true,
 	}
 }
 
 func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 	// TODO: after some duration, attempt a spawn. The request should be handled such that it uses pathfinding to find the best spot towards the player's core.
 	e.floatTick++
+	n := math.Sin(float64(e.floatTick)/30) * 2
+	max := 1.0
+	if n < -max && e.shouldSpawn {
+		e.shouldSpawn = false
+		var enemyConfig EntityConfig
+		switch e.physics.polarity {
+		case PositivePolarity:
+			enemyConfig = EnemyConfigs["walker-positive"]
+		case NegativePolarity:
+			enemyConfig = EnemyConfigs["walker-negative"]
+		}
+		request = SpawnEnemyRequest{
+			x:           e.physics.X,
+			y:           e.physics.Y,
+			enemyConfig: enemyConfig,
+		}
+	} else if n > max {
+		e.shouldSpawn = true
+	}
 	return request, nil
 }
 

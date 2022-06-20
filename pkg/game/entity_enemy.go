@@ -54,6 +54,9 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 		}
 
 		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
+	} else {
+		// No mo steppes
+		e.Trash()
 	}
 
 	return request, nil

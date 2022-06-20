@@ -17,6 +17,11 @@ type SpawnProjecticleRequest struct {
 	polarity Polarity
 }
 
+type SpawnEnemyRequest struct {
+	x, y        float64
+	enemyConfig EntityConfig
+}
+
 // Belt-related requests.
 
 // SelectToolbeltItemRequest selects a given toolbelt item
