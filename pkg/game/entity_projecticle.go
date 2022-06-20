@@ -22,26 +22,25 @@ func NewProjecticleEntity() *ProjecticleEntity {
 func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 	e.elapsed++
 
-	// If our projecticle is magnetic, we need to potentially update projecticle vector
-	if e.physics.polarity != NeutralPolarity {
-		// Grab set of physics objects from entities where projecticle collides with magnet radius
-		// For each collision
-		//  - get magnetic vector
-		//  - add to initial vector
-		for _, entity := range world.entities {
-			switch entity := entity.(type) {
-			case *EnemyEntity:
-				if e.IsCollided(entity) {
-					entity.health -= e.damage
-					e.Trash()
-					break
-				}
+	// Grab set of physics objects from entities where projecticle collides with magnet radius
+	// For each collision
+	//  - get magnetic vector
+	//  - add to initial vector
+	for _, entity := range world.entities {
+		switch entity := entity.(type) {
+		case *EnemyEntity:
+			if e.IsCollided(entity) {
+				entity.health -= e.damage
+				e.Trash()
+				break
 			}
-			if entity.IsWithinMagneticField(e) {
-				mX, mY := entity.Physics().GetMagneticVector(e.physics)
-				e.physics.vX = e.physics.vX + mX
-				e.physics.vY = e.physics.vY + mY
-			}
+		}
+
+		// If our projecticle has polarity, we need to potentially update projecticle vector
+		if e.physics.polarity != NeutralPolarity && entity.IsWithinMagneticField(e) {
+			mX, mY := entity.Physics().GetMagneticVector(e.physics)
+			e.physics.vX = e.physics.vX + mX
+			e.physics.vY = e.physics.vY + mY
 		}
 	}
 
