@@ -28,6 +28,7 @@ type BaseEntity struct {
 	action    EntityAction
 	turret    Turret
 	health    int
+	maxHealth int
 	animation Animation
 }
 

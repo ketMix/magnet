@@ -1,6 +1,7 @@
 package game
 
 import (
+	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,20 +10,21 @@ import (
 
 type EnemyEntity struct {
 	BaseEntity
-	steps []pathing.Step
-	speed float64
+	steps     []pathing.Step
+	healthBar *ProgressBar
+	speed     float64
 }
 
 func NewEnemyEntity(config EntityConfig) *EnemyEntity {
 	return &EnemyEntity{
-		speed: config.speed,
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images:    config.images,
 				frameTime: 60,
 				speed:     0.25,
 			},
-			health: config.health,
+			health:    config.health,
+			maxHealth: config.health,
 			physics: PhysicsObject{
 				polarity:       config.polarity,
 				magnetic:       config.magnetic,
@@ -31,6 +33,12 @@ func NewEnemyEntity(config EntityConfig) *EnemyEntity {
 				radius:         config.radius,
 			},
 		},
+		healthBar: NewProgressBar(
+			7,
+			1,
+			color.RGBA{255, 0, 0, 1},
+		),
+		speed: config.speed,
 	}
 }
 
@@ -41,6 +49,9 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 	}
 	// Update animation.
 	e.animation.Update()
+
+	// Update healthbar
+	e.healthBar.progress = float64(e.maxHealth) / float64(e.health)
 
 	// Attempt to move along path to player's core
 	if len(e.steps) != 0 {
@@ -85,4 +96,11 @@ func (e *EnemyEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptio
 
 	// Draw animation.
 	e.animation.Draw(screen, op)
+
+	// Draw healthbar if less than max health
+	if e.health < e.maxHealth {
+		// TODO: replace these magic numbas
+		op.GeoM.Translate(-3.5, 5)
+		e.healthBar.Draw(screen, op)
+	}
 }
