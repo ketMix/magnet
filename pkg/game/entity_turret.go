@@ -89,7 +89,7 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 	// Draw da head
 	op.GeoM.Translate(0, -5)
 	for i := float64(0); i < 3; i++ {
-		darken := i - (i / 3)
+		darken := .25 + i - (i / 3)
 		headOp := &ebiten.DrawImageOptions{}
 		headOp.GeoM.Concat(op.GeoM)
 		headOp.GeoM.Translate(0, -i)
