@@ -40,6 +40,7 @@ type EntityActionPlace struct {
 	x, y     int
 	complete bool
 	kind     ToolKind
+	polarity Polarity
 }
 
 func (a *EntityActionPlace) Replaceable() bool {
