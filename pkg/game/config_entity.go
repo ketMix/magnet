@@ -14,6 +14,7 @@ type EntityConfig struct {
 	title            string
 	health           int
 	speed            float64
+	radius           float64
 	damage           int
 	attackRange      float64
 	attackRate       float64
@@ -51,6 +52,8 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 			e.projecticleSpeed, err = strconv.ParseFloat(value, 64)
 		case 'S':
 			e.speed, err = strconv.ParseFloat(value, 64)
+		case 'r':
+			e.radius, err = strconv.ParseFloat(value, 64)
 		case 'P':
 			switch value {
 			case "positive":
