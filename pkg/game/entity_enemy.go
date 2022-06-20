@@ -35,6 +35,10 @@ func NewEnemyEntity(config EntityConfig) *EnemyEntity {
 }
 
 func (e *EnemyEntity) Update(world *World) (request Request, err error) {
+	if e.health <= 0 {
+		e.Trash()
+		return
+	}
 	// Update animation.
 	e.animation.Update()
 
