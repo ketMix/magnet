@@ -1,7 +1,6 @@
 package game
 
 import (
-	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -70,16 +69,7 @@ func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImag
 	y1 := op.GeoM.Element(1, 2)
 	x2 := x1 + e.physics.vX
 	y2 := y1 + e.physics.vY
-	c := color.RGBA{255, 255, 255, 255}
-	if e.physics.polarity == NegativePolarity {
-		c = color.RGBA{
-			255, 0, 0, 255,
-		}
-	} else if e.physics.polarity == PositivePolarity {
-		c = color.RGBA{
-			0, 0, 255, 255,
-		}
-	}
+	c := GetPolarityColor(e.physics.polarity)
 
 	length := math.Hypot(x2-x1, y2-y1)
 

@@ -153,11 +153,7 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 	}
 
 	if image != nil {
-		if t.polarity == NegativePolarity {
-			op.ColorM.Scale(1, .25, .25, 1)
-		} else if t.polarity == PositivePolarity {
-			op.ColorM.Scale(.25, .25, 1, 1)
-		}
+		op.ColorM.Scale(GetPolarityColorScale(t.polarity))
 		op.GeoM.Translate(-float64(image.Bounds().Dx()/2), -float64(image.Bounds().Dy()/2))
 		screen.DrawImage(image, &op)
 	}
