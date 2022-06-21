@@ -11,7 +11,6 @@ import (
 type SpawnerEntity struct {
 	BaseEntity
 	floatTick   int
-	active      bool
 	shouldSpawn bool
 	wave        *data.Wave
 	// spawnTargets []EnemyKind ???
@@ -26,7 +25,6 @@ func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 			},
 		},
 		floatTick:   rand.Intn(60), // Lightly randomize that start.
-		active:      true,
 		shouldSpawn: true,
 	}
 }
@@ -129,7 +127,7 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 		-float64(img.Bounds().Dy())/2-math.Sin(float64(e.floatTick)/30)*2,
 	)
 
-	if e.active {
+	if e.wave != nil {
 		portalImg, _ := data.GetImage("spawner-portal.png")
 		screen.DrawImage(portalImg, op)
 	}
