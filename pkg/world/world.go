@@ -19,9 +19,13 @@ type World struct {
 	width, height    int
 	cells            [][]LiveCell
 	entities         []Entity
+	spawners         []*SpawnerEntity
 	currentTileset   data.TileSet
 	CameraX, CameraY float64
 	path             pathing.Path
+	state            WorldState
+	// Our waves, acquired from BuildFromLevel.
+	waves []*data.Wave
 	// Might as well store the core's position.
 	coreX, coreY int
 }
@@ -66,9 +70,11 @@ func (w *World) BuildFromLevel(level data.Level) error {
 			} else if c.Kind == data.SouthSpawnCell {
 				e := NewSpawnerEntity(data.NegativePolarity)
 				w.PlaceEntityInCell(e, x, y)
+				w.spawners = append(w.spawners, e)
 			} else if c.Kind == data.NorthSpawnCell {
 				e := NewSpawnerEntity(data.PositivePolarity)
 				w.PlaceEntityInCell(e, x, y)
+				w.spawners = append(w.spawners, e)
 			} else if c.Kind == data.EnemyPositiveCell {
 				e := NewEnemyEntity(data.EnemyConfigs["walker-positive"])
 				w.PlaceEntityInCell(e, x, y)
@@ -96,8 +102,71 @@ func (w *World) BuildFromLevel(level data.Level) error {
 			}
 		}
 	}
+
+	// Clone our waves list from the level.
+	for _, wave := range level.Waves {
+		w.waves = append(w.waves, wave.Clone())
+	}
+
+	// Set our first waves!
+	w.SetWaves()
+
 	w.UpdatePathing()
 	return nil
+}
+
+func (w *World) ProcessRequest(r Request) {
+	switch r := r.(type) {
+	case MultiRequest:
+		for _, rq := range r.requests {
+			w.ProcessRequest(rq)
+		}
+	case UseToolRequest:
+		if r.kind == ToolTurret {
+			c := w.GetCell(r.x, r.y)
+			if c != nil {
+				if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
+					e := NewTurretEntity(data.TurretConfigs["basic"])
+					e.physics.polarity = r.polarity
+					w.PlaceEntityInCell(e, r.x, r.y)
+					if snd, err := data.GetSound("turret-place.ogg"); err == nil {
+						snd.Play(1)
+					}
+					c.entity = e
+					w.UpdatePathing()
+				}
+			}
+		} else if r.kind == ToolDestroy {
+			c := w.GetCell(r.x, r.y)
+			if c != nil {
+				if c.entity != nil {
+					c.entity.Trash()
+					c.entity = nil
+					w.UpdatePathing()
+				}
+			}
+		} else if r.kind == ToolWall {
+			c := w.GetCell(r.x, r.y)
+			if c != nil {
+				if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
+					e := NewWallEntity()
+					w.PlaceEntityInCell(e, r.x, r.y)
+					if snd, err := data.GetSound("turret-place.ogg"); err == nil {
+						snd.Play(1)
+					}
+					c.entity = e
+					w.UpdatePathing()
+				}
+			}
+		}
+	case SpawnProjecticleRequest:
+		w.PlaceEntityAt(r.projectile, r.x, r.y)
+	case SpawnEnemyRequest:
+		e := NewEnemyEntity(r.enemyConfig)
+		w.PlaceEntityAt(e, r.x, r.y)
+		w.UpdatePathing()
+
+	}
 }
 
 // Update updates the world.
@@ -121,52 +190,7 @@ func (w *World) Update() error {
 
 	// Iterate through our requests.
 	for _, r := range requests {
-		switch r := r.(type) {
-		case UseToolRequest:
-			if r.kind == ToolTurret {
-				c := w.GetCell(r.x, r.y)
-				if c != nil {
-					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
-						e := NewTurretEntity(data.TurretConfigs["basic"])
-						e.physics.polarity = r.polarity
-						w.PlaceEntityInCell(e, r.x, r.y)
-						if snd, err := data.GetSound("turret-place.ogg"); err == nil {
-							snd.Play(1)
-						}
-						c.entity = e
-						w.UpdatePathing()
-					}
-				}
-			} else if r.kind == ToolDestroy {
-				c := w.GetCell(r.x, r.y)
-				if c != nil {
-					if c.entity != nil {
-						c.entity.Trash()
-						c.entity = nil
-						w.UpdatePathing()
-					}
-				}
-			} else if r.kind == ToolWall {
-				c := w.GetCell(r.x, r.y)
-				if c != nil {
-					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
-						e := NewWallEntity()
-						w.PlaceEntityInCell(e, r.x, r.y)
-						if snd, err := data.GetSound("turret-place.ogg"); err == nil {
-							snd.Play(1)
-						}
-						c.entity = e
-						w.UpdatePathing()
-					}
-				}
-			}
-		case SpawnProjecticleRequest:
-			w.PlaceEntityAt(r.projectile, r.x, r.y)
-		case SpawnEnemyRequest:
-			e := NewEnemyEntity(r.enemyConfig)
-			w.PlaceEntityAt(e, r.x, r.y)
-			w.UpdatePathing()
-		}
+		w.ProcessRequest(r)
 	}
 
 	return nil
@@ -253,6 +277,34 @@ func (w *World) Draw(screen *ebiten.Image) {
 			}
 		}
 	}*/
+}
+
+/** WAVES **/
+func (w *World) AreWavesComplete() bool {
+	spawnerCount := len(w.spawners)
+
+	// FIXME: Store spawner references in their own field.
+	for _, s := range w.spawners {
+		if s.wave == nil {
+			spawnerCount--
+		}
+	}
+
+	return spawnerCount == 0
+}
+
+func (w *World) SetWaves() {
+	for i, wave := range w.waves {
+		if i >= len(w.spawners) {
+			// Ignore, wave definition is beyond our actual spawner count.
+			continue
+		}
+		w.spawners[i].wave = wave
+		// Set the spawn elapsed to the first spawn's spawn rate so as to ensure immediate spawning.
+		if wave.Spawns != nil {
+			w.spawners[i].spawnElapsed = wave.Spawns.Spawnrate
+		}
+	}
 }
 
 /** PATHING **/

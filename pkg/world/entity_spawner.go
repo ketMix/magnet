@@ -13,7 +13,9 @@ type SpawnerEntity struct {
 	floatTick   int
 	active      bool
 	shouldSpawn bool
+	wave        *data.Wave
 	// spawnTargets []EnemyKind ???
+	spawnElapsed int
 }
 
 func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
@@ -30,9 +32,42 @@ func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 }
 
 func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
-	// TODO: after some duration, attempt a spawn. The request should be handled such that it uses pathfinding to find the best spot towards the player's core.
+	if e.wave != nil {
+		if e.wave.Spawns != nil {
+			if e.spawnElapsed >= e.wave.Spawns.Spawnrate {
+				var spawnRequests MultiRequest
+				// Spread out our spawns if more than 1 kind is to spawn.
+				for i, k := range e.wave.Spawns.Kinds {
+					// FIXME: Spread from center.
+					spread := float64(i) / float64(len(e.wave.Spawns.Kinds))
+					spreadX := spread * float64(data.CellWidth)
+					spreadY := spread * float64(data.CellHeight)
+
+					enemyConfig := data.EnemyConfigs[k]
+					spawnRequests.requests = append(spawnRequests.requests,
+						SpawnEnemyRequest{
+							x:           e.physics.X + spreadX,
+							y:           e.physics.Y + spreadY,
+							enemyConfig: enemyConfig,
+						},
+					)
+				}
+				request = spawnRequests
+				e.wave.Spawns.Count--
+				if e.wave.Spawns.Count <= 0 {
+					e.wave.Spawns = e.wave.Spawns.Next
+				}
+				e.spawnElapsed = 0
+			}
+		} else {
+			e.wave = e.wave.Next
+			e.spawnElapsed = 0
+		}
+	}
+	e.spawnElapsed++
+
 	e.floatTick++
-	n := math.Sin(float64(e.floatTick)/30) * 2
+	/*n := math.Sin(float64(e.floatTick)/30) * 2
 	max := 1.0
 	if n < -max && e.shouldSpawn {
 		e.shouldSpawn = false
@@ -50,7 +85,7 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 		}
 	} else if n > max {
 		e.shouldSpawn = true
-	}
+	}*/
 	return request, nil
 }
 
