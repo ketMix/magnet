@@ -9,6 +9,7 @@ type Animation struct {
 	frameTime float64
 	rotation  float64
 	index     int
+	mirror    bool
 	images    []*ebiten.Image
 }
 
@@ -48,6 +49,11 @@ func (a *Animation) Draw(screen *ebiten.Image, op *ebiten.DrawImageOptions) {
 		-float64(a.Image().Bounds().Dx())/2,
 		-float64(a.Image().Bounds().Dy())/2,
 	)
+
+	if a.mirror {
+		aop.GeoM.Scale(-1, 1)
+	}
+
 	aop.GeoM.Rotate(a.rotation)
 	aop.GeoM.Translate(
 		float64(a.Image().Bounds().Dx())/2,
