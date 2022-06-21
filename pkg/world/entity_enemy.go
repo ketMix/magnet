@@ -22,7 +22,7 @@ func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images:    config.Images,
-				frameTime: 60,
+				frameTime: 30,
 				speed:     0.25,
 			},
 			health:    config.Health,
@@ -70,6 +70,12 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 
 			e.physics.X -= x
 			e.physics.Y -= y
+
+			if x > 0 {
+				e.animation.mirror = false
+			} else {
+				e.animation.mirror = true
+			}
 		}
 
 		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
@@ -99,6 +105,11 @@ func (e *EnemyEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptio
 
 	if e.lifetime < 10 {
 		op.ColorM.Scale(1, 1, 1, e.lifetime/10)
+	}
+
+	if e.physics.polarity != data.NeutralPolarity {
+		r, g, b, a := data.GetPolarityColorScale(e.physics.polarity)
+		op.ColorM.Scale(r*2, g*2, b*2, a)
 	}
 
 	// Draw animation.
