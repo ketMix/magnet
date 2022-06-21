@@ -23,7 +23,7 @@ func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 			animation: Animation{
 				images:    config.Images,
 				frameTime: 30,
-				speed:     0.25,
+				speed:     1 - config.Speed,
 			},
 			health:    config.Health,
 			maxHealth: config.Health,
