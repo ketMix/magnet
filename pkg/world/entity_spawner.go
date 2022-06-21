@@ -46,6 +46,7 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 						SpawnEnemyRequest{
 							x:           e.physics.X + spreadX,
 							y:           e.physics.Y + spreadY,
+							polarity:    e.physics.polarity,
 							enemyConfig: enemyConfig,
 						},
 					)

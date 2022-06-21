@@ -21,6 +21,7 @@ type SpawnProjecticleRequest struct {
 
 type SpawnEnemyRequest struct {
 	x, y        float64
+	polarity    data.Polarity
 	enemyConfig data.EntityConfig
 }
 

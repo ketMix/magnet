@@ -163,6 +163,7 @@ func (w *World) ProcessRequest(r Request) {
 		w.PlaceEntityAt(r.projectile, r.x, r.y)
 	case SpawnEnemyRequest:
 		e := NewEnemyEntity(r.enemyConfig)
+		e.physics.polarity = r.polarity
 		w.PlaceEntityAt(e, r.x, r.y)
 		w.UpdatePathing()
 
