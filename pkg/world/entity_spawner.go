@@ -24,6 +24,7 @@ func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 			},
 		},
 		floatTick:   rand.Intn(60), // Lightly randomize that start.
+		active:      true,
 		shouldSpawn: true,
 	}
 }
@@ -93,6 +94,10 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 		-float64(img.Bounds().Dy())/2-math.Sin(float64(e.floatTick)/30)*2,
 	)
 
-	// TODO: Make an "active" mode that has an alternative image or an image underlay.
+	if e.active {
+		portalImg, _ := data.GetImage("spawner-portal.png")
+		screen.DrawImage(portalImg, op)
+	}
+
 	screen.DrawImage(img, op)
 }
