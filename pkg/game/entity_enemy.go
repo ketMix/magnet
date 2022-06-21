@@ -13,6 +13,7 @@ type EnemyEntity struct {
 	steps     []pathing.Step
 	healthBar *ProgressBar
 	speed     float64
+	lifetime  float64
 }
 
 func NewEnemyEntity(config EntityConfig) *EnemyEntity {
@@ -47,6 +48,7 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 		e.Trash()
 		return
 	}
+	e.lifetime++
 	// Update animation.
 	e.animation.Update()
 
@@ -93,6 +95,10 @@ func (e *EnemyEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptio
 		e.physics.X,
 		e.physics.Y,
 	)
+
+	if e.lifetime < 10 {
+		op.ColorM.Scale(1, 1, 1, e.lifetime/10)
+	}
 
 	// Draw animation.
 	e.animation.Draw(screen, op)
