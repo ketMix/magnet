@@ -5,7 +5,7 @@ R 1
 X 1
 S 0.25
 r 3
-P positive
+P neutral
 M true
 Y 1
 Z 100
