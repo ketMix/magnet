@@ -40,8 +40,8 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 				for i, k := range e.wave.Spawns.Kinds {
 					// FIXME: Spread from center.
 					spread := float64(i) / float64(len(e.wave.Spawns.Kinds))
-					spreadX := spread * float64(data.CellWidth)
-					spreadY := spread * float64(data.CellHeight)
+					spreadX := spread * float64(data.CellWidth/2)
+					spreadY := spread * float64(data.CellHeight/2)
 
 					enemyConfig := data.EnemyConfigs[k]
 					spawnRequests.requests = append(spawnRequests.requests,
