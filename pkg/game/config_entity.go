@@ -127,3 +127,9 @@ func NewPlayerConfig() (EntityConfig, error) {
 	err := config.LoadFromFile("player")
 	return config, err
 }
+
+func NewCoreConfig() (EntityConfig, error) {
+	config := EntityConfig{}
+	err := config.LoadFromFile("core")
+	return config, err
+}
