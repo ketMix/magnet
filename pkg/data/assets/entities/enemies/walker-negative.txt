@@ -9,4 +9,4 @@ P negative
 M true
 Y 1
 Z 100
-I walker-negative
+I walker-fancy
