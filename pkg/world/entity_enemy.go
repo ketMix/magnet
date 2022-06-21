@@ -1,4 +1,4 @@
-package game
+package world
 
 import (
 	"image/color"
@@ -58,9 +58,9 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 
 	// Attempt to move along path to player's core
 	if len(e.steps) != 0 {
-		tx := float64(e.steps[0].X()*cellWidth + cellWidth/2)
-		ty := float64(e.steps[0].Y()*cellHeight + cellHeight/2)
-		if math.Abs(e.physics.X-float64(e.steps[0].X()*cellWidth+cellWidth/2)) < 1 && math.Abs(e.physics.Y-float64(e.steps[0].Y()*cellHeight+cellHeight/2)) < 1 {
+		tx := float64(e.steps[0].X()*data.CellWidth + data.CellWidth/2)
+		ty := float64(e.steps[0].Y()*data.CellHeight + data.CellHeight/2)
+		if math.Abs(e.physics.X-float64(e.steps[0].X()*data.CellWidth+data.CellWidth/2)) < 1 && math.Abs(e.physics.Y-float64(e.steps[0].Y()*data.CellHeight+data.CellHeight/2)) < 1 {
 			//
 			e.steps = e.steps[1:]
 		} else {

@@ -1,4 +1,4 @@
-package game
+package world
 
 type Turret struct {
 	damage      int     // the damage of each projecticle

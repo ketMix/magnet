@@ -1,4 +1,4 @@
-package game
+package world
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
@@ -51,7 +51,7 @@ func (t *Toolbelt) CheckHit(x, y int) bool {
 // Position positions the toolbelt and all its tools.
 func (t *Toolbelt) Position() {
 	toolSlotImage, _ := data.GetImage("toolslot.png")
-	x, y := 8, screenHeight-8-toolSlotImage.Bounds().Dy()+toolSlotImage.Bounds().Dy()/2
+	x, y := 8, ScreenHeight-8-toolSlotImage.Bounds().Dy()+toolSlotImage.Bounds().Dy()/2
 
 	for _, ti := range t.items {
 		ti.Position(&x, &y)

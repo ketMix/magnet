@@ -7,16 +7,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/world"
 )
 
 type PlayState struct {
 	game  *Game
 	level data.Level
-	world World
+	world world.World
 }
 
 func (s *PlayState) Init() error {
-	s.world.game = s.game // Eww
+	s.world.Game = s.game // Eww
 	if err := s.world.BuildFromLevel(s.level); err != nil {
 		return err
 	}
@@ -26,7 +27,7 @@ func (s *PlayState) Init() error {
 func (s *PlayState) Dispose() error {
 	// Remove player entity reference.
 	for _, p := range s.game.players {
-		p.entity = nil
+		p.Entity = nil
 	}
 	return nil
 }
@@ -41,7 +42,7 @@ func (s *PlayState) Update() error {
 	}
 	// Update our players.
 	for _, p := range s.game.players {
-		if err := p.Update(s); err != nil {
+		if err := p.Update(&s.world); err != nil {
 			return err
 		}
 	}
@@ -60,17 +61,9 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 
 	// Draw level text centered at top of screen for now.
 	bounds := text.BoundString(boldFace, s.level.Title)
-	centeredX := screenWidth/2 - bounds.Min.X - bounds.Dx()/2
+	centeredX := world.ScreenWidth/2 - bounds.Min.X - bounds.Dx()/2
 	text.Draw(screen, s.level.Title, boldFace, centeredX, bounds.Dy()+1, color.White)
 
 	// Draw our player's belt!
-	s.game.players[0].toolbelt.Draw(screen)
-}
-
-// getCursorPosition returns the cursor position relative to the map.
-func (s *PlayState) getCursorPosition() (x, y int) {
-	x, y = ebiten.CursorPosition()
-	x -= int(s.world.cameraX)
-	y -= int(s.world.cameraY)
-	return x, y
+	s.game.players[0].Toolbelt.Draw(screen)
 }

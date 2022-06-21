@@ -1,4 +1,4 @@
-package game
+package world
 
 import (
 	"math"
@@ -9,14 +9,18 @@ import (
 	"github.com/kettek/goro/pathing"
 )
 
+// FIXME: This is a sin.
+var ScreenWidth int = 640
+var ScreenHeight int = 360
+
 // World is a struct for our cells and entities.
 type World struct {
-	game             *Game // Ewwww
+	Game             Game // Ewwww x2
 	width, height    int
 	cells            [][]LiveCell
 	entities         []Entity
 	currentTileset   data.TileSet
-	cameraX, cameraY float64
+	CameraX, CameraY float64
 	path             pathing.Path
 	// Might as well store the core's position.
 	coreX, coreY int
@@ -45,8 +49,8 @@ func (w *World) BuildFromLevel(level data.Level) error {
 			if c.Kind == data.PlayerCell {
 				var target *Player
 				// Only add it if we actually need to add a player.
-				for _, p := range w.game.players {
-					if p.entity == nil {
+				for _, p := range w.Game.Players() {
+					if p.Entity == nil {
 						target = p
 						break
 					}
@@ -55,7 +59,7 @@ func (w *World) BuildFromLevel(level data.Level) error {
 					e := NewActorEntity(target, data.PlayerInit)
 					// Tie 'em together.
 					e.player = target
-					target.entity = e
+					target.Entity = e
 					// And place.
 					w.PlaceEntityInCell(e, x, y)
 				}
@@ -173,13 +177,13 @@ func (w *World) Draw(screen *ebiten.Image) {
 	// Get our camera position.
 	screenOp := &ebiten.DrawImageOptions{}
 	// FIXME: Base this on some sort of player lookup or a global self reference.
-	if w.game.players[0].entity != nil {
-		w.cameraX = -w.game.players[0].entity.Physics().X + float64(screenWidth)/2
-		w.cameraY = -w.game.players[0].entity.Physics().Y + float64(screenHeight)/2
+	if w.Game.Players()[0].Entity != nil {
+		w.CameraX = -w.Game.Players()[0].Entity.Physics().X + float64(ScreenWidth)/2
+		w.CameraY = -w.Game.Players()[0].Entity.Physics().Y + float64(ScreenHeight)/2
 	}
 	screenOp.GeoM.Translate(
-		w.cameraX,
-		w.cameraY,
+		w.CameraX,
+		w.CameraY,
 	)
 
 	// Draw the map.
@@ -187,7 +191,7 @@ func (w *World) Draw(screen *ebiten.Image) {
 		for x, c := range r {
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Concat(screenOp.GeoM)
-			op.GeoM.Translate(float64(x*cellWidth), float64(y*cellHeight))
+			op.GeoM.Translate(float64(x*data.CellWidth), float64(y*data.CellHeight))
 			if c.kind == data.BlockedCell {
 				// Don't mind my magic numbers.
 				op.GeoM.Translate(0, -11)
@@ -205,10 +209,10 @@ func (w *World) Draw(screen *ebiten.Image) {
 	}
 
 	// Check for any special pending renders, such as move target or pending turret location.
-	for _, p := range w.game.players {
-		if p.entity != nil {
-			if p.entity.Action() != nil && p.entity.Action().Next() != nil {
-				switch a := p.entity.Action().Next().(type) {
+	for _, p := range w.Game.Players() {
+		if p.Entity != nil {
+			if p.Entity.Action() != nil && p.Entity.Action().Next() != nil {
+				switch a := p.Entity.Action().Next().(type) {
 				case *EntityActionPlace:
 					// Draw transparent version of tool for placement
 					if a.kind == ToolTurret || a.kind == ToolWall {
@@ -217,7 +221,7 @@ func (w *World) Draw(screen *ebiten.Image) {
 						op.ColorM.Scale(data.GetPolarityColorScale(a.polarity))
 						op.ColorM.Scale(1, 1, 1, 0.5)
 						op.GeoM.Concat(screenOp.GeoM)
-						op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
+						op.GeoM.Translate(float64(a.x*data.CellWidth)+float64(data.CellWidth/2), float64(a.y*data.CellHeight)+float64(data.CellHeight/2))
 						// Draw from center.
 						op.GeoM.Translate(
 							-float64(image.Bounds().Dx())/2,
@@ -317,7 +321,7 @@ func (w *World) IsPlacementValid(placeX, placeY int) bool {
 
 // PlaceEntity places the entity into the world, aligned by cell and centered within a cell.
 func (w *World) PlaceEntityInCell(e Entity, x, y int) {
-	w.PlaceEntityAt(e, float64(x*cellWidth+cellWidth/2), float64(y*cellHeight+cellHeight/2))
+	w.PlaceEntityAt(e, float64(x*data.CellWidth+data.CellWidth/2), float64(y*data.CellHeight+data.CellHeight/2))
 }
 
 // PlaceEntityAt places the entity into the world at the given specific coordinates.
@@ -348,8 +352,16 @@ func (w *World) GetCell(x, y int) *LiveCell {
 }
 
 func (w *World) GetClosestCellPosition(x, y int) (int, int) {
-	tx, ty := math.Floor(float64(x)/float64(cellWidth)), math.Floor(float64(y)/float64(cellHeight))
+	tx, ty := math.Floor(float64(x)/float64(data.CellWidth)), math.Floor(float64(y)/float64(data.CellHeight))
 	return int(tx), int(ty)
+}
+
+// GetCursorPosition returns the cursor position relative to the map.
+func (w *World) GetCursorPosition() (x, y int) {
+	x, y = ebiten.CursorPosition()
+	x -= int(w.CameraX)
+	y -= int(w.CameraY)
+	return x, y
 }
 
 // LiveCell is a position in a live level.

@@ -1,4 +1,4 @@
-package game
+package world
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
@@ -8,14 +8,14 @@ import (
 // Player represents a player that controls an entity. It handles input and makes the entity dance.
 type Player struct {
 	// entity is the player-controlled entity.
-	entity Entity
+	Entity Entity
 	// I suppose the toolbelt should be here.
-	toolbelt Toolbelt
+	Toolbelt Toolbelt
 }
 
 func NewPlayer() *Player {
 	return &Player{
-		toolbelt: Toolbelt{
+		Toolbelt: Toolbelt{
 			items: []*ToolbeltItem{
 				{kind: ToolGun, key: ebiten.Key1},
 				{kind: ToolTurret, key: ebiten.Key2, polarity: data.NegativePolarity},
@@ -26,27 +26,27 @@ func NewPlayer() *Player {
 	}
 }
 
-// It's kind of weird to pass the play state, but oh well.
-func (p *Player) Update(s *PlayState) error {
+// Arglebargle
+func (p *Player) Update(w *World) error {
 	// FIXME: This should be only be called when the window is changed.
-	p.toolbelt.Position()
+	p.Toolbelt.Position()
 
 	// Increment turret tick
-	p.entity.Turret().Tick()
+	p.Entity.Turret().Tick()
 
 	// Handle our toolbelt first.
-	if req := p.toolbelt.Update(); req != nil {
+	if req := p.Toolbelt.Update(); req != nil {
 		return nil
 	}
-	if p.entity != nil {
+	if p.Entity != nil {
 		var action EntityAction
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
 			// Right-click to delete.
-			cx, cy := s.getCursorPosition()
-			tx, ty := s.world.GetClosestCellPosition(cx, cy)
+			cx, cy := w.GetCursorPosition()
+			tx, ty := w.GetClosestCellPosition(cx, cy)
 			action = &EntityActionMove{
-				x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
-				y:        float64(ty+1)*float64(cellHeight) + float64(cellHeight)/2,
+				x:        float64(tx)*float64(data.CellWidth) + float64(data.CellWidth)/2,
+				y:        float64(ty+1)*float64(data.CellHeight) + float64(data.CellHeight)/2,
 				distance: 8,
 				// We wrap the place action as a move action's next step.
 				next: &EntityActionPlace{
@@ -57,34 +57,34 @@ func (p *Player) Update(s *PlayState) error {
 			}
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			// Send turret placement request at the cell closest to the mouse.
-			cx, cy := s.getCursorPosition()
-			tx, ty := s.world.GetClosestCellPosition(cx, cy)
+			cx, cy := w.GetCursorPosition()
+			tx, ty := w.GetClosestCellPosition(cx, cy)
 
-			switch p.toolbelt.activeItem.kind {
+			switch p.Toolbelt.activeItem.kind {
 			case ToolTurret:
 				fallthrough
 			case ToolWall:
 				fallthrough
 			case ToolDestroy:
 				action = &EntityActionMove{
-					x:        float64(tx)*float64(cellWidth) + float64(cellWidth)/2,
-					y:        float64(ty+1)*float64(cellHeight) + float64(cellHeight)/2,
+					x:        float64(tx)*float64(data.CellWidth) + float64(data.CellWidth)/2,
+					y:        float64(ty+1)*float64(data.CellHeight) + float64(data.CellHeight)/2,
 					distance: 8,
 					// We wrap the place action as a move action's next step.
 					next: &EntityActionPlace{
 						x:        tx,
 						y:        ty,
-						kind:     p.toolbelt.activeItem.kind,
-						polarity: p.toolbelt.activeItem.polarity,
+						kind:     p.Toolbelt.activeItem.kind,
+						polarity: p.Toolbelt.activeItem.polarity,
 					},
 				}
 			case ToolGun:
 				// Check if we can fire
-				if p.entity.Turret().CanFire() {
+				if p.Entity.Turret().CanFire() {
 					action = &EntityActionShoot{
 						targetX:  float64(cx),
 						targetY:  float64(cy),
-						polarity: p.toolbelt.activeItem.polarity,
+						polarity: p.Toolbelt.activeItem.polarity,
 					}
 				}
 			}
@@ -106,14 +106,14 @@ func (p *Player) Update(s *PlayState) error {
 			}
 
 			action = &EntityActionMove{
-				x:        p.entity.Physics().X + x,
-				y:        p.entity.Physics().Y + y,
+				x:        p.Entity.Physics().X + x,
+				y:        p.Entity.Physics().Y + y,
 				distance: 0.5,
 			}
 		}
-		if action != nil && (p.entity.Action() == nil || p.entity.Action().Replaceable()) {
+		if action != nil && (p.Entity.Action() == nil || p.Entity.Action().Replaceable()) {
 			// TODO: Add a "chainable" action field that will instead add a new action as the next action in the deepest nested next action.
-			p.entity.SetAction(action)
+			p.Entity.SetAction(action)
 		}
 	}
 

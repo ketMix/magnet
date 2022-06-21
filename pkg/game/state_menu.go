@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/world"
 )
 
 type MenuState struct {
@@ -24,7 +25,7 @@ func (s *MenuState) Init() error {
 	}
 
 	// Add players here...?
-	s.game.players = append(s.game.players, NewPlayer())
+	s.game.players = append(s.game.players, world.NewPlayer())
 
 	return nil
 }
@@ -51,6 +52,6 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 	op.GeoM.Rotate(s.magnetSpin)
 
 	// Render it at the center of the screen.
-	op.GeoM.Translate(float64(screenWidth/2), float64(screenHeight/2))
+	op.GeoM.Translate(float64(world.ScreenWidth/2), float64(world.ScreenHeight/2))
 	screen.DrawImage(s.magnetImage, &op)
 }

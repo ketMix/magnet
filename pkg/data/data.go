@@ -12,21 +12,7 @@ var (
 	EmptyImage    *ebiten.Image
 	EmptySubImage *ebiten.Image
 
-	// Images
-	wallImage                                  *ebiten.Image
-	turretNegativeImage                        *ebiten.Image
-	turretPositiveImage                        *ebiten.Image
-	spawnerImage, spawnerShadowImage           *ebiten.Image
-	spawnerPositiveImage, spawnerNegativeImage *ebiten.Image
-	toolSlotImage, toolSlotActiveImage         *ebiten.Image
-	toolDestroyImage                           *ebiten.Image
-	toolGunImage                               *ebiten.Image
-	projecticlePositiveImage                   *ebiten.Image
-	projecticleNegativeImage                   *ebiten.Image
-	projecticleNeutralImage                    *ebiten.Image
-
-	// SFX
-	turretPlaceSound *Sound
+	CellWidth, CellHeight int
 )
 
 // Images is the map of all loaded images.

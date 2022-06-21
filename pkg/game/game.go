@@ -5,6 +5,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/world"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -12,9 +13,7 @@ import (
 // For now...
 var (
 	// Our internal screen width and height.
-	cellWidth, cellHeight     int
-	screenWidth, screenHeight int
-	normalFace, boldFace      font.Face
+	normalFace, boldFace font.Face
 )
 
 // Game is our ebiten engine interface compliant type.
@@ -22,18 +21,14 @@ type Game struct {
 	// Our game current game state.
 	state State
 	//
-	players []*Player
+	players []*world.Player
 }
 
 // Init is used to set up all initial game structures.
 func (g *Game) Init() (err error) {
-	// Default to 640x360 for now.
-	screenWidth = 640
-	screenHeight = 360
-
 	// Set our cell width and height.
-	cellWidth = 16
-	cellHeight = 11
+	data.CellWidth = 16
+	data.CellHeight = 11
 
 	// Use nearest-neighbor for scaling.
 	ebiten.SetScreenFilterEnabled(false)
@@ -95,6 +90,10 @@ func (g *Game) Init() (err error) {
 	return
 }
 
+func (g *Game) Players() []*world.Player {
+	return g.players
+}
+
 // Update updates, how about that.
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
@@ -110,7 +109,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // Layout sets up "virtual" screen dimensions in contrast to the window's dimensions.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return screenWidth, screenHeight
+	return world.ScreenWidth, world.ScreenHeight
 }
 
 func (g *Game) SetState(s State) error {

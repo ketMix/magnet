@@ -1,4 +1,4 @@
-package game
+package world
 
 import "github.com/kettek/ebijam22/pkg/data"
 
