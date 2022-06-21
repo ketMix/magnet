@@ -24,6 +24,11 @@ type SpawnEnemyRequest struct {
 	enemyConfig data.EntityConfig
 }
 
+// MultiRequest is a container for multiple requests.
+type MultiRequest struct {
+	requests []Request
+}
+
 // Belt-related requests.
 
 // SelectToolbeltItemRequest selects a given toolbelt item
