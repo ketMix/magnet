@@ -72,7 +72,7 @@ func (w *World) BuildFromLevel(level Level) error {
 				w.PlaceEntityInCell(e, x, y)
 			} else if c.kind == CoreCell {
 				// Do we want more than 1 core...?
-				e := NewCoreEntity()
+				e := NewCoreEntity(CoreConfig)
 				w.PlaceEntityInCell(e, x, y)
 				w.coreX = x
 				w.coreY = y
