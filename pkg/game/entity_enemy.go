@@ -99,8 +99,9 @@ func (e *EnemyEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptio
 
 	// Draw healthbar if less than max health
 	if e.health < e.maxHealth {
-		// TODO: replace these magic numbas
-		op.GeoM.Translate(-3.5, 5)
+		// Center the health bar horizontally and position it at the bottom of our image.
+		// NOTE: we're using the first image, as if we use whatever the current frame is, it might be of different dimensions, which would lead to the health bar changing position.
+		op.GeoM.Translate(-float64(e.animation.images[0].Bounds().Dx())/2, float64(e.animation.images[0].Bounds().Dy()))
 		e.healthBar.Draw(screen, op)
 	}
 }
