@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 // Player represents a player that controls an entity. It handles input and makes the entity dance.
@@ -17,7 +18,7 @@ func NewPlayer() *Player {
 		toolbelt: Toolbelt{
 			items: []*ToolbeltItem{
 				{kind: ToolGun, key: ebiten.Key1},
-				{kind: ToolTurret, key: ebiten.Key2, polarity: NegativePolarity},
+				{kind: ToolTurret, key: ebiten.Key2, polarity: data.NegativePolarity},
 				{kind: ToolWall, key: ebiten.Key3},
 				{kind: ToolDestroy, key: ebiten.Key4},
 			},

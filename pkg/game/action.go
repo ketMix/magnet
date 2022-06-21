@@ -1,5 +1,7 @@
 package game
 
+import "github.com/kettek/ebijam22/pkg/data"
+
 // EntityAction is the interface to represent an entity's desired action.
 type EntityAction interface {
 	// Replaceble returns if the action can be immediately replaced by another.
@@ -40,7 +42,7 @@ type EntityActionPlace struct {
 	x, y     int
 	complete bool
 	kind     ToolKind
-	polarity Polarity
+	polarity data.Polarity
 }
 
 func (a *EntityActionPlace) Replaceable() bool {
@@ -58,7 +60,7 @@ func (a *EntityActionPlace) Next() EntityAction {
 type EntityActionShoot struct {
 	// targetX and targetY represent the position to fire at.
 	targetX, targetY float64
-	polarity         Polarity
+	polarity         data.Polarity
 	complete         bool
 	next             EntityAction
 }

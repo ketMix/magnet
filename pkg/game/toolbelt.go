@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 // Toolbelt is the interface for containing user actions for placing turrets and similar.
@@ -80,7 +81,7 @@ const (
 // ToolbeltItem is a toolbelt entry.
 type ToolbeltItem struct {
 	kind     ToolKind
-	polarity Polarity
+	polarity data.Polarity
 	x, y     int
 	key      ebiten.Key // Key to check against for activation.
 	active   bool
@@ -135,7 +136,7 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 	image := GetToolKindImage(t.kind)
 
 	if image != nil {
-		op.ColorM.Scale(GetPolarityColorScale(t.polarity))
+		op.ColorM.Scale(data.GetPolarityColorScale(t.polarity))
 		op.GeoM.Translate(-float64(image.Bounds().Dx()/2), -float64(image.Bounds().Dy()/2))
 		screen.DrawImage(image, &op)
 	}
@@ -147,8 +148,8 @@ func (t *ToolbeltItem) Cycle() {
 	// Abuse the fact that polarities have value
 	case ToolGun:
 		t.polarity++
-		if t.polarity > PositivePolarity {
-			t.polarity = NegativePolarity
+		if t.polarity > data.PositivePolarity {
+			t.polarity = data.NegativePolarity
 		}
 	case ToolTurret:
 		t.polarity *= -1
@@ -161,7 +162,7 @@ func GetToolKindImage(k ToolKind) *ebiten.Image {
 	var image *ebiten.Image
 	switch k {
 	case ToolTurret:
-		image = TurretConfigs["basic"].images[0]
+		image = data.TurretConfigs["basic"].Images[0]
 	case ToolDestroy:
 		image = toolDestroyImage
 	case ToolGun:

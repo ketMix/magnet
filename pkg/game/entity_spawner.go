@@ -5,6 +5,7 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type SpawnerEntity struct {
@@ -15,7 +16,7 @@ type SpawnerEntity struct {
 	// spawnTargets []EnemyKind ???
 }
 
-func NewSpawnerEntity(p Polarity) *SpawnerEntity {
+func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 	return &SpawnerEntity{
 		BaseEntity: BaseEntity{
 			physics: PhysicsObject{
@@ -34,12 +35,12 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 	max := 1.0
 	if n < -max && e.shouldSpawn {
 		e.shouldSpawn = false
-		var enemyConfig EntityConfig
+		var enemyConfig data.EntityConfig
 		switch e.physics.polarity {
-		case PositivePolarity:
-			enemyConfig = EnemyConfigs["walker-positive"]
-		case NegativePolarity:
-			enemyConfig = EnemyConfigs["walker-negative"]
+		case data.PositivePolarity:
+			enemyConfig = data.EnemyConfigs["walker-positive"]
+		case data.NegativePolarity:
+			enemyConfig = data.EnemyConfigs["walker-negative"]
 		}
 		request = SpawnEnemyRequest{
 			x:           e.physics.X,
@@ -61,9 +62,9 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 	)
 
 	var img *ebiten.Image
-	if e.physics.polarity == NegativePolarity {
+	if e.physics.polarity == data.NegativePolarity {
 		img = spawnerNegativeImage
-	} else if e.physics.polarity == PositivePolarity {
+	} else if e.physics.polarity == data.PositivePolarity {
 		img = spawnerPositiveImage
 	} else {
 		img = spawnerImage

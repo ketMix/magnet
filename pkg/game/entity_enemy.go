@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/goro/pathing"
 )
 
@@ -16,22 +17,22 @@ type EnemyEntity struct {
 	lifetime  float64
 }
 
-func NewEnemyEntity(config EntityConfig) *EnemyEntity {
+func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 	return &EnemyEntity{
 		BaseEntity: BaseEntity{
 			animation: Animation{
-				images:    config.images,
+				images:    config.Images,
 				frameTime: 60,
 				speed:     0.25,
 			},
-			health:    config.health,
-			maxHealth: config.health,
+			health:    config.Health,
+			maxHealth: config.Health,
 			physics: PhysicsObject{
-				polarity:       config.polarity,
-				magnetic:       config.magnetic,
-				magnetStrength: config.magnetStrength,
-				magnetRadius:   config.magnetRadius,
-				radius:         config.radius,
+				polarity:       config.Polarity,
+				magnetic:       config.Magnetic,
+				magnetStrength: config.MagnetStrength,
+				magnetRadius:   config.MagnetRadius,
+				radius:         config.Radius,
 			},
 		},
 		healthBar: NewProgressBar(
@@ -39,7 +40,7 @@ func NewEnemyEntity(config EntityConfig) *EnemyEntity {
 			1,
 			color.RGBA{255, 0, 0, 1},
 		),
-		speed: config.speed,
+		speed: config.Speed,
 	}
 }
 

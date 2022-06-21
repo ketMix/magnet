@@ -6,11 +6,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type PlayState struct {
 	game  *Game
-	level Level
+	level data.Level
 	world World
 }
 
@@ -58,9 +59,9 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	s.world.Draw(screen)
 
 	// Draw level text centered at top of screen for now.
-	bounds := text.BoundString(boldFace, s.level.title)
+	bounds := text.BoundString(boldFace, s.level.Title)
 	centeredX := screenWidth/2 - bounds.Min.X - bounds.Dx()/2
-	text.Draw(screen, s.level.title, boldFace, centeredX, bounds.Dy()+1, color.White)
+	text.Draw(screen, s.level.Title, boldFace, centeredX, bounds.Dy()+1, color.White)
 
 	// Draw our player's belt!
 	s.game.players[0].toolbelt.Draw(screen)

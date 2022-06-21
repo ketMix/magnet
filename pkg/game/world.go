@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/goro/pathing"
 )
 
@@ -14,7 +15,7 @@ type World struct {
 	width, height    int
 	cells            [][]LiveCell
 	entities         []Entity
-	currentTileset   TileSet
+	currentTileset   data.TileSet
 	cameraX, cameraY float64
 	path             pathing.Path
 	// Might as well store the core's position.
@@ -22,12 +23,12 @@ type World struct {
 }
 
 // BuildFromLevel builds the world's cells and entities from a given base level.
-func (w *World) BuildFromLevel(level Level) error {
-	tileset := level.tileset
+func (w *World) BuildFromLevel(level data.Level) error {
+	tileset := level.Tileset
 	if tileset == "" {
 		tileset = "nature"
 	}
-	ts, err := loadTileSet(tileset)
+	ts, err := data.LoadTileSet(tileset)
 	if err != nil {
 		return err
 	}
@@ -36,12 +37,12 @@ func (w *World) BuildFromLevel(level Level) error {
 	w.width = 0
 	w.height = 0
 	w.cells = make([][]LiveCell, 0)
-	for y, r := range level.cells {
+	for y, r := range level.Cells {
 		w.height++
 		w.cells = append(w.cells, make([]LiveCell, 0))
 		for x, c := range r {
 			// Create any entities that should be there.
-			if c.kind == PlayerCell {
+			if c.Kind == data.PlayerCell {
 				var target *Player
 				// Only add it if we actually need to add a player.
 				for _, p := range w.game.players {
@@ -51,38 +52,38 @@ func (w *World) BuildFromLevel(level Level) error {
 					}
 				}
 				if target != nil {
-					e := NewActorEntity(target, PlayerInit)
+					e := NewActorEntity(target, data.PlayerInit)
 					// Tie 'em together.
 					e.player = target
 					target.entity = e
 					// And place.
 					w.PlaceEntityInCell(e, x, y)
 				}
-			} else if c.kind == SouthSpawnCell {
-				e := NewSpawnerEntity(NegativePolarity)
+			} else if c.Kind == data.SouthSpawnCell {
+				e := NewSpawnerEntity(data.NegativePolarity)
 				w.PlaceEntityInCell(e, x, y)
-			} else if c.kind == NorthSpawnCell {
-				e := NewSpawnerEntity(PositivePolarity)
+			} else if c.Kind == data.NorthSpawnCell {
+				e := NewSpawnerEntity(data.PositivePolarity)
 				w.PlaceEntityInCell(e, x, y)
-			} else if c.kind == EnemyPositiveCell {
-				e := NewEnemyEntity(EnemyConfigs["walker-positive"])
+			} else if c.Kind == data.EnemyPositiveCell {
+				e := NewEnemyEntity(data.EnemyConfigs["walker-positive"])
 				w.PlaceEntityInCell(e, x, y)
-			} else if c.kind == EnemyNegativeCell {
-				e := NewEnemyEntity(EnemyConfigs["walker-negative"])
+			} else if c.Kind == data.EnemyNegativeCell {
+				e := NewEnemyEntity(data.EnemyConfigs["walker-negative"])
 				w.PlaceEntityInCell(e, x, y)
-			} else if c.kind == CoreCell {
+			} else if c.Kind == data.CoreCell {
 				// Do we want more than 1 core...?
-				e := NewCoreEntity(CoreConfig)
+				e := NewCoreEntity(data.CoreConfig)
 				w.PlaceEntityInCell(e, x, y)
 				w.coreX = x
 				w.coreY = y
 			}
 			// Create the cell.
 			cell := LiveCell{
-				kind: c.kind,
-				alt:  c.alt,
+				kind: c.Kind,
+				alt:  c.Alt,
 			}
-			if c.kind == BlockedCell || c.kind == EmptyCell {
+			if c.Kind == data.BlockedCell || c.Kind == data.EmptyCell {
 				cell.blocked = true
 			}
 			w.cells[y] = append(w.cells[y], cell)
@@ -122,7 +123,7 @@ func (w *World) Update() error {
 				c := w.GetCell(r.x, r.y)
 				if c != nil {
 					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
-						e := NewTurretEntity(TurretConfigs["basic"])
+						e := NewTurretEntity(data.TurretConfigs["basic"])
 						e.physics.polarity = r.polarity
 						w.PlaceEntityInCell(e, r.x, r.y)
 						turretPlaceSound.Play(1)
@@ -183,17 +184,17 @@ func (w *World) Draw(screen *ebiten.Image) {
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Concat(screenOp.GeoM)
 			op.GeoM.Translate(float64(x*cellWidth), float64(y*cellHeight))
-			if c.kind == BlockedCell {
+			if c.kind == data.BlockedCell {
 				// Don't mind my magic numbers.
 				op.GeoM.Translate(0, -11)
-				screen.DrawImage(w.currentTileset.blockedImage, op)
-			} else if c.kind == EmptyCell {
+				screen.DrawImage(w.currentTileset.BlockedImage, op)
+			} else if c.kind == data.EmptyCell {
 				// nada
 			} else {
 				if c.alt {
-					screen.DrawImage(w.currentTileset.openImage2, op)
+					screen.DrawImage(w.currentTileset.OpenImage2, op)
 				} else {
-					screen.DrawImage(w.currentTileset.openImage, op)
+					screen.DrawImage(w.currentTileset.OpenImage, op)
 				}
 			}
 		}
@@ -209,7 +210,7 @@ func (w *World) Draw(screen *ebiten.Image) {
 					if a.kind == ToolTurret || a.kind == ToolWall {
 						image := GetToolKindImage(a.kind)
 						op := &ebiten.DrawImageOptions{}
-						op.ColorM.Scale(GetPolarityColorScale(a.polarity))
+						op.ColorM.Scale(data.GetPolarityColorScale(a.polarity))
 						op.ColorM.Scale(1, 1, 1, 0.5)
 						op.GeoM.Concat(screenOp.GeoM)
 						op.GeoM.Translate(float64(a.x*cellWidth)+float64(cellWidth/2), float64(a.y*cellHeight)+float64(cellHeight/2))
@@ -351,11 +352,11 @@ func (w *World) GetClosestCellPosition(x, y int) (int, int) {
 type LiveCell struct {
 	entity  Entity
 	blocked bool
-	kind    CellKind // Same as Level
-	alt     bool     // Same as Level
+	kind    data.CellKind // Same as Level
+	alt     bool          // Same as Level
 }
 
 // IsOpen does what you think it does.
 func (c *LiveCell) IsOpen() bool {
-	return c.kind == NorthSpawnCell || c.kind == SouthSpawnCell || (c.entity == nil && c.blocked == false)
+	return c.kind == data.NorthSpawnCell || c.kind == data.SouthSpawnCell || (c.entity == nil && c.blocked == false)
 }

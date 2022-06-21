@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type CoreEntity struct {
@@ -11,14 +12,14 @@ type CoreEntity struct {
 	healthBar *ProgressBar
 }
 
-func NewCoreEntity(config EntityConfig) *CoreEntity {
+func NewCoreEntity(config data.EntityConfig) *CoreEntity {
 	return &CoreEntity{
 		BaseEntity: BaseEntity{
 			health:    50,
 			maxHealth: 50,
 			physics:   PhysicsObject{},
 			animation: Animation{
-				images:    config.images,
+				images:    config.Images,
 				frameTime: 5,
 				speed:     1,
 			},

@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type MenuState struct {
@@ -15,7 +16,7 @@ type MenuState struct {
 
 func (s *MenuState) Init() error {
 	// Load some assets. This will be abstracted elsewhere.
-	if img, err := readImage("magnet.png"); err == nil {
+	if img, err := data.ReadImage("magnet.png"); err == nil {
 		ebiten.SetWindowIcon([]image.Image{img})
 		s.magnetImage = ebiten.NewImageFromImage(img)
 	} else {

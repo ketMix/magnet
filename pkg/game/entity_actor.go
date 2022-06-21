@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type ActorEntity struct {
@@ -17,30 +18,30 @@ type ActorEntity struct {
 	idleAnimation Animation
 }
 
-func NewActorEntity(player *Player, config EntityConfig) *ActorEntity {
-	fmt.Println(len(config.walkImages))
+func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
+	fmt.Println(len(config.WalkImages))
 	return &ActorEntity{
-		speed: config.speed,
+		speed: config.Speed,
 		walkAnimation: Animation{
-			images:    config.walkImages,
+			images:    config.WalkImages,
 			frameTime: 5,
 			speed:     1,
 		},
 		idleAnimation: Animation{
-			images: config.images,
+			images: config.Images,
 		},
 		BaseEntity: BaseEntity{
 			animation: Animation{
-				images: config.images,
+				images: config.Images,
 			},
-			health: config.health,
+			health: config.Health,
 			physics: PhysicsObject{
-				polarity: config.polarity,
+				polarity: config.Polarity,
 			},
 			turret: Turret{
-				damage: config.damage,
-				speed:  config.projecticleSpeed,
-				rate:   config.attackRate,
+				damage: config.Damage,
+				speed:  config.ProjecticleSpeed,
+				rate:   config.AttackRate,
 			},
 		},
 		player: player,

@@ -1,5 +1,7 @@
 package game
 
+import "github.com/kettek/ebijam22/pkg/data"
+
 // Request represents results from an entity's action completion.
 type Request interface {
 }
@@ -8,7 +10,7 @@ type Request interface {
 type UseToolRequest struct {
 	x, y     int
 	kind     ToolKind // ???
-	polarity Polarity
+	polarity data.Polarity
 }
 
 // SpawnProjecticleRequest attempts to spawn a projecticle at given location with given direction
@@ -19,7 +21,7 @@ type SpawnProjecticleRequest struct {
 
 type SpawnEnemyRequest struct {
 	x, y        float64
-	enemyConfig EntityConfig
+	enemyConfig data.EntityConfig
 }
 
 // Belt-related requests.

@@ -2,6 +2,8 @@ package game
 
 import (
 	"math"
+
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type PhysicsObject struct {
@@ -12,7 +14,7 @@ type PhysicsObject struct {
 	vX, vY float64
 
 	// Magnetism
-	polarity       Polarity
+	polarity       data.Polarity
 	magnetic       bool
 	magnetStrength float64
 	magnetRadius   float64
@@ -32,9 +34,9 @@ func (p *PhysicsObject) GetMagneticVector(t PhysicsObject) (float64, float64) {
 }
 
 // Retrieve the strength of the magnetic field based on distance to target
-func (p *PhysicsObject) GetMagneticAffect(polarity Polarity, magnitude float64) float64 {
+func (p *PhysicsObject) GetMagneticAffect(polarity data.Polarity, magnitude float64) float64 {
 	// If either source or target is neutral, return no affect
-	if p.polarity == NeutralPolarity || polarity == NeutralPolarity {
+	if p.polarity == data.NeutralPolarity || polarity == data.NeutralPolarity {
 		return 1.0
 	}
 

@@ -1,4 +1,4 @@
-package game
+package data
 
 import (
 	"bufio"
@@ -11,25 +11,25 @@ import (
 )
 
 type EntityConfig struct {
-	title            string
-	health           int
-	speed            float64
-	radius           float64
-	damage           int
-	attackRange      float64
-	attackRate       float64
-	projecticleSpeed float64
-	polarity         Polarity
-	magnetic         bool
-	magnetStrength   float64
-	magnetRadius     float64
-	images           []*ebiten.Image
-	walkImages       []*ebiten.Image
-	headImages       []*ebiten.Image
+	Title            string
+	Health           int
+	Speed            float64
+	Radius           float64
+	Damage           int
+	AttackRange      float64
+	AttackRate       float64
+	ProjecticleSpeed float64
+	Polarity         Polarity
+	Magnetic         bool
+	MagnetStrength   float64
+	MagnetRadius     float64
+	Images           []*ebiten.Image
+	WalkImages       []*ebiten.Image
+	HeadImages       []*ebiten.Image
 }
 
 func (e *EntityConfig) LoadFromFile(p string) error {
-	b, err := readFile(path.Join("entities", p+".txt"))
+	b, err := ReadFile(path.Join("entities", p+".txt"))
 	if err != nil {
 		return err
 	}
@@ -40,67 +40,67 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 		value := strings.TrimSpace(t[1:])
 		switch t[0] {
 		case 'T':
-			e.title = value
+			e.Title = value
 		case 'H':
-			e.health, err = strconv.Atoi(value)
+			e.Health, err = strconv.Atoi(value)
 		case 'D':
-			e.damage, err = strconv.Atoi(value)
+			e.Damage, err = strconv.Atoi(value)
 		case 'R':
-			e.attackRange, err = strconv.ParseFloat(value, 64)
+			e.AttackRange, err = strconv.ParseFloat(value, 64)
 		case 'X':
-			e.attackRate, err = strconv.ParseFloat(value, 64)
+			e.AttackRate, err = strconv.ParseFloat(value, 64)
 		case 'O':
-			e.projecticleSpeed, err = strconv.ParseFloat(value, 64)
+			e.ProjecticleSpeed, err = strconv.ParseFloat(value, 64)
 		case 'S':
-			e.speed, err = strconv.ParseFloat(value, 64)
+			e.Speed, err = strconv.ParseFloat(value, 64)
 		case 'r':
-			e.radius, err = strconv.ParseFloat(value, 64)
+			e.Radius, err = strconv.ParseFloat(value, 64)
 		case 'P':
 			switch value {
 			case "positive":
-				e.polarity = PositivePolarity
+				e.Polarity = PositivePolarity
 			case "negative":
-				e.polarity = NegativePolarity
+				e.Polarity = NegativePolarity
 			default:
 				fallthrough
 			case "neutral":
-				e.polarity = NeutralPolarity
+				e.Polarity = NeutralPolarity
 			}
 		case 'M':
-			e.magnetic, err = strconv.ParseBool(value)
+			e.Magnetic, err = strconv.ParseBool(value)
 		case 'Y':
-			e.magnetStrength, err = strconv.ParseFloat(value, 64)
+			e.MagnetStrength, err = strconv.ParseFloat(value, 64)
 		case 'Z':
-			e.magnetRadius, err = strconv.ParseFloat(value, 64)
+			e.MagnetRadius, err = strconv.ParseFloat(value, 64)
 		case 'I':
 			// Load images using prefix in value
-			images, err := readImagesByPrefix(value)
+			images, err := ReadImagesByPrefix(value)
 			if err != nil {
 				return err
 			}
 			for _, image := range images {
 				img := ebiten.NewImageFromImage(image)
-				e.images = append(e.images, img)
+				e.Images = append(e.Images, img)
 			}
 		case 'W':
 			// Load images using prefix in value
-			images, err := readImagesByPrefix(value)
+			images, err := ReadImagesByPrefix(value)
 			if err != nil {
 				return err
 			}
 			for _, image := range images {
 				img := ebiten.NewImageFromImage(image)
-				e.walkImages = append(e.walkImages, img)
+				e.WalkImages = append(e.WalkImages, img)
 			}
 		case 'i':
 			// Load images using prefix in value
-			images, err := readImagesByPrefix(value)
+			images, err := ReadImagesByPrefix(value)
 			if err != nil {
 				return err
 			}
 			for _, image := range images {
 				img := ebiten.NewImageFromImage(image)
-				e.headImages = append(e.headImages, img)
+				e.HeadImages = append(e.HeadImages, img)
 			}
 		}
 		if err != nil {

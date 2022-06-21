@@ -1,16 +1,19 @@
 package game
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
+)
 
 type TravelState struct {
 	game        *Game
 	done        bool
 	targetLevel string
-	loadedLevel Level
+	loadedLevel data.Level
 }
 
 func (s *TravelState) Init() (err error) {
-	s.loadedLevel, err = NewLevel(s.targetLevel)
+	s.loadedLevel, err = data.NewLevel(s.targetLevel)
 	if err != nil {
 		return err
 	}

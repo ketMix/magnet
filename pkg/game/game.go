@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/kettek/ebijam22/pkg/data"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -36,7 +37,7 @@ var (
 	projecticleNeutralImage                    *ebiten.Image
 
 	// SFX
-	turretPlaceSound *Sound
+	turretPlaceSound *data.Sound
 )
 
 // Game is our ebiten engine interface compliant type.
@@ -67,11 +68,11 @@ func (g *Game) Init() (err error) {
 	audio.NewContext(44100)
 
 	// Load our global fonts.
-	data, err := readFile("fonts/OpenSansPX.ttf")
+	d, err := data.ReadFile("fonts/OpenSansPX.ttf")
 	if err != nil {
 		return err
 	}
-	tt, err := opentype.Parse(data)
+	tt, err := opentype.Parse(d)
 	if err != nil {
 		return err
 	}
@@ -82,11 +83,11 @@ func (g *Game) Init() (err error) {
 	}); err != nil {
 		return err
 	}
-	data, err = readFile("fonts/OpenSansPXBold.ttf")
+	d, err = data.ReadFile("fonts/OpenSansPXBold.ttf")
 	if err != nil {
 		return err
 	}
-	tt, err = opentype.Parse(data)
+	tt, err = opentype.Parse(d)
 	if err != nil {
 		return err
 	}
@@ -99,7 +100,7 @@ func (g *Game) Init() (err error) {
 	}
 
 	// Load configurations
-	err = LoadConfigurations()
+	err = data.LoadConfigurations()
 	if err != nil {
 		return err
 	}
@@ -110,94 +111,94 @@ func (g *Game) Init() (err error) {
 	emptyImage.Fill(color.White)
 
 	// IMAGES //
-	if img, err := readImage("wall.png"); err == nil {
+	if img, err := data.ReadImage("wall.png"); err == nil {
 		wallImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("turret-negative.png"); err == nil {
+	if img, err := data.ReadImage("turret-negative.png"); err == nil {
 		turretNegativeImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("turret-positive.png"); err == nil {
+	if img, err := data.ReadImage("turret-positive.png"); err == nil {
 		turretPositiveImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("spawner.png"); err == nil {
+	if img, err := data.ReadImage("spawner.png"); err == nil {
 		spawnerImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("spawner-positive.png"); err == nil {
+	if img, err := data.ReadImage("spawner-positive.png"); err == nil {
 		spawnerPositiveImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("spawner-negative.png"); err == nil {
+	if img, err := data.ReadImage("spawner-negative.png"); err == nil {
 		spawnerNegativeImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("spawner-shadow.png"); err == nil {
+	if img, err := data.ReadImage("spawner-shadow.png"); err == nil {
 		spawnerShadowImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
 	// Tools
-	if img, err := readImage("toolslot.png"); err == nil {
+	if img, err := data.ReadImage("toolslot.png"); err == nil {
 		toolSlotImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("toolslot-active.png"); err == nil {
+	if img, err := data.ReadImage("toolslot-active.png"); err == nil {
 		toolSlotActiveImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("tool-destroy.png"); err == nil {
+	if img, err := data.ReadImage("tool-destroy.png"); err == nil {
 		toolDestroyImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("tool-gun.png"); err == nil {
+	if img, err := data.ReadImage("tool-gun.png"); err == nil {
 		toolGunImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
 	// Projecticles
-	if img, err := readImage("projecticle-positive.png"); err == nil {
+	if img, err := data.ReadImage("projecticle-positive.png"); err == nil {
 		projecticlePositiveImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("projecticle-negative.png"); err == nil {
+	if img, err := data.ReadImage("projecticle-negative.png"); err == nil {
 		projecticleNegativeImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
-	if img, err := readImage("projecticle-neutral.png"); err == nil {
+	if img, err := data.ReadImage("projecticle-neutral.png"); err == nil {
 		projecticleNeutralImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
 
 	// SOUNDS //
-	if snd, err := readSound("turret-place.ogg"); err == nil {
+	if snd, err := data.ReadSound("turret-place.ogg"); err == nil {
 		turretPlaceSound = snd
 	} else {
 		panic(err)

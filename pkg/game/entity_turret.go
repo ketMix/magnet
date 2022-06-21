@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type TurretEntity struct {
@@ -14,24 +15,24 @@ type TurretEntity struct {
 	headAnimation Animation
 }
 
-func NewTurretEntity(config EntityConfig) *TurretEntity {
+func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 	return &TurretEntity{
 		BaseEntity: BaseEntity{
 			animation: Animation{
-				images: config.images,
+				images: config.Images,
 			},
 			physics: PhysicsObject{
-				polarity: config.polarity,
+				polarity: config.Polarity,
 			},
 			turret: Turret{
-				damage:      config.damage,
-				speed:       config.projecticleSpeed,
-				rate:        config.attackRate,
-				attackRange: config.attackRange,
+				damage:      config.Damage,
+				speed:       config.ProjecticleSpeed,
+				rate:        config.AttackRate,
+				attackRange: config.AttackRange,
 			},
 		},
 		headAnimation: Animation{
-			images: config.headImages,
+			images: config.HeadImages,
 		},
 	}
 }
@@ -90,7 +91,7 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 	e.animation.Draw(screen, op)
 
 	headColor := ebiten.ColorM{}
-	headColor.Scale(GetPolarityColorScale(e.physics.polarity))
+	headColor.Scale(data.GetPolarityColorScale(e.physics.polarity))
 
 	// Draw da head
 	op.GeoM.Translate(0, -5)

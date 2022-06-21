@@ -1,4 +1,4 @@
-package game
+package data
 
 import (
 	"bytes"
@@ -12,12 +12,12 @@ import (
 //go:embed assets/*
 var assets embed.FS
 
-func readFile(p string) ([]byte, error) {
+func ReadFile(p string) ([]byte, error) {
 	return assets.ReadFile(path.Join("assets", p))
 }
 
-func readImage(p string) (image.Image, error) {
-	data, err := readFile(path.Join("images", p))
+func ReadImage(p string) (image.Image, error) {
+	data, err := ReadFile(path.Join("images", p))
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +25,8 @@ func readImage(p string) (image.Image, error) {
 	return img, err
 }
 
-func readSound(p string) (*Sound, error) {
-	data, err := readFile(path.Join("sounds", p))
+func ReadSound(p string) (*Sound, error) {
+	data, err := ReadFile(path.Join("sounds", p))
 	if err != nil {
 		return nil, err
 	}
@@ -34,12 +34,12 @@ func readSound(p string) (*Sound, error) {
 	return snd, err
 }
 
-func readImagesByPrefix(prefix string) ([]image.Image, error) {
+func ReadImagesByPrefix(prefix string) ([]image.Image, error) {
 	var images []image.Image
 	fileList, err := assets.ReadDir(path.Join("assets", "images"))
 	for _, file := range fileList {
 		if !file.IsDir() && strings.HasPrefix(file.Name(), prefix) {
-			image, err := readImage(file.Name())
+			image, err := ReadImage(file.Name())
 			if err != nil {
 				return images, err
 			}

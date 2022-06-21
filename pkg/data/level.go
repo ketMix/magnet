@@ -1,4 +1,4 @@
-package game
+package data
 
 type Level struct {
 	LevelConfig
@@ -19,9 +19,8 @@ const (
 )
 
 type Cell struct {
-	kind   CellKind
-	alt    bool
-	entity Entity // This is used during level -> live cells construction to store any placed turrets or similar.
+	Kind CellKind
+	Alt  bool
 	// ???
 }
 

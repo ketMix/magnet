@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type ProjecticleEntity struct {
@@ -37,7 +38,7 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 		}
 
 		// If our projecticle has polarity, we need to potentially update projecticle vector
-		if e.physics.polarity != NeutralPolarity && entity.IsWithinMagneticField(e) {
+		if e.physics.polarity != data.NeutralPolarity && entity.IsWithinMagneticField(e) {
 			mX, mY := entity.Physics().GetMagneticVector(e.physics)
 			e.physics.vX = e.physics.vX + mX
 			e.physics.vY = e.physics.vY + mY
@@ -68,7 +69,7 @@ func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImag
 	y1 := op.GeoM.Element(1, 2)
 	x2 := x1 + e.physics.vX
 	y2 := y1 + e.physics.vY
-	c := GetPolarityColor(e.physics.polarity)
+	c := data.GetPolarityColor(e.physics.polarity)
 
 	length := math.Hypot(x2-x1, y2-y1)
 
