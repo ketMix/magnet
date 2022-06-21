@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"path"
+	"strconv"
 	"strings"
 )
 
@@ -13,6 +14,7 @@ type LevelConfig struct {
 	Width   int
 	Height  int
 	Cells   [][]Cell
+	Waves   []*Wave
 }
 
 func (l *LevelConfig) newCell(r rune) (c Cell) {
@@ -61,6 +63,55 @@ func (l *LevelConfig) LoadFromFile(p string) (err error) {
 				l.Title = strings.TrimSpace(t[1:])
 			} else if t[0] == 'S' {
 				l.Tileset = strings.TrimSpace(t[1:])
+			} else if t[0] == 'W' {
+				s := strings.TrimSpace(t[1:])
+				waveStrs := strings.Split(s, ";")
+				var firstWave *Wave
+				var lastWave *Wave
+				for _, w := range waveStrs {
+					var lastSpawn *SpawnList
+					wave := &Wave{}
+					spawnStrs := strings.Split(w, ",")
+					for _, s := range spawnStrs {
+						var amount int
+						var tickDelay int
+						var enemies []string
+						amountAndList := strings.Split(s, " ")
+						amountStr := amountAndList[0]
+						// Get amount and tick delay.
+						amountAndTickDelayStrs := strings.Split(amountStr, "@")
+						if len(amountAndTickDelayStrs) == 1 {
+							// No tick specified.
+							amount, _ = strconv.Atoi(amountAndTickDelayStrs[0])
+							tickDelay = 20
+						} else {
+							amount, _ = strconv.Atoi(amountAndTickDelayStrs[0])
+							tickDelay, _ = strconv.Atoi(amountAndTickDelayStrs[1])
+						}
+						// Get enemies list.
+						listStr := amountAndList[1]
+						enemies = strings.Split(listStr, "&")
+						sl := &SpawnList{
+							Kinds:     enemies,
+							Spawnrate: tickDelay,
+							Count:     amount,
+						}
+						if lastSpawn == nil {
+							wave.Spawns = sl
+						} else {
+							lastSpawn.Next = sl
+						}
+						lastSpawn = sl
+					}
+					if firstWave == nil {
+						firstWave = wave
+					}
+					if lastWave != nil {
+						lastWave.Next = wave
+					}
+					lastWave = wave
+				}
+				l.Waves = append(l.Waves, firstWave)
 			}
 		} else {
 			if len(t) > l.Width {

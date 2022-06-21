@@ -1,5 +1,7 @@
 T The Start
 S nature
+W 5@200 walker-negative,2@200 walker-negative&walker-negative;10@200 walker-negative
+W 5@200 walker-positive;10@200 walker-positive
 
 #####   #####
 ##N##   ##S##
