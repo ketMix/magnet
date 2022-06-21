@@ -1,0 +1,4 @@
+T CORE
+H 50
+r 5
+I core
