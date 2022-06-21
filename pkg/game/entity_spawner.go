@@ -60,8 +60,17 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 		e.physics.Y,
 	)
 
+	var img *ebiten.Image
+	if e.physics.polarity == NegativePolarity {
+		img = spawnerNegativeImage
+	} else if e.physics.polarity == PositivePolarity {
+		img = spawnerPositiveImage
+	} else {
+		img = spawnerImage
+	}
+
 	op.GeoM.Translate(
-		-float64(spawnerImage.Bounds().Dx())/2,
+		-float64(img.Bounds().Dx())/2,
 		0,
 	)
 
@@ -79,9 +88,9 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 	// Draw from center.
 	op.GeoM.Translate(
 		0,
-		-float64(spawnerImage.Bounds().Dy())/2-math.Sin(float64(e.floatTick)/30)*2,
+		-float64(img.Bounds().Dy())/2-math.Sin(float64(e.floatTick)/30)*2,
 	)
 
 	// TODO: Make an "active" mode that has an alternative image or an image underlay.
-	screen.DrawImage(spawnerImage, op)
+	screen.DrawImage(img, op)
 }
