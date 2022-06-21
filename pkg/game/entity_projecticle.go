@@ -80,5 +80,5 @@ func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImag
 	op2.ColorM.ScaleWithColor(c)
 	// Filter must be 'nearest' filter (default).
 	// Linear filtering would make edges blurred.
-	screen.DrawImage(emptySubImage, op2)
+	screen.DrawImage(data.EmptySubImage, op2)
 }

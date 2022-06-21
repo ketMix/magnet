@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/kettek/ebijam22/pkg/data"
 )
 
 type WallEntity struct {
@@ -9,11 +10,12 @@ type WallEntity struct {
 }
 
 func NewWallEntity() *WallEntity {
+	wallImg, _ := data.GetImage("wall.png")
 	return &WallEntity{
 		BaseEntity: BaseEntity{
 			physics: PhysicsObject{},
 			animation: Animation{
-				images: []*ebiten.Image{wallImage},
+				images: []*ebiten.Image{wallImg},
 			},
 		},
 	}

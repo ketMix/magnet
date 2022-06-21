@@ -126,7 +126,9 @@ func (w *World) Update() error {
 						e := NewTurretEntity(data.TurretConfigs["basic"])
 						e.physics.polarity = r.polarity
 						w.PlaceEntityInCell(e, r.x, r.y)
-						turretPlaceSound.Play(1)
+						if snd, err := data.GetSound("turret-place.ogg"); err == nil {
+							snd.Play(1)
+						}
 						c.entity = e
 						w.UpdatePathing()
 					}
@@ -146,7 +148,9 @@ func (w *World) Update() error {
 					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
 						e := NewWallEntity()
 						w.PlaceEntityInCell(e, r.x, r.y)
-						turretPlaceSound.Play(1)
+						if snd, err := data.GetSound("turret-place.ogg"); err == nil {
+							snd.Play(1)
+						}
 						c.entity = e
 						w.UpdatePathing()
 					}

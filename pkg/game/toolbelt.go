@@ -50,6 +50,7 @@ func (t *Toolbelt) CheckHit(x, y int) bool {
 
 // Position positions the toolbelt and all its tools.
 func (t *Toolbelt) Position() {
+	toolSlotImage, _ := data.GetImage("toolslot.png")
 	x, y := 8, screenHeight-8-toolSlotImage.Bounds().Dy()+toolSlotImage.Bounds().Dy()/2
 
 	for _, ti := range t.items {
@@ -88,6 +89,7 @@ type ToolbeltItem struct {
 }
 
 func (t *ToolbeltItem) Update() (request Request) {
+	toolSlotImage, _ := data.GetImage("toolslot.png")
 	// Does the cursor intersect us?
 	if inpututil.IsKeyJustPressed(t.key) {
 		return SelectToolbeltItemRequest{t.kind}
@@ -109,6 +111,8 @@ func (t *ToolbeltItem) Update() (request Request) {
 
 // Position assigns the center position for the toolbelt item.
 func (t *ToolbeltItem) Position(sx, sy *int) {
+	toolSlotImage, _ := data.GetImage("toolslot.png")
+	toolDestroyImage, _ := data.GetImage("tool-destroy.png")
 	t.x = *sx + toolDestroyImage.Bounds().Dx()/2
 	t.y = *sy
 
@@ -117,6 +121,8 @@ func (t *ToolbeltItem) Position(sx, sy *int) {
 }
 
 func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
+	toolSlotImage, _ := data.GetImage("toolslot.png")
+	toolSlotActiveImage, _ := data.GetImage("toolslot-active.png")
 	op := ebiten.DrawImageOptions{}
 	if t.active {
 		op.GeoM.Translate(float64(t.x-toolSlotActiveImage.Bounds().Dx()/2), float64(t.y-toolSlotActiveImage.Bounds().Dy()/2))
@@ -164,11 +170,11 @@ func GetToolKindImage(k ToolKind) *ebiten.Image {
 	case ToolTurret:
 		image = data.TurretConfigs["basic"].Images[0]
 	case ToolDestroy:
-		image = toolDestroyImage
+		image, _ = data.GetImage("tool-destroy.png")
 	case ToolGun:
-		image = toolGunImage
+		image, _ = data.GetImage("tool-gun.png")
 	case ToolWall:
-		image = wallImage
+		image, _ = data.GetImage("wall.png")
 	}
 	return image
 }

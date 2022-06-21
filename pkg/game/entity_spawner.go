@@ -63,11 +63,11 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 
 	var img *ebiten.Image
 	if e.physics.polarity == data.NegativePolarity {
-		img = spawnerNegativeImage
+		img, _ = data.GetImage("spawner-negative.png")
 	} else if e.physics.polarity == data.PositivePolarity {
-		img = spawnerPositiveImage
+		img, _ = data.GetImage("spawner-positive.png")
 	} else {
-		img = spawnerImage
+		img, _ = data.GetImage("spawner.png")
 	}
 
 	op.GeoM.Translate(
@@ -77,13 +77,14 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 
 	// Draw shadow
 	{
+		shadowImg, _ := data.GetImage("spawner-shadow.png")
 		sop := &ebiten.DrawImageOptions{}
 		sop.GeoM.Concat(op.GeoM)
 		sop.GeoM.Translate(
-			float64(spawnerShadowImage.Bounds().Dx())/2,
+			float64(shadowImg.Bounds().Dx())/2,
 			0,
 		)
-		screen.DrawImage(spawnerShadowImage, sop)
+		screen.DrawImage(shadowImg, sop)
 	}
 
 	// Draw from center.
