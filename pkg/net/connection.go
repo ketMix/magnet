@@ -2,11 +2,13 @@ package net
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Connection struct {
@@ -60,6 +62,30 @@ func (c *Connection) AwaitHandshake(handshaker string, local string, target stri
 	_, err = localConn.WriteTo([]byte(fmt.Sprintf("%d %s", RegisterMessage, c.Name)), c.handshakerAddr)
 	if err != nil {
 		return err
+	}
+
+	// Wait for a character string response.
+	for {
+		buffer := make([]byte, 2)
+		c.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+		bytesRead, fromAddr, err := c.conn.ReadFromUDP(buffer)
+		if err != nil {
+			return err
+		}
+		// Ignore sends from non-handhsaker.
+		if fromAddr.String() != handshakerAddr.String() {
+			continue
+		}
+		c.conn.SetReadDeadline(time.Time{})
+		msg := string(buffer[0:bytesRead])
+		a, err := strconv.Atoi(msg)
+		if err != nil {
+			return err
+		}
+		if a != int(HandshakerMessage) {
+			return errors.New("incorrect handshake response")
+		}
+		break
 	}
 
 	if target != "" {

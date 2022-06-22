@@ -11,6 +11,7 @@ const (
 	AwaitMessage
 	ArrivedMessage
 	HelloMessage
+	HandshakerMessage
 )
 
 // TypedMessageType represents the contained type within a TypedMessage.

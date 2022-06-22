@@ -63,6 +63,9 @@ func main() {
 		parts := strings.Split(msg, " ")
 		a, err := strconv.Atoi(parts[0])
 
+		// Send an immediate response to the client to make sure they know we're alive.
+		localConn.WriteTo([]byte(fmt.Sprintf("%d", enet.HandshakerMessage)), remoteAddr)
+
 		fmt.Println("[INCOMING]", msg)
 		//if incoming.
 		if enet.HandshakeMessage(a) == enet.RegisterMessage {
