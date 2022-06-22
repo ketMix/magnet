@@ -40,7 +40,7 @@ func (s *MenuState) Update() error {
 	// Travel first map after a spin.
 	s.game.SetState(&TravelState{
 		game:        s.game,
-		targetLevel: "001",
+		targetLevel: s.game.Options.Map,
 	})
 	return nil
 }

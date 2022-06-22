@@ -17,6 +17,7 @@ require (
 	github.com/jfreymuth/oggvorbis v1.0.3 // indirect
 	github.com/jfreymuth/vorbis v1.0.2 // indirect
 	github.com/radovskyb/watcher v1.0.7 // indirect
+	github.com/thought-machine/go-flags v1.6.1 // indirect
 	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
 	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect

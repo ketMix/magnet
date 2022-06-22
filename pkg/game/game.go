@@ -18,6 +18,7 @@ var (
 
 // Game is our ebiten engine interface compliant type.
 type Game struct {
+	Options data.Options
 	// Our game current game state.
 	state State
 	//
