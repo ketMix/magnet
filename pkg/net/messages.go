@@ -21,6 +21,7 @@ type TypedMessageType int
 const (
 	MissingMessageType TypedMessageType = iota
 	HenloMessageType
+	PingMessageType
 )
 
 // TypedMessage wraps a Message.
@@ -34,6 +35,10 @@ func (t *TypedMessage) Message() Message {
 	switch t.Type {
 	case HenloMessageType:
 		var m HenloMessage
+		json.Unmarshal(t.Data, &m)
+		return m
+	case PingMessageType:
+		var m PingMessage
 		json.Unmarshal(t.Data, &m)
 		return m
 	}
@@ -53,4 +58,13 @@ type HenloMessage struct {
 // Type returns HenloMessage's corresponding type number.
 func (m HenloMessage) Type() TypedMessageType {
 	return HenloMessageType
+}
+
+// PingMessage is used to send periodic pings.
+type PingMessage struct {
+}
+
+// Type returns PingMessage's corresponding type number.
+func (m PingMessage) Type() TypedMessageType {
+	return PingMessageType
 }

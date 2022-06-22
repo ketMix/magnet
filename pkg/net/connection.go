@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +28,10 @@ type Connection struct {
 	//
 	connected bool
 	active    bool
+
+	//
+	lastReceived time.Time
+	lastSent     time.Time
 
 	//
 	Messages chan Message
@@ -217,12 +222,28 @@ func (c *Connection) Loop() {
 		panic(err)
 	}
 	c.connected = true
+	c.lastReceived = time.Now()
+	c.lastSent = time.Now()
 	for {
+		t := time.Now()
+		// More than 5 seconds have passed since last receive, presume failure.
+		if t.Sub(c.lastReceived) > 5*time.Second {
+			fmt.Println("lost connection")
+			c.connected = false
+			return
+		}
+		// Send a ping every 3 seconds.
+		if t.Sub(c.lastSent) > 3*time.Second {
+			c.Send(PingMessage{})
+		}
+
+		// Attempt to read any pending messages, with a 2 second deadline.
 		var msg TypedMessage
 		b := make([]byte, 10000)
-		//c.conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+		c.conn.SetReadDeadline(t.Add(2 * time.Second))
 		n, foreignAddr, err := c.conn.ReadFromUDP(b)
-		if err != nil {
+		if err != nil && !os.IsTimeout(err) {
+			fmt.Println("disconnect")
 			c.connected = false
 			fmt.Println(err)
 			return
@@ -234,8 +255,11 @@ func (c *Connection) Loop() {
 		if err = json.Unmarshal(b, &msg); err != nil {
 			fmt.Println(err)
 		} else {
+			c.lastReceived = time.Now()
 			m := msg.Message()
-			if m != nil {
+			switch msg.Message().(type) {
+			case PingMessage:
+			default:
 				c.Messages <- m
 			}
 		}
@@ -262,5 +286,6 @@ func (c *Connection) Send(msg Message) error {
 	if bytes != nil {
 		_, err = c.conn.WriteTo(bytes, c.otherAddress)
 	}
+	c.lastSent = time.Now()
 	return err
 }
