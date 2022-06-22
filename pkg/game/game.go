@@ -1,10 +1,13 @@
 package game
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -21,6 +24,8 @@ type Game struct {
 	Options data.Options
 	// Our game current game state.
 	state State
+	//
+	Net net.Connection
 	//
 	players []*world.Player
 }
@@ -81,6 +86,20 @@ func (g *Game) Init() (err error) {
 	// Load data
 	err = data.LoadData()
 
+	// FIXME: Don't manually network connect here. This should be handled in some intermediate state, like "preplay" or a lobby.
+	g.Net = net.NewConnection(g.Options.Name)
+	if g.Options.Host != "" {
+		if err := g.Net.AwaitDirect(g.Options.Host, ""); err != nil {
+			panic(err)
+		}
+		go g.Net.Loop()
+	} else if g.Options.Join != "" {
+		if err := g.Net.AwaitDirect("", g.Options.Join); err != nil {
+			panic(err)
+		}
+		go g.Net.Loop()
+	}
+
 	// Set our initial menu state.
 	if err := g.SetState(&MenuState{
 		game: g,
@@ -100,6 +119,23 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
 		ebiten.SetFullscreen(!ebiten.IsFullscreen())
 	}
+
+	if g.Net.Connected() {
+		for {
+			done := false
+			select {
+			case msg := <-g.Net.Messages:
+				fmt.Println("handle net msg", msg)
+			default:
+				done = true
+				break
+			}
+			if done {
+				break
+			}
+		}
+	}
+
 	return g.state.Update()
 }
 
