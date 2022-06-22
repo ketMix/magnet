@@ -61,7 +61,7 @@ func main() {
 
 		msg := string(buffer[0:bytesRead])
 		parts := strings.Split(msg, " ")
-		a, err := strconv.Atoi(msg)
+		a, err := strconv.Atoi(parts[0])
 
 		fmt.Println("[INCOMING]", msg)
 		//if incoming.
