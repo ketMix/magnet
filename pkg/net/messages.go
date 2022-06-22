@@ -1,5 +1,7 @@
 package net
 
+import "encoding/gob"
+
 type HandshakeMessage int
 
 const (
@@ -7,7 +9,21 @@ const (
 	AwaitMessage
 	ArrivedMessage
 	HelloMessage
+	PingMessage
 )
 
+type Message interface {
+	Type() HandshakeMessage
+}
+
+type HenloMessage struct {
+	Greeting string
+}
+
+func (m HenloMessage) Type() HandshakeMessage {
+	return HelloMessage
+}
+
 func init() {
+	gob.Register(HenloMessage{})
 }
