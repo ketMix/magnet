@@ -81,6 +81,7 @@ func main() {
 				}
 			}
 		} else if enet.HandshakeMessage(a) == enet.AwaitMessage {
+			fmt.Println("got someone seeking", clientKey, parts[1])
 			mbox, ok := clientsMap[clientKey]
 			if !ok {
 				continue
