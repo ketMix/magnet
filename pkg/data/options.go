@@ -7,4 +7,5 @@ type Options struct {
 	Search     string `short:"s" long:"search" description:"Search for a given user using external handshaking"`
 	Await      string `short:"a" long:"await" description:"Await for a player search using the given user in external handshaking"`
 	Map        string `short:"m" long:"map" description:"Map to start the game on" default:"001"`
+	Name       string `short:"n" long:"name" description:"Name to user in multiplayer"`
 }
