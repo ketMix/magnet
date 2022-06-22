@@ -1,7 +1,5 @@
 package net
 
-import "encoding/gob"
-
 type HandshakeMessage int
 
 const (
@@ -25,5 +23,4 @@ func (m HenloMessage) Type() HandshakeMessage {
 }
 
 func init() {
-	gob.Register(HenloMessage{})
 }

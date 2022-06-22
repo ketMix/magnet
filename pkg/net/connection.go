@@ -1,18 +1,17 @@
 package net
 
 import (
-	"encoding/gob"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/davecgh/go-xdr/xdr"
 )
 
 type Connection struct {
-	Name    string
-	Encoder *gob.Encoder
-	Decoder *gob.Decoder
+	Name string
 
 	// handshakerAddr is the target handshaker service.
 	handshakerAddr *net.UDPAddr
@@ -98,25 +97,29 @@ func (c *Connection) await() {
 
 func (c *Connection) loop(otherAddress *net.UDPAddr) {
 	fmt.Println("starting main loop with", otherAddress.String())
-	gob.Register(HenloMessage{})
 	c.otherAddress = otherAddress
-	c.Encoder = gob.NewEncoder(c)
-	c.Decoder = gob.NewDecoder(c)
 	if err := c.Send(HenloMessage{"hai from " + c.Name}); err != nil {
 		panic(err)
 	}
 	for {
-		var msg Message
-		if err := c.Decoder.Decode(&msg); err != nil {
+		var msg HenloMessage
+		//n, err := xdr.Unmarshal()
+		b := make([]byte, 10000)
+		n, foreignAddr, err := c.conn.ReadFromUDP(b)
+		if foreignAddr.String() != c.otherAddress.String() {
+			continue
+		}
+		if err != nil {
+			fmt.Println(err)
+		}
+		b = b[:n]
+		r, err := xdr.Unmarshal(b, &msg)
+		fmt.Println(r)
+		if err != nil {
 			panic(err)
 		}
-		switch msg := msg.(type) {
-		case HenloMessage:
-			fmt.Println("got henlo", msg)
-			c.Messages <- msg
-		default:
-			fmt.Println("got unhandled message!", msg)
-		}
+		fmt.Println("got henlo", msg)
+		c.Messages <- msg
 	}
 }
 
@@ -137,5 +140,12 @@ func (c *Connection) Write(p []byte) (n int, err error) {
 
 func (c *Connection) Send(msg Message) error {
 	fmt.Println("sending", msg)
-	return c.Encoder.Encode(&msg)
+	bytes, err := xdr.Marshal(msg)
+	fmt.Println("wrote", bytes)
+	if err != nil {
+		return err
+	}
+	_, err = c.conn.WriteTo(bytes, c.otherAddress)
+	return err
+	//return c.Encoder.Encode(&msg)
 }

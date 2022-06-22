@@ -3,6 +3,7 @@ module github.com/kettek/ebijam22
 go 1.18
 
 require (
+	github.com/davecgh/go-xdr v0.0.0-20161123171359-e6a2ba005892 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220320163800-277f93cfa958 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/hajimehoshi/ebiten/v2 v2.3.4 // indirect
