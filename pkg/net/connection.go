@@ -33,17 +33,23 @@ func NewConnection(name string) Connection {
 	}
 }
 
-func (c *Connection) Await(handshaker string, local string, target string) {
-	handshakerAddr, _ := net.ResolveUDPAddr("udp", handshaker)
+func (c *Connection) AwaitHandshake(handshaker string, local string, target string) error {
+	handshakerAddr, err := net.ResolveUDPAddr("udp", handshaker)
+	if err != nil {
+		return err
+	}
 
 	// Get a random local port.
-	localAddr, _ := net.ResolveUDPAddr("udp", local)
+	localAddr, err := net.ResolveUDPAddr("udp", local)
+	if err != nil {
+		return err
+	}
 	log.Printf("Attempting to listen on %s\n", localAddr.String())
 
 	// Start listening!
 	localConn, err := net.ListenUDP("udp", localAddr)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	c.handshakerAddr = handshakerAddr
@@ -53,45 +59,115 @@ func (c *Connection) Await(handshaker string, local string, target string) {
 	log.Println("Sending register message to handshaker service")
 	_, err = localConn.WriteTo([]byte(fmt.Sprintf("%d %s", RegisterMessage, c.Name)), c.handshakerAddr)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if target != "" {
 		log.Printf("Sending await message for %s to handshaker service\n", target)
 		_, err := localConn.WriteTo([]byte(fmt.Sprintf("%d %s", AwaitMessage, target)), c.handshakerAddr)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
-	c.await()
+	return c.awaitHandshake()
 }
 
-func (c *Connection) await() {
+func (c *Connection) awaitHandshake() error {
 	fmt.Println("entering main await")
 	for {
 		buffer := make([]byte, 1024)
 		bytesRead, fromAddr, err := c.conn.ReadFromUDP(buffer)
 		if err != nil {
-			fmt.Println("ERROR", err)
+			return err
 		}
 		msg := string(buffer[0:bytesRead])
 		parts := strings.Split(msg, " ")
-		a, _ := strconv.Atoi(parts[0])
+		a, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return err
+		}
 		if a == int(ArrivedMessage) {
-			otherAddr, _ := net.ResolveUDPAddr("udp", parts[1])
-			c.conn.WriteTo([]byte(fmt.Sprintf("%d %s", HelloMessage, c.Name)), otherAddr)
+			otherAddr, err := net.ResolveUDPAddr("udp", parts[1])
+			if err != nil {
+				return err
+			}
+			_, err = c.conn.WriteTo([]byte(fmt.Sprintf("%d %s", HelloMessage, c.Name)), otherAddr)
+			if err != nil {
+				return err
+			}
 			c.loop(otherAddr)
-			return
+			return nil
 		} else if a == int(HelloMessage) {
 			fmt.Println("got hello from self-declared", parts[1])
 			fmt.Println(fromAddr.String())
 			c.loop(fromAddr)
-			return
+			return nil
+		} else {
+			return nil
+			// BOGUS
+		}
+	}
+}
+
+// AwaitDirect attempts to set up a client-to-client connection without any handshaking.
+func (c *Connection) AwaitDirect(local string, target string) error {
+	localAddr, err := net.ResolveUDPAddr("udp", local)
+	if err != nil {
+		return err
+	}
+	log.Printf("Attempting to listen on %s\n", localAddr.String())
+
+	// Start listening!
+	localConn, err := net.ListenUDP("udp", localAddr)
+	if err != nil {
+		return err
+	}
+
+	c.conn = localConn
+	fmt.Println("listening on", localConn.LocalAddr().String())
+
+	if target != "" {
+		otherAddr, err := net.ResolveUDPAddr("udp", target)
+		if err != nil {
+			return err
+		}
+		_, err = c.conn.WriteTo([]byte(fmt.Sprintf("%d %s", HelloMessage, c.Name)), otherAddr)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Start the listen loop.
+	for {
+		buffer := make([]byte, 1024)
+		bytesRead, fromAddr, err := c.conn.ReadFromUDP(buffer)
+		if err != nil {
+			return err
+		}
+		msg := string(buffer[0:bytesRead])
+		parts := strings.Split(msg, " ")
+		a, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return err
+		}
+		if a == int(HelloMessage) {
+			fmt.Println("got hello from self-declared", parts[1])
+			fmt.Println(fromAddr.String())
+
+			// Send hello back to let the other client that we're ready to rumble.
+			_, err := c.conn.WriteTo([]byte(fmt.Sprintf("%d %s", HelloMessage, c.Name)), fromAddr)
+			if err != nil {
+				return err
+			}
+
+			c.loop(fromAddr)
+			break
 		} else {
 			// BOGUS
 		}
 	}
+	return nil
 }
 
 func (c *Connection) loop(otherAddress *net.UDPAddr) {
@@ -103,6 +179,7 @@ func (c *Connection) loop(otherAddress *net.UDPAddr) {
 	for {
 		var msg TypedMessage
 		b := make([]byte, 10000)
+		//c.conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 		n, foreignAddr, err := c.conn.ReadFromUDP(b)
 		if foreignAddr.String() != c.otherAddress.String() {
 			continue
@@ -122,35 +199,23 @@ func (c *Connection) loop(otherAddress *net.UDPAddr) {
 	}
 }
 
-func (c *Connection) Read(p []byte) (n int, err error) {
-	n, foreignAddr, err := c.conn.ReadFromUDP(p)
-	p = p[:n]
-	if foreignAddr.String() != c.otherAddress.String() {
-		p = p[:0]
-		return 0, nil
-	}
-	return
-}
-
-func (c *Connection) Write(p []byte) (n int, err error) {
-	n, err = c.conn.WriteTo(p, c.otherAddress)
-	return n, err
-}
-
 func (c *Connection) Send(msg Message) error {
 	var envelope TypedMessage
 
 	payload, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
 
 	envelope.Type = msg.Type()
 	envelope.Data = payload
 
 	bytes, err := json.Marshal(envelope)
+	if err != nil {
+		return err
+	}
 
 	if bytes != nil {
-		if err != nil {
-			return err
-		}
 		_, err = c.conn.WriteTo(bytes, c.otherAddress)
 	}
 	return err

@@ -17,21 +17,52 @@ func main() {
 	var name string
 	var target string
 
-	handshaker = os.Args[1]
-	addr = os.Args[2]
-	name = os.Args[3]
+	var c net.Connection
 
-	if len(os.Args) > 4 {
-		target = os.Args[4]
+	if os.Args[1] == "host" {
+		addr = os.Args[2]
+		name = os.Args[3]
+
+		c = net.NewConnection(name)
+
+		go func() {
+			err := c.AwaitDirect(addr, target)
+			if err != nil {
+				panic(err)
+			}
+		}()
+	} else if os.Args[1] == "join" {
+		target = os.Args[2]
+		name = os.Args[3]
+
+		c = net.NewConnection(name)
+
+		go func() {
+			err := c.AwaitDirect(addr, target)
+			if err != nil {
+				panic(err)
+			}
+		}()
+	} else {
+		handshaker = os.Args[1]
+		addr = os.Args[2]
+		name = os.Args[3]
+
+		if len(os.Args) > 4 {
+			target = os.Args[4]
+		}
+
+		c = net.NewConnection(name)
+
+		fmt.Println(addr, name, target)
+
+		go func() {
+			err := c.AwaitHandshake(handshaker, addr, target)
+			if err != nil {
+				panic(err)
+			}
+		}()
 	}
-
-	c := net.NewConnection(name)
-
-	fmt.Println(addr, name, target)
-
-	go func() {
-		c.Await(handshaker, addr, target)
-	}()
 	for {
 		select {
 		case m := <-c.Messages:
@@ -41,5 +72,7 @@ func main() {
 }
 
 func help() {
-	fmt.Printf("Syntax: %s <address:port> <name> [<target>]\n", os.Args[0])
+	fmt.Printf("Syntax: %s <signaler> <address:port> <name> [<target>]\n", os.Args[0])
+	fmt.Printf("Syntax: %s join <target address:port> <name>\n", os.Args[0])
+	fmt.Printf("Syntax: %s host <address:port> <name>\n", os.Args[0])
 }
