@@ -25,24 +25,22 @@ func main() {
 
 		c = net.NewConnection(name)
 
-		go func() {
-			err := c.AwaitDirect(addr, target)
-			if err != nil {
-				panic(err)
-			}
-		}()
+		err := c.AwaitDirect(addr, target)
+		if err != nil {
+			panic(err)
+		}
+		go c.Loop()
 	} else if os.Args[1] == "join" {
 		target = os.Args[2]
 		name = os.Args[3]
 
 		c = net.NewConnection(name)
 
-		go func() {
-			err := c.AwaitDirect(addr, target)
-			if err != nil {
-				panic(err)
-			}
-		}()
+		err := c.AwaitDirect(addr, target)
+		if err != nil {
+			panic(err)
+		}
+		go c.Loop()
 	} else {
 		handshaker = os.Args[1]
 		addr = os.Args[2]
@@ -56,12 +54,11 @@ func main() {
 
 		fmt.Println(addr, name, target)
 
-		go func() {
-			err := c.AwaitHandshake(handshaker, addr, target)
-			if err != nil {
-				panic(err)
-			}
-		}()
+		err := c.AwaitHandshake(handshaker, addr, target)
+		if err != nil {
+			panic(err)
+		}
+		go c.Loop()
 	}
 	for {
 		select {

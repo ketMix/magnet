@@ -130,12 +130,12 @@ func (c *Connection) awaitHandshake() error {
 			if err != nil {
 				return err
 			}
-			c.loop(otherAddr)
+			c.otherAddress = otherAddr
 			return nil
 		} else if a == int(HelloMessage) {
 			fmt.Println("got hello from self-declared", parts[1])
 			fmt.Println(fromAddr.String())
-			c.loop(fromAddr)
+			c.otherAddress = fromAddr
 			return nil
 		} else {
 			return nil
@@ -195,7 +195,7 @@ func (c *Connection) AwaitDirect(local string, target string) error {
 				return err
 			}
 
-			c.loop(fromAddr)
+			c.otherAddress = fromAddr
 			break
 		} else {
 			// BOGUS
@@ -204,9 +204,8 @@ func (c *Connection) AwaitDirect(local string, target string) error {
 	return nil
 }
 
-func (c *Connection) loop(otherAddress *net.UDPAddr) {
-	fmt.Println("starting main loop with", otherAddress.String())
-	c.otherAddress = otherAddress
+func (c *Connection) Loop() {
+	fmt.Println("starting main loop with", c.otherAddress.String())
 	if err := c.Send(HenloMessage{"hai from " + c.Name}); err != nil {
 		panic(err)
 	}
