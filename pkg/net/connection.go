@@ -25,6 +25,9 @@ type Connection struct {
 	otherAddress *net.UDPAddr
 
 	//
+	connected bool
+
+	//
 	Messages chan Message
 }
 
@@ -33,6 +36,11 @@ func NewConnection(name string) Connection {
 		Name:     name,
 		Messages: make(chan Message, 1000),
 	}
+}
+
+// Connected returns if the connection is actually connected.
+func (c *Connection) Connected() bool {
+	return c.connected
 }
 
 func (c *Connection) AwaitHandshake(handshaker string, local string, target string) error {
@@ -202,16 +210,19 @@ func (c *Connection) loop(otherAddress *net.UDPAddr) {
 	if err := c.Send(HenloMessage{"hai from " + c.Name}); err != nil {
 		panic(err)
 	}
+	c.connected = true
 	for {
 		var msg TypedMessage
 		b := make([]byte, 10000)
 		//c.conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 		n, foreignAddr, err := c.conn.ReadFromUDP(b)
+		if err != nil {
+			c.connected = false
+			fmt.Println(err)
+			return
+		}
 		if foreignAddr.String() != c.otherAddress.String() {
 			continue
-		}
-		if err != nil {
-			fmt.Println(err)
 		}
 		b = b[:n]
 		if err = json.Unmarshal(b, &msg); err != nil {
@@ -225,6 +236,7 @@ func (c *Connection) loop(otherAddress *net.UDPAddr) {
 	}
 }
 
+// Send sends the given message interface to the other player.
 func (c *Connection) Send(msg Message) error {
 	var envelope TypedMessage
 
