@@ -66,6 +66,7 @@ func main() {
 		fmt.Println("[INCOMING]", msg)
 		//if incoming.
 		if enet.HandshakeMessage(a) == enet.RegisterMessage {
+			delete(clientsMap, clientKey)
 			if _, ok := clientsMap[clientKey]; !ok {
 				clientsMap[clientKey] = new(MessageBox)
 				clientsMap[clientKey].wavingAt = make(map[string]struct{})
@@ -105,6 +106,8 @@ func main() {
 }
 
 func sendArrival(conn *net.UDPConn, to, target AddressKey) {
+	delete(clientsMap, to)
+	delete(clientsMap, target)
 	log.Printf("Sending arrival of %s to %s\n", target, to)
 	toAddress := AddressKeyToIP(to)
 	conn.WriteTo([]byte(fmt.Sprintf("%d %s", enet.ArrivedMessage, target)), toAddress)
