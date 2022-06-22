@@ -1,13 +1,12 @@
 package net
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
 	"strings"
-
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Connection struct {
@@ -102,8 +101,7 @@ func (c *Connection) loop(otherAddress *net.UDPAddr) {
 		panic(err)
 	}
 	for {
-		var msg HenloMessage
-		//n, err := xdr.Unmarshal()
+		var msg TypedMessage
 		b := make([]byte, 10000)
 		n, foreignAddr, err := c.conn.ReadFromUDP(b)
 		if foreignAddr.String() != c.otherAddress.String() {
@@ -113,12 +111,14 @@ func (c *Connection) loop(otherAddress *net.UDPAddr) {
 			fmt.Println(err)
 		}
 		b = b[:n]
-		err = msgpack.Unmarshal(b, &msg)
-		if err != nil {
-			panic(err)
+		if err = json.Unmarshal(b, &msg); err != nil {
+			fmt.Println(err)
+		} else {
+			m := msg.Message()
+			if m != nil {
+				c.Messages <- m
+			}
 		}
-		fmt.Println("got henlo", msg)
-		c.Messages <- msg
 	}
 }
 
@@ -138,13 +138,20 @@ func (c *Connection) Write(p []byte) (n int, err error) {
 }
 
 func (c *Connection) Send(msg Message) error {
-	fmt.Println("sending", msg)
-	bytes, err := msgpack.Marshal(msg)
-	fmt.Println("wrote", bytes)
-	if err != nil {
-		return err
+	var envelope TypedMessage
+
+	payload, err := json.Marshal(msg)
+
+	envelope.Type = msg.Type()
+	envelope.Data = payload
+
+	bytes, err := json.Marshal(envelope)
+
+	if bytes != nil {
+		if err != nil {
+			return err
+		}
+		_, err = c.conn.WriteTo(bytes, c.otherAddress)
 	}
-	_, err = c.conn.WriteTo(bytes, c.otherAddress)
 	return err
-	//return c.Encoder.Encode(&msg)
 }
