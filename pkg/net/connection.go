@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/davecgh/go-xdr/xdr"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Connection struct {
@@ -113,8 +113,7 @@ func (c *Connection) loop(otherAddress *net.UDPAddr) {
 			fmt.Println(err)
 		}
 		b = b[:n]
-		r, err := xdr.Unmarshal(b, &msg)
-		fmt.Println(r)
+		err = msgpack.Unmarshal(b, &msg)
 		if err != nil {
 			panic(err)
 		}
@@ -140,7 +139,7 @@ func (c *Connection) Write(p []byte) (n int, err error) {
 
 func (c *Connection) Send(msg Message) error {
 	fmt.Println("sending", msg)
-	bytes, err := xdr.Marshal(msg)
+	bytes, err := msgpack.Marshal(msg)
 	fmt.Println("wrote", bytes)
 	if err != nil {
 		return err
