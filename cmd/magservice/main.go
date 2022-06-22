@@ -8,7 +8,10 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
+
+	enet "github.com/kettek/ebijam22/pkg/net"
 )
 
 // AddressKey is a key that represents an ip address and port.
@@ -58,10 +61,11 @@ func main() {
 
 		msg := string(buffer[0:bytesRead])
 		parts := strings.Split(msg, " ")
+		a, err := strconv.Atoi(msg)
 
 		fmt.Println("[INCOMING]", msg)
 		//if incoming.
-		if parts[0] == "REG" {
+		if enet.HandshakeMessage(a) == enet.RegisterMessage {
 			if _, ok := clientsMap[clientKey]; !ok {
 				clientsMap[clientKey] = new(MessageBox)
 				clientsMap[clientKey].wavingAt = make(map[string]struct{})
@@ -76,7 +80,7 @@ func main() {
 					sendArrival(localConn, otherClientKey, clientKey)
 				}
 			}
-		} else if parts[0] == "AWAIT" {
+		} else if enet.HandshakeMessage(a) == enet.AwaitMessage {
 			mbox, ok := clientsMap[clientKey]
 			if !ok {
 				continue
@@ -102,5 +106,5 @@ func main() {
 func sendArrival(conn *net.UDPConn, to, target AddressKey) {
 	log.Printf("Sending arrival of %s to %s\n", target, to)
 	toAddress := AddressKeyToIP(to)
-	conn.WriteTo([]byte(fmt.Sprintf("ARRIVED %s", target)), toAddress)
+	conn.WriteTo([]byte(fmt.Sprintf("%d %s", enet.ArrivedMessage, target)), toAddress)
 }
