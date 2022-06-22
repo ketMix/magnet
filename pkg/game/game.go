@@ -142,6 +142,25 @@ func (g *Game) Update() error {
 // Draw draws to the given ebiten screen buffer image.
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.state.Draw(screen)
+
+	// This should be handled differently than directly drawing network state here.
+	if g.Net.Active() {
+		var img *ebiten.Image
+		if g.Net.Connected() {
+			img, _ = data.GetImage("online.png")
+		} else {
+			img, _ = data.GetImage("offline.png")
+		}
+		if img != nil {
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(
+				float64(world.ScreenWidth)-float64(img.Bounds().Dx())-8,
+				float64(img.Bounds().Dy()-8),
+			)
+			screen.DrawImage(img, op)
+		}
+	} else {
+	}
 }
 
 // Layout sets up "virtual" screen dimensions in contrast to the window's dimensions.
