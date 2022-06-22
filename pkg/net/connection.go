@@ -26,6 +26,7 @@ type Connection struct {
 
 	//
 	connected bool
+	active    bool
 
 	//
 	Messages chan Message
@@ -35,12 +36,18 @@ func NewConnection(name string) Connection {
 	return Connection{
 		Name:     name,
 		Messages: make(chan Message, 1000),
+		active:   true,
 	}
 }
 
 // Connected returns if the connection is actually connected.
 func (c *Connection) Connected() bool {
 	return c.connected
+}
+
+// Active returns if the connection should be connected.
+func (c *Connection) Active() bool {
+	return c.active
 }
 
 func (c *Connection) AwaitHandshake(handshaker string, local string, target string) error {
