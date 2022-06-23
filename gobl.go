@@ -21,6 +21,10 @@ func main() {
 		Run("build").
 		Run("run")
 
+	Task("watch-only").
+		Watch("cmd/*/*", "cmd/*/*/*", "pkg/*/*", "pkg/*/*/*", "pkg/*/*/*/*").
+		Run("build")
+
 	Task("run").
 		Exec("./magnet" + exe)
 
