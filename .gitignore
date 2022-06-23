@@ -1,5 +1,7 @@
 # Binaries for programs and plugins
 /magnet
+/magclient
+/magservice
 *.exe
 *.exe~
 *.dll
