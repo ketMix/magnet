@@ -145,13 +145,11 @@ func (c *Connection) awaitHandshake() error {
 			c.otherAddress = otherAddr
 			return nil
 		} else if a == int(HelloMessage) {
-			fmt.Println("got hello from self-declared", parts[1])
-			fmt.Println(fromAddr.String())
 			c.otherAddress = fromAddr
 			return nil
 		} else {
-			return nil
-			// BOGUS
+			fmt.Println("unhandled message from", fromAddr.String())
+			continue
 		}
 	}
 }
