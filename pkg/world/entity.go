@@ -20,6 +20,7 @@ type Entity interface {
 	// Why not.
 	CanPathfind() bool
 	SetSteps(p []pathing.Step)
+	NetID() int
 }
 
 type BaseEntity struct {
@@ -30,6 +31,7 @@ type BaseEntity struct {
 	health    int
 	maxHealth int
 	animation Animation
+	netID     int
 }
 
 func (e *BaseEntity) Physics() *PhysicsObject {
@@ -65,6 +67,10 @@ func (e *BaseEntity) CanPathfind() bool {
 }
 
 func (e *BaseEntity) SetSteps(s []pathing.Step) {
+}
+
+func (e *BaseEntity) NetID() int {
+	return e.netID
 }
 
 // Check whether or not the provided entity collides
