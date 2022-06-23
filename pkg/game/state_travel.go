@@ -16,6 +16,7 @@ type TravelState struct {
 	targetLevel string
 	loadedLevel data.Level
 	ready       bool
+	restarting  bool
 	//
 	magnetImage *ebiten.Image
 	magnetSpin  float64
@@ -38,6 +39,10 @@ func (s *TravelState) Init() (err error) {
 			s.game.Net.Send(net.TravelMessage{
 				Destination: s.targetLevel,
 			})
+			if err := s.LoadLevel(); err != nil {
+				return err
+			}
+		} else if s.restarting {
 			if err := s.LoadLevel(); err != nil {
 				return err
 			}
@@ -64,28 +69,6 @@ func (s *TravelState) LoadLevel() (err error) {
 func (s *TravelState) Update() error {
 	// Always spin that magnet.
 	s.magnetSpin += math.Pi / 180 * 4
-	// If we're connected and not hosting, wait for a travel message.
-	if s.game.Net.Connected() && !s.game.Net.Hosting() {
-		for {
-			done := false
-			select {
-			case msg := <-s.game.Net.Messages:
-				switch m := msg.(type) {
-				case net.TravelMessage:
-					s.targetLevel = m.Destination
-					if err := s.LoadLevel(); err != nil {
-						return err
-					}
-				}
-			default:
-				done = true
-				break
-			}
-			if done {
-				break
-			}
-		}
-	}
 
 	// If we're marked as ready, let's go.
 	if s.ready {
@@ -93,7 +76,24 @@ func (s *TravelState) Update() error {
 			game:  s.game,
 			level: s.loadedLevel,
 		})
+		return nil
 	}
+
+	// If we're connected and not hosting, wait for a travel message.
+	if s.game.Net.Connected() && !s.game.Net.Hosting() {
+		for _, msg := range s.game.Net.Messages() {
+			switch m := msg.(type) {
+			case net.TravelMessage:
+				s.targetLevel = m.Destination
+				if err := s.LoadLevel(); err != nil {
+					return err
+				}
+			default:
+				break
+			}
+		}
+	}
+
 	return nil
 }
 

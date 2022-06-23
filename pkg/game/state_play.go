@@ -1,19 +1,22 @@
 package game
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
 )
 
 type PlayState struct {
-	game  *Game
-	level data.Level
-	world world.World
+	game     *Game
+	level    data.Level
+	world    world.World
+	messages []Message
 }
 
 func (s *PlayState) Init() error {
@@ -33,13 +36,47 @@ func (s *PlayState) Dispose() error {
 }
 
 func (s *PlayState) Update() error {
+	// If we're the host/solo and we hit R, restart the level. If we're the client, send a request.
 	if inpututil.IsKeyJustReleased(ebiten.KeyR) {
-		s.game.SetState(&TravelState{
-			game:        s.game,
-			targetLevel: "001", // ???
-		})
+		if s.game.Net.Hosting() || !s.game.Net.Active() {
+			s.game.SetState(&TravelState{
+				game:        s.game,
+				targetLevel: "001", // ???
+			})
+		} else {
+			s.game.Net.Send(net.TravelMessage{})
+		}
 		return nil
 	}
+
+	// Handle our network updates.
+	for _, msg := range s.game.Net.Messages() {
+		switch msg := msg.(type) {
+		case net.TravelMessage:
+			if !s.game.Net.Hosting() {
+				s.game.SetState(&TravelState{
+					game:        s.game,
+					targetLevel: msg.Destination,
+					restarting:  true,
+				})
+			} else {
+				s.AddMessage(Message{
+					content: fmt.Sprintf("%s wants to restart! Hit 'r' to conform.", s.game.Net.OtherName),
+				})
+			}
+		}
+	}
+
+	// Process our local messages.
+	t := s.messages[:0]
+	for _, m := range s.messages {
+		m.lifetime++
+		if m.lifetime < m.deathtime {
+			t = append(t, m)
+		}
+	}
+	s.messages = t
+
 	// Update our players.
 	for _, p := range s.game.players {
 		if err := p.Update(&s.world); err != nil {
@@ -64,6 +101,39 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	centeredX := world.ScreenWidth/2 - bounds.Min.X - bounds.Dx()/2
 	text.Draw(screen, s.level.Title, boldFace, centeredX, bounds.Dy()+1, color.White)
 
+	// Draw our messages from most recent to oldest, bottom to top.
+	mx := 8
+	my := world.ScreenHeight - 40
+	for i := len(s.messages) - 1; i >= 0; i-- {
+		m := s.messages[i]
+		bounds := text.BoundString(normalFace, m.content)
+
+		d := float64(m.lifetime) / float64(m.deathtime)
+		c := color.RGBA{
+			255,
+			255,
+			255,
+			255 - uint8(255*d),
+		}
+
+		text.Draw(
+			screen,
+			m.content,
+			normalFace,
+			mx,
+			my,
+			c,
+		)
+		my -= bounds.Dy() + 2
+	}
+
 	// Draw our player's belt!
 	s.game.players[0].Toolbelt.Draw(screen)
+}
+
+func (s *PlayState) AddMessage(m Message) {
+	if m.deathtime <= 0 || m.deathtime >= 1000 {
+		m.deathtime = 300
+	}
+	s.messages = append(s.messages, m)
 }
