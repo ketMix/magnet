@@ -146,7 +146,7 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 func (w *World) ProcessRequest(r Request) {
 	switch r := r.(type) {
 	case MultiRequest:
-		for _, rq := range r.requests {
+		for _, rq := range r.Requests {
 			w.ProcessRequest(rq)
 		}
 	case UseToolRequest:
@@ -191,8 +191,8 @@ func (w *World) ProcessRequest(r Request) {
 		w.PlaceEntityAt(r.projectile, r.x, r.y)
 	case SpawnEnemyRequest:
 		e := NewEnemyEntity(r.enemyConfig)
-		e.physics.polarity = r.polarity
-		w.PlaceEntityAt(e, r.x, r.y)
+		e.physics.polarity = r.Polarity
+		w.PlaceEntityAt(e, r.X, r.Y)
 		w.UpdatePathing()
 
 	}
