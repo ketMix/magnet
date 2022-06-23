@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -129,22 +128,6 @@ func (g *Game) Players() []*world.Player {
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
 		ebiten.SetFullscreen(!ebiten.IsFullscreen())
-	}
-
-	if g.Net.Connected() {
-		for {
-			done := false
-			select {
-			case msg := <-g.Net.Messages:
-				fmt.Println("handle net msg", msg)
-			default:
-				done = true
-				break
-			}
-			if done {
-				break
-			}
-		}
 	}
 
 	return g.state.Update()

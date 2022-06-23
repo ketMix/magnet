@@ -37,7 +37,8 @@ func (s *MenuState) Dispose() error {
 func (s *MenuState) Update() error {
 	// Spin at 4 degrees per update.
 	s.magnetSpin += math.Pi / 180 * 4
-	// Travel first map after a spin.
+
+	// Travel for now.
 	s.game.SetState(&TravelState{
 		game:        s.game,
 		targetLevel: s.game.Options.Map,
