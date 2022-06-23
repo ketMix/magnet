@@ -1,0 +1,13 @@
+T PLAYER2
+H 100
+D 1
+R 0
+X 0.25
+O 2
+S 1
+P negative
+M false
+Y 1
+Z 100
+I player2-idle
+W player2-walk

@@ -3,6 +3,7 @@ package data
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"path"
 	"strconv"
 	"strings"
@@ -122,9 +123,9 @@ func NewTurretConfig(p string) (EntityConfig, error) {
 	return config, err
 }
 
-func NewPlayerConfig() (EntityConfig, error) {
+func NewPlayerConfig(i int) (EntityConfig, error) {
 	config := EntityConfig{}
-	err := config.LoadFromFile("player")
+	err := config.LoadFromFile(fmt.Sprintf("player%d", i))
 	return config, err
 }
 

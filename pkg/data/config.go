@@ -10,15 +10,22 @@ type Config interface {
 
 var (
 	PlayerInit    EntityConfig
+	Player2Init   EntityConfig
 	CoreConfig    EntityConfig
 	TurretConfigs map[string]EntityConfig
 	EnemyConfigs  map[string]EntityConfig
 )
 
 func LoadConfigurations() error {
-	// Load the player configuration
-	config, err := NewPlayerConfig()
+	// Load the players configuration
+	config, err := NewPlayerConfig(1)
 	PlayerInit = config
+	if err != nil {
+		return err
+	}
+
+	config, err = NewPlayerConfig(2)
+	Player2Init = config
 	if err != nil {
 		return err
 	}
