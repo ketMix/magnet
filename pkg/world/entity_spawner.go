@@ -41,14 +41,12 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 					spreadX := spread * float64(data.CellWidth/2)
 					spreadY := spread * float64(data.CellHeight/2)
 
-					enemyConfig := data.EnemyConfigs[k]
 					spawnRequests.Requests = append(spawnRequests.Requests,
 						SpawnEnemyRequest{
-							X:           e.physics.X + spreadX,
-							Y:           e.physics.Y + spreadY,
-							Polarity:    e.physics.polarity,
-							enemyConfig: enemyConfig,
-							Kind:        k,
+							X:        e.physics.X + spreadX,
+							Y:        e.physics.Y + spreadY,
+							Polarity: e.physics.polarity,
+							Kind:     k,
 						},
 					)
 				}

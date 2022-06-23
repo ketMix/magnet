@@ -46,7 +46,11 @@ func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 
 func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 	if e.health <= 0 {
-		e.Trash()
+		request = TrashEntityRequest{
+			NetID:  e.netID,
+			entity: e,
+			local:  true,
+		}
 		return
 	}
 	e.lifetime++
@@ -81,7 +85,11 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
 	} else {
 		// No mo steppes
-		e.Trash()
+		request = TrashEntityRequest{
+			NetID:  e.netID,
+			entity: e,
+			local:  true,
+		}
 	}
 
 	return request, nil

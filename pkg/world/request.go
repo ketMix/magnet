@@ -23,6 +23,7 @@ type UseToolRequest struct {
 type SpawnProjecticleRequest struct {
 	x, y       float64 // Position
 	projectile *ProjecticleEntity
+	NetID      int `json:"i"`
 }
 
 type SpawnEnemyRequest struct {
@@ -31,6 +32,14 @@ type SpawnEnemyRequest struct {
 	Polarity    data.Polarity `json:"p"`
 	enemyConfig data.EntityConfig
 	Kind        string `json:"k"`
+	NetID       int    `json:"i"`
+}
+
+// TrashEntityRequest is send from the server to client(s) to let them know to delete the given entity.
+type TrashEntityRequest struct {
+	NetID  int    `json:"i"`
+	entity Entity // Used locally to just trash.
+	local  bool   // Used to determine in the trash request is local.
 }
 
 // MultiRequest is a container for multiple requests.
@@ -70,6 +79,10 @@ func (r SelectToolbeltItemRequest) Type() net.TypedMessageType {
 	return net.MissingMessageType
 }
 
+func (r TrashEntityRequest) Type() net.TypedMessageType {
+	return 310
+}
+
 func (r DummyRequest) Type() net.TypedMessageType {
 	return net.MissingMessageType
 }
@@ -82,6 +95,11 @@ func init() {
 	})
 	net.AddTypedMessage(301, func(data json.RawMessage) net.Message {
 		var m SpawnEnemyRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(310, func(data json.RawMessage) net.Message {
+		var m TrashEntityRequest
 		json.Unmarshal(data, &m)
 		return m
 	})

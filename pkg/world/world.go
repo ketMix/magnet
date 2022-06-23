@@ -21,6 +21,7 @@ type World struct {
 	width, height    int
 	cells            [][]LiveCell
 	entities         []Entity
+	netIDs           int
 	spawners         []*SpawnerEntity
 	currentTileset   data.TileSet
 	CameraX, CameraY float64
@@ -137,6 +138,10 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 	switch msg := msg.(type) {
 	case EntityActionMove:
 		w.Game.Players()[1].Entity.SetAction(&msg)
+	case SpawnEnemyRequest:
+		w.SpawnEnemyEntity(msg)
+	case TrashEntityRequest:
+		w.ProcessRequest(msg)
 	default:
 		fmt.Printf("unhandled net %+v\n", msg)
 	}
@@ -190,20 +195,57 @@ func (w *World) ProcessRequest(r Request) {
 	case SpawnProjecticleRequest:
 		w.PlaceEntityAt(r.projectile, r.x, r.y)
 	case SpawnEnemyRequest:
-		e := NewEnemyEntity(r.enemyConfig)
-		e.physics.polarity = r.Polarity
-		w.PlaceEntityAt(e, r.X, r.Y)
-		w.UpdatePathing()
-
+		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+			e := w.SpawnEnemyEntity(r)
+			// Hmm.
+			w.Game.Net().Send(SpawnEnemyRequest{
+				X:        r.X,
+				Y:        r.Y,
+				Polarity: r.Polarity,
+				Kind:     r.Kind,
+				NetID:    e.netID,
+			})
+		}
+	case TrashEntityRequest:
+		// Trash entities if we are local or host.
+		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+			r.entity.Trash()
+			if w.Game.Net().Hosting() {
+				w.Game.Net().Send(r)
+			}
+		} else if w.Game.Net().Active() {
+			if !r.local {
+				for _, e := range w.entities {
+					if e.NetID() == r.NetID {
+						e.Trash()
+						break
+					}
+				}
+			}
+		}
 	}
+}
+
+func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
+	enemyConfig := data.EnemyConfigs[r.Kind]
+	e := NewEnemyEntity(enemyConfig)
+	if w.Game.Net().Hosting() {
+		e.netID = w.GetNextNetID()
+	} else {
+		e.netID = r.NetID
+	}
+	e.physics.polarity = r.Polarity
+	w.PlaceEntityAt(e, r.X, r.Y)
+	w.UpdatePathing()
+
+	return e
 }
 
 // Update updates the world.
 func (w *World) Update() error {
 	// TODO: Process physics
 
-	// For now we're effectively recreating the entities slice per update, so as to allow for entity update followed by entity deletion.
-	t := w.entities[:0]
+	// Update our entities and get any requests.
 	var requests []Request
 	for _, e := range w.entities {
 		if request, err := e.Update(w); err != nil {
@@ -211,16 +253,21 @@ func (w *World) Update() error {
 		} else if request != nil {
 			requests = append(requests, request)
 		}
-		if !e.Trashed() {
-			t = append(t, e)
-		}
 	}
-	w.entities = t
 
 	// Iterate through our requests.
 	for _, r := range requests {
 		w.ProcessRequest(r)
 	}
+
+	// Clean up any destroyed entities.
+	t := w.entities[:0]
+	for _, e := range w.entities {
+		if !e.Trashed() {
+			t = append(t, e)
+		}
+	}
+	w.entities = t
 
 	return nil
 }
@@ -443,6 +490,11 @@ func (w *World) GetCursorPosition() (x, y int) {
 	x -= int(w.CameraX)
 	y -= int(w.CameraY)
 	return x, y
+}
+
+func (w *World) GetNextNetID() int {
+	w.netIDs++
+	return w.netIDs
 }
 
 // LiveCell is a position in a live level.
