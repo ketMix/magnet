@@ -1,6 +1,8 @@
 package net
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // HandshakeMessage represents the type for the handshake step of networking.
 type HandshakeMessage int
@@ -23,7 +25,10 @@ const (
 	HenloMessageType
 	PingMessageType
 	TravelMessageType
+	MoveMessageType
 )
+
+var topType TypedMessageType = 100
 
 // TypedMessage wraps a Message.
 type TypedMessage struct {
@@ -31,8 +36,31 @@ type TypedMessage struct {
 	Data json.RawMessage  `json:"d"`
 }
 
+// TypedMessageHandler represents a dynamically defined unmarshaller for a message.
+type TypedMessageHandler struct {
+	Unwrap func(data json.RawMessage) Message
+}
+
+// TypedMessageMap is a map of all defined types->TypedMessageHandlers
+var TypedMessageMap = make(map[TypedMessageType]TypedMessageHandler)
+
+// AddTypedMessage adds the given unwrapper func as a Message unmarshaler. If typeIndex is 0, then an automatic index is generated and returned.
+func AddTypedMessage(typeIndex int, unwrapper func(data json.RawMessage) Message) TypedMessageType {
+	if typeIndex == 0 {
+		topType++
+		typeIndex = int(topType)
+	}
+	TypedMessageMap[TypedMessageType(typeIndex)] = TypedMessageHandler{
+		Unwrap: unwrapper,
+	}
+	return TypedMessageType(typeIndex)
+}
+
 // Message returns the typed message's wrapped data as a Message.
 func (t *TypedMessage) Message() Message {
+	if tt, ok := TypedMessageMap[t.Type]; ok {
+		return tt.Unwrap(t.Data)
+	}
 	switch t.Type {
 	case HenloMessageType:
 		var m HenloMessage

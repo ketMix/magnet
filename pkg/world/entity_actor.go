@@ -52,13 +52,13 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 	e.animation.Update()
 	switch a := e.action.(type) {
 	case *EntityActionMove:
-		if math.Abs(e.physics.X-a.x) < a.distance && math.Abs(e.physics.Y-a.y) < a.distance {
+		if math.Abs(e.physics.X-a.X) < a.Distance && math.Abs(e.physics.Y-a.Y) < a.Distance {
 			a.complete = true
 			break
 		}
 
 		// FIXME: Make this use actual physics resolution!
-		r := math.Atan2(e.physics.Y-a.y, e.physics.X-a.x)
+		r := math.Atan2(e.physics.Y-a.Y, e.physics.X-a.X)
 		x := math.Cos(r) * e.speed
 		y := math.Sin(r) * e.speed
 
@@ -73,10 +73,10 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 	case *EntityActionPlace:
 		a.complete = true
 		request = UseToolRequest{
-			x:        a.x,
-			y:        a.y,
-			kind:     a.kind,
-			polarity: a.polarity,
+			x:        a.X,
+			y:        a.Y,
+			kind:     a.Kind,
+			polarity: a.Polarity,
 		}
 	case *EntityActionShoot:
 		image := e.animation.Image()
@@ -85,7 +85,7 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		py := e.Physics().Y - float64(image.Bounds().Dy())/2
 
 		// Get direction vector from difference of player and target.
-		vX, vY := GetDirection(px, py, float64(a.targetX), float64(a.targetY))
+		vX, vY := GetDirection(px, py, float64(a.TargetX), float64(a.TargetY))
 		xSide := 1.0
 		if vX < 0 {
 			xSide = -xSide
@@ -101,7 +101,7 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 					physics: PhysicsObject{
 						vX:       vX * e.turret.speed,
 						vY:       vY * e.turret.speed,
-						polarity: a.polarity,
+						polarity: a.Polarity,
 					},
 				},
 				lifetime: 500,
@@ -112,7 +112,7 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 
 	// Separate action removal for now.
 	if e.action != nil && e.action.Complete() {
-		e.action = e.action.Next()
+		e.action = e.action.GetNext()
 	}
 
 	// Set our animation to idle if nothing else is doin.

@@ -27,7 +27,7 @@ func NewPlayer() *Player {
 }
 
 // Arglebargle
-func (p *Player) Update(w *World) error {
+func (p *Player) Update(w *World) (EntityAction, error) {
 	// FIXME: This should be only be called when the window is changed.
 	p.Toolbelt.Position()
 
@@ -36,7 +36,7 @@ func (p *Player) Update(w *World) error {
 
 	// Handle our toolbelt first.
 	if req := p.Toolbelt.Update(); req != nil {
-		return nil
+		return nil, nil
 	}
 	if p.Entity != nil {
 		var action EntityAction
@@ -45,14 +45,14 @@ func (p *Player) Update(w *World) error {
 			cx, cy := w.GetCursorPosition()
 			tx, ty := w.GetClosestCellPosition(cx, cy)
 			action = &EntityActionMove{
-				x:        float64(tx)*float64(data.CellWidth) + float64(data.CellWidth)/2,
-				y:        float64(ty+1)*float64(data.CellHeight) + float64(data.CellHeight)/2,
-				distance: 8,
+				X:        float64(tx)*float64(data.CellWidth) + float64(data.CellWidth)/2,
+				Y:        float64(ty+1)*float64(data.CellHeight) + float64(data.CellHeight)/2,
+				Distance: 8,
 				// We wrap the place action as a move action's next step.
-				next: &EntityActionPlace{
-					x:    tx,
-					y:    ty,
-					kind: ToolDestroy,
+				Next: &EntityActionPlace{
+					X:    tx,
+					Y:    ty,
+					Kind: ToolDestroy,
 				},
 			}
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
@@ -67,24 +67,24 @@ func (p *Player) Update(w *World) error {
 				fallthrough
 			case ToolDestroy:
 				action = &EntityActionMove{
-					x:        float64(tx)*float64(data.CellWidth) + float64(data.CellWidth)/2,
-					y:        float64(ty+1)*float64(data.CellHeight) + float64(data.CellHeight)/2,
-					distance: 8,
+					X:        float64(tx)*float64(data.CellWidth) + float64(data.CellWidth)/2,
+					Y:        float64(ty+1)*float64(data.CellHeight) + float64(data.CellHeight)/2,
+					Distance: 8,
 					// We wrap the place action as a move action's next step.
-					next: &EntityActionPlace{
-						x:        tx,
-						y:        ty,
-						kind:     p.Toolbelt.activeItem.kind,
-						polarity: p.Toolbelt.activeItem.polarity,
+					Next: &EntityActionPlace{
+						X:        tx,
+						Y:        ty,
+						Kind:     p.Toolbelt.activeItem.kind,
+						Polarity: p.Toolbelt.activeItem.polarity,
 					},
 				}
 			case ToolGun:
 				// Check if we can fire
 				if p.Entity.Turret().CanFire() {
 					action = &EntityActionShoot{
-						targetX:  float64(cx),
-						targetY:  float64(cy),
-						polarity: p.Toolbelt.activeItem.polarity,
+						TargetX:  float64(cx),
+						TargetY:  float64(cy),
+						Polarity: p.Toolbelt.activeItem.polarity,
 					}
 				}
 			}
@@ -106,16 +106,17 @@ func (p *Player) Update(w *World) error {
 			}
 
 			action = &EntityActionMove{
-				x:        p.Entity.Physics().X + x,
-				y:        p.Entity.Physics().Y + y,
-				distance: 0.5,
+				X:        p.Entity.Physics().X + x,
+				Y:        p.Entity.Physics().Y + y,
+				Distance: 0.5,
 			}
 		}
 		if action != nil && (p.Entity.Action() == nil || p.Entity.Action().Replaceable()) {
 			// TODO: Add a "chainable" action field that will instead add a new action as the next action in the deepest nested next action.
-			p.Entity.SetAction(action)
+			//p.Entity.SetAction(action)
+			return action, nil
 		}
 	}
 
-	return nil
+	return nil, nil
 }

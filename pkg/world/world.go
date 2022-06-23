@@ -1,11 +1,13 @@
 package world
 
 import (
+	"fmt"
 	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/goro/pathing"
 )
 
@@ -112,6 +114,16 @@ func (w *World) BuildFromLevel(level data.Level) error {
 	w.SetWaves()
 
 	w.UpdatePathing()
+	return nil
+}
+
+func (w *World) ProcessNetMessage(msg net.Message) error {
+	switch msg := msg.(type) {
+	case EntityActionMove:
+		fmt.Println("TODO: Move other player!", msg)
+	default:
+		fmt.Printf("unhandled net %+v\n", msg)
+	}
 	return nil
 }
 
@@ -236,17 +248,17 @@ func (w *World) Draw(screen *ebiten.Image) {
 	// Check for any special pending renders, such as move target or pending turret location.
 	for _, p := range w.Game.Players() {
 		if p.Entity != nil {
-			if p.Entity.Action() != nil && p.Entity.Action().Next() != nil {
-				switch a := p.Entity.Action().Next().(type) {
+			if p.Entity.Action() != nil && p.Entity.Action().GetNext() != nil {
+				switch a := p.Entity.Action().GetNext().(type) {
 				case *EntityActionPlace:
 					// Draw transparent version of tool for placement
-					if a.kind == ToolTurret || a.kind == ToolWall {
-						image := GetToolKindImage(a.kind)
+					if a.Kind == ToolTurret || a.Kind == ToolWall {
+						image := GetToolKindImage(a.Kind)
 						op := &ebiten.DrawImageOptions{}
-						op.ColorM.Scale(data.GetPolarityColorScale(a.polarity))
+						op.ColorM.Scale(data.GetPolarityColorScale(a.Polarity))
 						op.ColorM.Scale(1, 1, 1, 0.5)
 						op.GeoM.Concat(screenOp.GeoM)
-						op.GeoM.Translate(float64(a.x*data.CellWidth)+float64(data.CellWidth/2), float64(a.y*data.CellHeight)+float64(data.CellHeight/2))
+						op.GeoM.Translate(float64(a.X*data.CellWidth)+float64(data.CellWidth/2), float64(a.Y*data.CellHeight)+float64(data.CellHeight/2))
 						// Draw from center.
 						op.GeoM.Translate(
 							-float64(image.Bounds().Dx())/2,

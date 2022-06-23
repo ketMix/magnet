@@ -64,6 +64,9 @@ func (s *PlayState) Update() error {
 					content: fmt.Sprintf("%s wants to restart! Hit 'r' to conform.", s.game.Net.OtherName),
 				})
 			}
+		default:
+			// Send unhandled messages to the world.
+			s.world.ProcessNetMessage(msg)
 		}
 	}
 
@@ -79,8 +82,16 @@ func (s *PlayState) Update() error {
 
 	// Update our players.
 	for _, p := range s.game.players {
-		if err := p.Update(&s.world); err != nil {
+		action, err := p.Update(&s.world)
+		if err != nil {
 			return err
+		}
+		if action != nil {
+			// If our net is active, send our desired action to the other.
+			if s.game.Net.Active() {
+				s.game.Net.Send(action)
+			}
+			p.Entity.SetAction(action)
 		}
 	}
 
