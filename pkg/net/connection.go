@@ -36,13 +36,13 @@ type Connection struct {
 	lastSent     time.Time
 
 	//
-	Messages chan Message
+	messages chan Message
 }
 
 func NewConnection(name string) Connection {
 	return Connection{
 		Name:     name,
-		Messages: make(chan Message, 1000),
+		messages: make(chan Message, 1000),
 		active:   true,
 	}
 }
@@ -273,7 +273,7 @@ func (c *Connection) Loop() {
 				c.OtherName = m.Name
 			case PingMessage:
 			default:
-				c.Messages <- m
+				c.messages <- m
 			}
 		}
 	}
@@ -301,4 +301,22 @@ func (c *Connection) Send(msg Message) error {
 	}
 	c.lastSent = time.Now()
 	return err
+}
+
+// Messages returns the current contents of the messages channel as a slice.
+func (c *Connection) Messages() (m []Message) {
+	for {
+		done := false
+		select {
+		case msg := <-c.messages:
+			m = append(m, msg)
+		default:
+			done = true
+			break
+		}
+		if done {
+			break
+		}
+	}
+	return m
 }
