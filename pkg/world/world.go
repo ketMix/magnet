@@ -53,21 +53,37 @@ func (w *World) BuildFromLevel(level data.Level) error {
 		for x, c := range r {
 			// Create any entities that should be there.
 			if c.Kind == data.PlayerCell {
-				var target *Player
+				// Add all players to the same spot. We _could_ adjust level parsing to have "n" and "s" for players.
 				// Only add it if we actually need to add a player.
-				for _, p := range w.Game.Players() {
-					if p.Entity == nil {
-						target = p
-						break
+				for i, p := range w.Game.Players() {
+					if i > 0 && !w.Game.Net().Active() {
+						// Ignore players beyond 0 if we have no net.
+						continue
 					}
-				}
-				if target != nil {
-					e := NewActorEntity(target, data.PlayerInit)
-					// Tie 'em together.
-					e.player = target
-					target.Entity = e
-					// And place.
-					w.PlaceEntityInCell(e, x, y)
+					if p.Entity == nil {
+						c := data.PlayerInit
+						xoffset := 0
+						if i == 0 {
+							if w.Game.Net().Active() && !w.Game.Net().Hosting() {
+								c = data.Player2Init
+								xoffset = 1
+							}
+						} else if i == 1 {
+							if w.Game.Net().Active() && w.Game.Net().Hosting() {
+								c = data.Player2Init
+								xoffset = 1
+							}
+						}
+
+						fmt.Println("Adding player entity", i, c.Title)
+						e := NewActorEntity(p, c)
+						// Tie 'em together.
+						e.player = p
+						p.Entity = e
+						// And place.
+						w.PlaceEntityInCell(e, x+xoffset, y)
+						fmt.Printf("%d %+v\n", i, e)
+					}
 				}
 			} else if c.Kind == data.SouthSpawnCell {
 				e := NewSpawnerEntity(data.NegativePolarity)
@@ -120,7 +136,7 @@ func (w *World) BuildFromLevel(level data.Level) error {
 func (w *World) ProcessNetMessage(msg net.Message) error {
 	switch msg := msg.(type) {
 	case EntityActionMove:
-		fmt.Println("TODO: Move other player!", msg)
+		w.Game.Players()[1].Entity.SetAction(&msg)
 	default:
 		fmt.Printf("unhandled net %+v\n", msg)
 	}

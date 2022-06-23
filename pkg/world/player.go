@@ -7,6 +7,7 @@ import (
 
 // Player represents a player that controls an entity. It handles input and makes the entity dance.
 type Player struct {
+	Local bool
 	// entity is the player-controlled entity.
 	Entity Entity
 	// I suppose the toolbelt should be here.
@@ -28,11 +29,23 @@ func NewPlayer() *Player {
 
 // Arglebargle
 func (p *Player) Update(w *World) (EntityAction, error) {
+	// Increment turret tick
+	if p.Entity != nil {
+		p.Entity.Turret().Tick()
+	}
+
+	// Just bail if this player is not a local entity.
+	if !p.Local {
+		return nil, nil
+	}
+
 	// FIXME: This should be only be called when the window is changed.
 	p.Toolbelt.Position()
 
-	// Increment turret tick
-	p.Entity.Turret().Tick()
+	// Do _not_ handle inputs if the window is not focused.
+	if !ebiten.IsFocused() {
+		return nil, nil
+	}
 
 	// Handle our toolbelt first.
 	if req := p.Toolbelt.Update(); req != nil {

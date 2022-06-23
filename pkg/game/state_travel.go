@@ -33,10 +33,10 @@ func (s *TravelState) Init() (err error) {
 
 	// TODO: Probably should keep looping until we a receive a "OkayToTravel" message or something.
 	// See if we need to handle networked level loading logic.
-	if s.game.Net.Active() {
+	if s.game.net.Active() {
 		// If we're hosting, send the required travel to other client.
-		if s.game.Net.Hosting() {
-			s.game.Net.Send(net.TravelMessage{
+		if s.game.net.Hosting() {
+			s.game.net.Send(net.TravelMessage{
 				Destination: s.targetLevel,
 			})
 			if err := s.LoadLevel(); err != nil {
@@ -80,8 +80,8 @@ func (s *TravelState) Update() error {
 	}
 
 	// If we're connected and not hosting, wait for a travel message.
-	if s.game.Net.Connected() && !s.game.Net.Hosting() {
-		for _, msg := range s.game.Net.Messages() {
+	if s.game.net.Connected() && !s.game.net.Hosting() {
+		for _, msg := range s.game.net.Messages() {
 			switch m := msg.(type) {
 			case net.TravelMessage:
 				s.targetLevel = m.Destination

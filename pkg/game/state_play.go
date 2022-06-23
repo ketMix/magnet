@@ -21,9 +21,20 @@ type PlayState struct {
 
 func (s *PlayState) Init() error {
 	s.world.Game = s.game // Eww
+
+	// Add players here...?
+	s.game.players = append(s.game.players, world.NewPlayer())
+	s.game.players[0].Local = true
+	// Add other player!
+	if s.game.net.Active() {
+		s.game.players = append(s.game.players, world.NewPlayer())
+	}
+
+	// Build the level.
 	if err := s.world.BuildFromLevel(s.level); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -32,28 +43,30 @@ func (s *PlayState) Dispose() error {
 	for _, p := range s.game.players {
 		p.Entity = nil
 	}
+	// Remove players. Should this be moved to a preplay state? Something between menu and travel for setting up players.
+	s.game.players = make([]*world.Player, 0)
 	return nil
 }
 
 func (s *PlayState) Update() error {
 	// If we're the host/solo and we hit R, restart the level. If we're the client, send a request.
 	if inpututil.IsKeyJustReleased(ebiten.KeyR) {
-		if s.game.Net.Hosting() || !s.game.Net.Active() {
+		if s.game.net.Hosting() || !s.game.net.Active() {
 			s.game.SetState(&TravelState{
 				game:        s.game,
 				targetLevel: "001", // ???
 			})
 		} else {
-			s.game.Net.Send(net.TravelMessage{})
+			s.game.net.Send(net.TravelMessage{})
 		}
 		return nil
 	}
 
 	// Handle our network updates.
-	for _, msg := range s.game.Net.Messages() {
+	for _, msg := range s.game.net.Messages() {
 		switch msg := msg.(type) {
 		case net.TravelMessage:
-			if !s.game.Net.Hosting() {
+			if !s.game.net.Hosting() {
 				s.game.SetState(&TravelState{
 					game:        s.game,
 					targetLevel: msg.Destination,
@@ -61,7 +74,7 @@ func (s *PlayState) Update() error {
 				})
 			} else {
 				s.AddMessage(Message{
-					content: fmt.Sprintf("%s wants to restart! Hit 'r' to conform.", s.game.Net.OtherName),
+					content: fmt.Sprintf("%s wants to restart! Hit 'r' to conform.", s.game.net.OtherName),
 				})
 			}
 		default:
@@ -88,8 +101,8 @@ func (s *PlayState) Update() error {
 		}
 		if action != nil {
 			// If our net is active, send our desired action to the other.
-			if s.game.Net.Active() {
-				s.game.Net.Send(action)
+			if s.game.net.Active() {
+				s.game.net.Send(action)
 			}
 			p.Entity.SetAction(action)
 		}

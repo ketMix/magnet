@@ -24,9 +24,6 @@ func (s *MenuState) Init() error {
 		panic(err)
 	}
 
-	// Add players here...?
-	s.game.players = append(s.game.players, world.NewPlayer())
-
 	return nil
 }
 

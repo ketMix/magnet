@@ -26,7 +26,7 @@ type Game struct {
 	// Our game current game state.
 	state State
 	//
-	Net net.Connection
+	net net.Connection
 	//
 	players []*world.Player
 }
@@ -89,25 +89,25 @@ func (g *Game) Init() (err error) {
 
 	// FIXME: Don't manually network connect here. This should be handled in some intermediate state, like "preplay" or a lobby.
 	if g.Options.Host != "" || g.Options.Join != "" || g.Options.Await || g.Options.Search != "" {
-		g.Net = net.NewConnection(g.Options.Name)
+		g.net = net.NewConnection(g.Options.Name)
 		if g.Options.Host != "" {
-			if err := g.Net.AwaitDirect(g.Options.Host, ""); err != nil {
+			if err := g.net.AwaitDirect(g.Options.Host, ""); err != nil {
 				panic(err)
 			}
 		} else if g.Options.Join != "" {
-			if err := g.Net.AwaitDirect("", g.Options.Join); err != nil {
+			if err := g.net.AwaitDirect("", g.Options.Join); err != nil {
 				panic(err)
 			}
 		} else if g.Options.Await {
-			if err := g.Net.AwaitHandshake(g.Options.Handshaker, "", ""); err != nil {
+			if err := g.net.AwaitHandshake(g.Options.Handshaker, "", ""); err != nil {
 				panic(err)
 			}
 		} else if g.Options.Search != "" {
-			if err := g.Net.AwaitHandshake(g.Options.Handshaker, "", g.Options.Search); err != nil {
+			if err := g.net.AwaitHandshake(g.Options.Handshaker, "", g.Options.Search); err != nil {
 				panic(err)
 			}
 		}
-		go g.Net.Loop()
+		go g.net.Loop()
 	}
 
 	// Set our initial menu state.
@@ -124,6 +124,10 @@ func (g *Game) Players() []*world.Player {
 	return g.players
 }
 
+func (g *Game) Net() *net.Connection {
+	return &g.net
+}
+
 // Update updates, how about that.
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
@@ -138,9 +142,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.state.Draw(screen)
 
 	// This should be handled differently than directly drawing network state here.
-	if g.Net.Active() {
+	if g.net.Active() {
 		var img *ebiten.Image
-		if g.Net.Connected() {
+		if g.net.Connected() {
 			img, _ = data.GetImage("online.png")
 		} else {
 			img, _ = data.GetImage("offline.png")
@@ -153,8 +157,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			)
 			screen.DrawImage(img, op)
 			// Draw other player text.
-			bounds := text.BoundString(normalFace, g.Net.OtherName)
-			text.Draw(screen, g.Net.OtherName, normalFace, world.ScreenWidth-bounds.Dx()-img.Bounds().Dx()-16, img.Bounds().Dy()/2+bounds.Dy()/2+8, color.White)
+			bounds := text.BoundString(normalFace, g.net.OtherName)
+			text.Draw(screen, g.net.OtherName, normalFace, world.ScreenWidth-bounds.Dx()-img.Bounds().Dx()-16, img.Bounds().Dy()/2+bounds.Dy()/2+8, color.White)
 		}
 	} else {
 	}
