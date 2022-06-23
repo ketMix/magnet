@@ -53,6 +53,7 @@ type Message interface {
 // HenloMessage is our basic greeting message.
 type HenloMessage struct {
 	Greeting string `json:"g"`
+	Name     string `json:"n"`
 }
 
 // Type returns HenloMessage's corresponding type number.
