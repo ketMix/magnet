@@ -29,6 +29,7 @@ type Connection struct {
 	//
 	connected bool
 	active    bool
+	hosting   bool
 
 	//
 	lastReceived time.Time
@@ -54,6 +55,11 @@ func (c *Connection) Connected() bool {
 // Active returns if the connection should be connected.
 func (c *Connection) Active() bool {
 	return c.active
+}
+
+// Hosting returns if the connection is acting as a host.
+func (c *Connection) Hosting() bool {
+	return c.hosting
 }
 
 func (c *Connection) AwaitHandshake(handshaker string, local string, target string) error {
@@ -115,6 +121,8 @@ func (c *Connection) AwaitHandshake(handshaker string, local string, target stri
 		if err != nil {
 			return err
 		}
+	} else {
+		c.hosting = true
 	}
 
 	return c.awaitHandshake()
@@ -181,6 +189,8 @@ func (c *Connection) AwaitDirect(local string, target string) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		c.hosting = true
 	}
 
 	// Start the listen loop.
