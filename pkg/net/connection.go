@@ -24,6 +24,7 @@ type Connection struct {
 	// otherConn is the peer we wish to play with.
 	otherConn    *net.UDPConn
 	otherAddress *net.UDPAddr
+	OtherName    string
 
 	//
 	connected bool
@@ -216,7 +217,10 @@ func (c *Connection) AwaitDirect(local string, target string) error {
 
 func (c *Connection) Loop() {
 	fmt.Println("starting main loop with", c.otherAddress.String())
-	if err := c.Send(HenloMessage{"hai from " + c.Name}); err != nil {
+	if err := c.Send(HenloMessage{
+		Name:     c.Name,
+		Greeting: "hai",
+	}); err != nil {
 		panic(err)
 	}
 	c.connected = true
@@ -254,8 +258,9 @@ func (c *Connection) Loop() {
 			fmt.Println(err)
 		} else {
 			c.lastReceived = time.Now()
-			m := msg.Message()
-			switch msg.Message().(type) {
+			switch m := msg.Message().(type) {
+			case HenloMessage:
+				c.OtherName = m.Name
 			case PingMessage:
 			default:
 				c.Messages <- m

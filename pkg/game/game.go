@@ -2,10 +2,12 @@ package game
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
@@ -167,6 +169,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				float64(img.Bounds().Dy()-8),
 			)
 			screen.DrawImage(img, op)
+			// Draw other player text.
+			bounds := text.BoundString(normalFace, g.Net.OtherName)
+			text.Draw(screen, g.Net.OtherName, normalFace, world.ScreenWidth-bounds.Dx()-img.Bounds().Dx()-16, img.Bounds().Dy()/2+bounds.Dy()/2+8, color.White)
 		}
 	} else {
 	}
