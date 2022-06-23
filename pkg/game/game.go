@@ -87,15 +87,24 @@ func (g *Game) Init() (err error) {
 	err = data.LoadData()
 
 	// FIXME: Don't manually network connect here. This should be handled in some intermediate state, like "preplay" or a lobby.
-	g.Net = net.NewConnection(g.Options.Name)
-	if g.Options.Host != "" {
-		if err := g.Net.AwaitDirect(g.Options.Host, ""); err != nil {
-			panic(err)
-		}
-		go g.Net.Loop()
-	} else if g.Options.Join != "" {
-		if err := g.Net.AwaitDirect("", g.Options.Join); err != nil {
-			panic(err)
+	if g.Options.Host != "" || g.Options.Join != "" || g.Options.Await || g.Options.Search != "" {
+		g.Net = net.NewConnection(g.Options.Name)
+		if g.Options.Host != "" {
+			if err := g.Net.AwaitDirect(g.Options.Host, ""); err != nil {
+				panic(err)
+			}
+		} else if g.Options.Join != "" {
+			if err := g.Net.AwaitDirect("", g.Options.Join); err != nil {
+				panic(err)
+			}
+		} else if g.Options.Await {
+			if err := g.Net.AwaitHandshake(g.Options.Handshaker, "", ""); err != nil {
+				panic(err)
+			}
+		} else if g.Options.Search != "" {
+			if err := g.Net.AwaitHandshake(g.Options.Handshaker, "", g.Options.Search); err != nil {
+				panic(err)
+			}
 		}
 		go g.Net.Loop()
 	}
