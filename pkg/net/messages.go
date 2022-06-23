@@ -22,6 +22,7 @@ const (
 	MissingMessageType TypedMessageType = iota
 	HenloMessageType
 	PingMessageType
+	TravelMessageType
 )
 
 // TypedMessage wraps a Message.
@@ -39,6 +40,10 @@ func (t *TypedMessage) Message() Message {
 		return m
 	case PingMessageType:
 		var m PingMessage
+		json.Unmarshal(t.Data, &m)
+		return m
+	case TravelMessageType:
+		var m TravelMessage
 		json.Unmarshal(t.Data, &m)
 		return m
 	}
@@ -68,4 +73,14 @@ type PingMessage struct {
 // Type returns PingMessage's corresponding type number.
 func (m PingMessage) Type() TypedMessageType {
 	return PingMessageType
+}
+
+// TravelMessage is sent by the host to clients to enforce travel.
+type TravelMessage struct {
+	Destination string `json:"d"`
+}
+
+// Type returns TravelMessage's corresponding type number.
+func (m TravelMessage) Type() TypedMessageType {
+	return TravelMessageType
 }
