@@ -198,13 +198,15 @@ func (w *World) ProcessRequest(r Request) {
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
 			e := w.SpawnEnemyEntity(r)
 			// Hmm.
-			w.Game.Net().Send(SpawnEnemyRequest{
-				X:        r.X,
-				Y:        r.Y,
-				Polarity: r.Polarity,
-				Kind:     r.Kind,
-				NetID:    e.netID,
-			})
+			if w.Game.Net().Active() && w.Game.Net().Hosting() {
+				w.Game.Net().Send(SpawnEnemyRequest{
+					X:        r.X,
+					Y:        r.Y,
+					Polarity: r.Polarity,
+					Kind:     r.Kind,
+					NetID:    e.netID,
+				})
+			}
 		}
 	case TrashEntityRequest:
 		// Trash entities if we are local or host.
