@@ -26,7 +26,7 @@ type World struct {
 	currentTileset   data.TileSet
 	CameraX, CameraY float64
 	path             pathing.Path
-	//state            WorldState
+	mode             WorldMode
 	// Our waves, acquired from BuildFromLevel.
 	waves []*data.Wave
 	// Might as well store the core's position.
