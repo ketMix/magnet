@@ -7,11 +7,14 @@ import (
 
 // Player represents a player that controls an entity. It handles input and makes the entity dance.
 type Player struct {
+	//
 	Local bool
 	// entity is the player-controlled entity.
 	Entity Entity
 	// I suppose the toolbelt should be here.
 	Toolbelt Toolbelt
+	// ReadyForWave means the players are done building and ready to start the waves.
+	ReadyForWave bool
 }
 
 func NewPlayer() *Player {

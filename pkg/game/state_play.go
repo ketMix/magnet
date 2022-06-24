@@ -49,6 +49,26 @@ func (s *PlayState) Dispose() error {
 }
 
 func (s *PlayState) Update() error {
+	// World mode handling.
+	switch s.world.Mode {
+	case world.LossMode:
+		// TODO: Show hit "R" to restart or something. Also maybe stats.
+		if s.game.net.Hosting() || !s.game.net.Active() {
+			s.game.SetState(&TravelState{
+				game:        s.game,
+				targetLevel: "001", // FIXME: replace with current level!
+			})
+		}
+	case world.VictoryMode:
+		// TODO: Show end game stats, if possible! Then some sort of "hit okay" to travel button/key.
+		if s.game.net.Hosting() || !s.game.net.Active() {
+			s.game.SetState(&TravelState{
+				game:        s.game,
+				targetLevel: "001", // FIXME: replace with next level!
+			})
+		}
+	}
+
 	// If we're the host/solo and we hit R, restart the level. If we're the client, send a request.
 	if inpututil.IsKeyJustReleased(ebiten.KeyR) {
 		if s.game.net.Hosting() || !s.game.net.Active() {

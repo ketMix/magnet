@@ -18,6 +18,7 @@ var ScreenHeight int = 360
 // World is a struct for our cells and entities.
 type World struct {
 	Game             Game // Ewwww x2
+	Mode             WorldMode
 	width, height    int
 	cells            [][]LiveCell
 	entities         []Entity
@@ -26,10 +27,10 @@ type World struct {
 	currentTileset   data.TileSet
 	CameraX, CameraY float64
 	path             pathing.Path
-	mode             WorldMode
 	// Our waves, acquired from BuildFromLevel.
 	waves []*data.Wave
 	// Might as well store the core's position.
+	cores        []*CoreEntity
 	coreX, coreY int
 }
 
@@ -101,11 +102,12 @@ func (w *World) BuildFromLevel(level data.Level) error {
 				e := NewEnemyEntity(data.EnemyConfigs["walker-negative"])
 				w.PlaceEntityInCell(e, x, y)
 			} else if c.Kind == data.CoreCell {
-				// Do we want more than 1 core...?
 				e := NewCoreEntity(data.CoreConfig)
 				w.PlaceEntityInCell(e, x, y)
 				w.coreX = x
 				w.coreY = y
+				// Do we want more than 1 core...?
+				w.cores = append(w.cores, e)
 			}
 			// Create the cell.
 			cell := LiveCell{
@@ -155,6 +157,10 @@ func (w *World) ProcessRequest(r Request) {
 			w.ProcessRequest(rq)
 		}
 	case UseToolRequest:
+		// Disallow tool use during wave mode.
+		if w.Mode == WaveMode {
+			return
+		}
 		if r.kind == ToolTurret {
 			c := w.GetCell(r.x, r.y)
 			if c != nil {
@@ -246,6 +252,30 @@ func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
 // Update updates the world.
 func (w *World) Update() error {
 	// TODO: Process physics
+
+	// TODO: Add delay between mode switching!
+	switch w.Mode {
+	case PreGameMode:
+		// I dunno what this is. Maybe to ensure travel was succesful?
+		w.Mode = BuildMode
+	case BuildMode:
+		if w.ArePlayersReady() {
+			w.Mode = WaveMode
+		}
+	case WaveMode:
+		if w.AreCoresDead() {
+			w.Mode = LossMode
+		} else if w.AreWavesComplete() {
+			w.Mode = VictoryMode
+			// Move onto build mode...?
+		}
+	case LossMode:
+		// See state_play
+	case VictoryMode:
+		// See state_play
+	case PostGameMode:
+		// wat is this
+	}
 
 	// Update our entities and get any requests.
 	var requests []Request
@@ -355,6 +385,28 @@ func (w *World) Draw(screen *ebiten.Image) {
 			}
 		}
 	}*/
+}
+
+// ArePlayersReady returns true if all players are ready to start.
+func (w *World) ArePlayersReady() bool {
+	playersCount := len(w.Game.Players())
+	for _, p := range w.Game.Players() {
+		if p.ReadyForWave {
+			playersCount--
+		}
+	}
+	return playersCount == 0
+}
+
+// AreCoresDead returns true if all cores are dead.
+func (w *World) AreCoresDead() bool {
+	coreCount := len(w.cores)
+	for _, c := range w.cores {
+		if c.health <= 0 {
+			coreCount--
+		}
+	}
+	return coreCount < 1
 }
 
 /** WAVES **/
