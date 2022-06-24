@@ -144,6 +144,8 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 		w.SpawnEnemyEntity(msg)
 	case TrashEntityRequest:
 		w.ProcessRequest(msg)
+	case SetModeRequest:
+		w.SetMode(msg)
 	default:
 		fmt.Printf("unhandled net %+v\n", msg)
 	}
@@ -249,6 +251,24 @@ func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
 	return e
 }
 
+// SetMode sets the current game mode to the one indicated. If we're a client and the mode set is local, this does nothing.
+func (w *World) SetMode(r SetModeRequest) {
+	// If it is a locally generated mode and we're a client, do nothing.
+	if w.Game.Net().Active() && !w.Game.Net().Hosting() && r.local {
+		return
+	}
+	// Otherwise update the mode.
+	w.Mode = r.Mode
+	fmt.Println("sed mode to", r.Mode)
+	// Also send the network message if we're the host.
+	if w.Game.Net().Active() && w.Game.Net().Hosting() && r.local {
+		fmt.Println("send mode requset")
+		w.Game.Net().Send(SetModeRequest{
+			Mode: r.Mode,
+		})
+	}
+}
+
 // Update updates the world.
 func (w *World) Update() error {
 	// TODO: Process physics
@@ -257,16 +277,16 @@ func (w *World) Update() error {
 	switch w.Mode {
 	case PreGameMode:
 		// I dunno what this is. Maybe to ensure travel was succesful?
-		w.Mode = BuildMode
+		w.SetMode(SetModeRequest{Mode: BuildMode, local: true})
 	case BuildMode:
 		if w.ArePlayersReady() {
-			w.Mode = WaveMode
+			w.SetMode(SetModeRequest{Mode: WaveMode, local: true})
 		}
 	case WaveMode:
 		if w.AreCoresDead() {
-			w.Mode = LossMode
+			w.SetMode(SetModeRequest{Mode: LossMode, local: true})
 		} else if w.AreWavesComplete() {
-			w.Mode = VictoryMode
+			w.SetMode(SetModeRequest{Mode: VictoryMode, local: true})
 			// Move onto build mode...?
 		}
 	case LossMode:
