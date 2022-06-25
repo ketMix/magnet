@@ -104,7 +104,9 @@ func (m WaveMode) Type() net.TypedMessageType {
 	return 502
 }
 func (m *WaveMode) Update(w *World) (next WorldMode, err error) {
-	if w.AreCoresDead() {
+	if w.AreSpawnersHolding() {
+		next = &BuildMode{local: true}
+	} else if w.AreCoresDead() {
 		next = &LossMode{local: true}
 	} else if w.AreWavesComplete() {
 		next = &VictoryMode{local: true}

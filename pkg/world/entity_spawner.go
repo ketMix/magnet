@@ -13,6 +13,7 @@ type SpawnerEntity struct {
 	floatTick   int
 	shouldSpawn bool
 	wave        *data.Wave
+	heldWave    bool // heldWave indicicates if the spawner has a held wave waiting to be spawned.
 	// spawnTargets []EnemyKind ???
 	spawnElapsed int
 }
@@ -30,7 +31,7 @@ func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 }
 
 func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
-	if e.wave != nil {
+	if e.wave != nil && !e.heldWave {
 		if e.wave.Spawns != nil {
 			if e.spawnElapsed >= e.wave.Spawns.Spawnrate {
 				var spawnRequests MultiRequest
@@ -52,14 +53,17 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 				}
 				request = spawnRequests
 				e.wave.Spawns.Count--
+				e.spawnElapsed = 0
 				if e.wave.Spawns.Count <= 0 {
 					e.wave.Spawns = e.wave.Spawns.Next
 				}
-				e.spawnElapsed = 0
 			}
 		} else {
 			e.wave = e.wave.Next
 			e.spawnElapsed = 0
+			if e.wave != nil {
+				e.heldWave = true
+			}
 		}
 	}
 	e.spawnElapsed++

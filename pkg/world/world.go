@@ -129,6 +129,8 @@ func (w *World) BuildFromLevel(level data.Level) error {
 		w.waves = append(w.waves, wave.Clone())
 	}
 
+	w.SetWaves()
+
 	w.UpdatePathing()
 	return nil
 }
@@ -266,7 +268,14 @@ func (w *World) SetMode(m WorldMode) {
 	w.Mode = m
 
 	if _, ok := w.Mode.(*WaveMode); ok {
-		w.SetWaves()
+		// UGH
+		for _, pl := range w.Game.Players() {
+			pl.ReadyForWave = false
+		}
+		// Unleash the spawners.
+		for _, s := range w.spawners {
+			s.heldWave = false
+		}
 	}
 
 	// Also send the network message if we're the host.
@@ -417,10 +426,21 @@ func (w *World) AreCoresDead() bool {
 }
 
 /** WAVES **/
+func (w *World) AreSpawnersHolding() bool {
+	spawnerCount := len(w.spawners)
+
+	for _, s := range w.spawners {
+		if s.heldWave {
+			spawnerCount--
+		}
+	}
+
+	return spawnerCount == 0
+}
+
 func (w *World) AreWavesComplete() bool {
 	spawnerCount := len(w.spawners)
 
-	// FIXME: Store spawner references in their own field.
 	for _, s := range w.spawners {
 		if s.wave == nil {
 			spawnerCount--
@@ -450,6 +470,8 @@ func (w *World) SetWaves() {
 		if wave.Spawns != nil {
 			w.spawners[i].spawnElapsed = wave.Spawns.Spawnrate
 		}
+		// Make sure to hold until build is done.
+		w.spawners[i].heldWave = true
 	}
 }
 
