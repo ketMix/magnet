@@ -19,6 +19,23 @@ const (
 	PostGameMode                  // PostGame is... the final victory...?
 )
 
+func (m WorldMode) String() string {
+	if m == PreGameMode {
+		return "pre"
+	} else if m == BuildMode {
+		return "build"
+	} else if m == WaveMode {
+		return "wave"
+	} else if m == LossMode {
+		return "loss"
+	} else if m == VictoryMode {
+		return "victory"
+	} else if m == PostGameMode {
+		return "post"
+	}
+	return "dunno"
+}
+
 // SetModeRequest is used to both set the mode in world, as well as the data type send to the client to let them know we're moving along.
 type SetModeRequest struct {
 	Mode  WorldMode `json:"m"`

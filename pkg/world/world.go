@@ -256,6 +256,7 @@ func (w *World) SetMode(r SetModeRequest) {
 	}
 	// Otherwise update the mode.
 	w.Mode = r.Mode
+	fmt.Println("Mode: ", w.Mode.String())
 
 	if w.Mode == WaveMode {
 		w.SetWaves()
