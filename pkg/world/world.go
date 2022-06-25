@@ -129,9 +129,6 @@ func (w *World) BuildFromLevel(level data.Level) error {
 		w.waves = append(w.waves, wave.Clone())
 	}
 
-	// Set our first waves!
-	w.SetWaves()
-
 	w.UpdatePathing()
 	return nil
 }
@@ -259,10 +256,13 @@ func (w *World) SetMode(r SetModeRequest) {
 	}
 	// Otherwise update the mode.
 	w.Mode = r.Mode
-	fmt.Println("sed mode to", r.Mode)
+
+	if w.Mode == WaveMode {
+		w.SetWaves()
+	}
+
 	// Also send the network message if we're the host.
 	if w.Game.Net().Active() && w.Game.Net().Hosting() && r.local {
-		fmt.Println("send mode requset")
 		w.Game.Net().SendReliable(SetModeRequest{
 			Mode: r.Mode,
 		})
