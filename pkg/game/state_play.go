@@ -171,6 +171,30 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		my -= bounds.Dy() + 2
 	}
 
+	// Draw current game mode overlay...?
+	if s.world.Mode == world.BuildMode {
+		bounds := text.BoundString(normalFace, "build mode")
+		text.Draw(
+			screen,
+			"build mode",
+			normalFace,
+			8,
+			bounds.Dy()+8,
+			color.White,
+		)
+		// Hmm.
+		msg := "hit <spacebar> to start combat waves"
+		bounds = text.BoundString(normalFace, msg)
+		text.Draw(
+			screen,
+			msg,
+			normalFace,
+			world.ScreenWidth/2-bounds.Dx()/2,
+			world.ScreenHeight-50,
+			color.White,
+		)
+	}
+
 	// Draw our player's belt!
 	s.game.players[0].Toolbelt.Draw(screen)
 }
