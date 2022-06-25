@@ -62,7 +62,6 @@ func (s *TravelState) Dispose() error {
 
 func (s *TravelState) LoadLevel() (err error) {
 	s.loadedLevel, err = data.NewLevel(s.targetLevel)
-	s.ready = true
 	return err
 }
 
@@ -88,10 +87,23 @@ func (s *TravelState) Update() error {
 				if err := s.LoadLevel(); err != nil {
 					return err
 				}
+				// Let server know we traveled.
+				s.game.net.Send(net.TravelMessage{})
+				s.ready = true
 			default:
 				break
 			}
 		}
+		// If we're connected and hosting, wait for the okay from the client.
+	} else if s.game.net.Connected() {
+		for _, msg := range s.game.net.Messages() {
+			switch msg.(type) {
+			case net.TravelMessage:
+				s.ready = true
+			}
+		}
+	} else {
+		s.ready = true
 	}
 
 	return nil
