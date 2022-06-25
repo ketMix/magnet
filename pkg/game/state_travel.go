@@ -16,7 +16,7 @@ type TravelState struct {
 	targetLevel string
 	loadedLevel data.Level
 	ready       bool
-	restarting  bool
+	fromLive    bool
 	//
 	magnetImage *ebiten.Image
 	magnetSpin  float64
@@ -42,7 +42,7 @@ func (s *TravelState) Init() (err error) {
 			if err := s.LoadLevel(); err != nil {
 				return err
 			}
-		} else if s.restarting {
+		} else if s.fromLive {
 			if err := s.LoadLevel(); err != nil {
 				return err
 			}
@@ -72,14 +72,22 @@ func (s *TravelState) Update() error {
 	// If we're marked as ready, let's go.
 	if s.ready {
 		s.game.SetState(&PlayState{
-			game:  s.game,
-			level: s.loadedLevel,
+			game:          s.game,
+			level:         s.loadedLevel,
+			levelDataName: s.targetLevel,
 		})
 		return nil
 	}
 
 	// If we're connected and not hosting, wait for a travel message.
 	if s.game.net.Connected() && !s.game.net.Hosting() {
+		// If this is "fromLive", then presume a map travel (skip initial load up confirm)
+		if s.fromLive {
+			s.game.net.SendReliable(net.TravelMessage{})
+			s.ready = true
+			return nil
+		}
+		// Continue on.
 		for _, msg := range s.game.net.Messages() {
 			switch m := msg.(type) {
 			case net.TravelMessage:

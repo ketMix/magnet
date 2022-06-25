@@ -13,10 +13,11 @@ import (
 )
 
 type PlayState struct {
-	game     *Game
-	level    data.Level
-	world    world.World
-	messages []Message
+	game          *Game
+	levelDataName string
+	level         data.Level
+	world         world.World
+	messages      []Message
 }
 
 func (s *PlayState) Init() error {
@@ -58,15 +59,16 @@ func (s *PlayState) Update() error {
 		if s.game.net.Hosting() || !s.game.net.Active() {
 			s.game.SetState(&TravelState{
 				game:        s.game,
-				targetLevel: "001", // FIXME: replace with current level!
+				targetLevel: s.level.Next,
 			})
 		}
 	case *world.VictoryMode:
 		// TODO: Show end game stats, if possible! Then some sort of "hit okay" to travel button/key.
 		if s.game.net.Hosting() || !s.game.net.Active() {
+			fmt.Println("TRAVELING TO NEXT")
 			s.game.SetState(&TravelState{
 				game:        s.game,
-				targetLevel: "001", // FIXME: replace with next level!
+				targetLevel: s.level.Next,
 			})
 		}
 	}
@@ -76,7 +78,7 @@ func (s *PlayState) Update() error {
 		if s.game.net.Hosting() || !s.game.net.Active() {
 			s.game.SetState(&TravelState{
 				game:        s.game,
-				targetLevel: "001", // ???
+				targetLevel: s.levelDataName, // ???
 			})
 		} else {
 			s.game.net.Send(net.TravelMessage{})
@@ -92,7 +94,7 @@ func (s *PlayState) Update() error {
 				s.game.SetState(&TravelState{
 					game:        s.game,
 					targetLevel: msg.Destination,
-					restarting:  true,
+					fromLive:    true,
 				})
 			} else {
 				s.AddMessage(Message{
