@@ -427,7 +427,16 @@ func (w *World) AreWavesComplete() bool {
 		}
 	}
 
-	return spawnerCount == 0
+	// Also check entities.
+	enemyCount := 0
+	for _, entity := range w.entities {
+		switch entity.(type) {
+		case *EnemyEntity:
+			enemyCount++
+		}
+	}
+
+	return spawnerCount == 0 && enemyCount == 0
 }
 
 func (w *World) SetWaves() {
