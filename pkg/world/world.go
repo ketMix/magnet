@@ -141,8 +141,16 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 		w.SpawnEnemyEntity(msg)
 	case TrashEntityRequest:
 		w.ProcessRequest(msg)
-	case SetModeRequest:
-		w.SetMode(msg)
+	case BuildMode:
+		w.SetMode(&msg)
+	case WaveMode:
+		w.SetMode(&msg)
+	case VictoryMode:
+		w.SetMode(&msg)
+	case LossMode:
+		w.SetMode(&msg)
+	case PostGameMode:
+		w.SetMode(&msg)
 	default:
 		fmt.Printf("unhandled net %+v\n", msg)
 	}
@@ -157,7 +165,7 @@ func (w *World) ProcessRequest(r Request) {
 		}
 	case UseToolRequest:
 		// Disallow tool use during wave mode.
-		if w.Mode == WaveMode {
+		if _, ok := w.Mode.(*WaveMode); ok {
 			return
 		}
 		if r.kind == ToolTurret {
@@ -249,24 +257,21 @@ func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
 }
 
 // SetMode sets the current game mode to the one indicated. If we're a client and the mode set is local, this does nothing.
-func (w *World) SetMode(r SetModeRequest) {
+func (w *World) SetMode(m WorldMode) {
 	// If it is a locally generated mode and we're a client, do nothing.
-	if w.Game.Net().Active() && !w.Game.Net().Hosting() && r.local {
+	if w.Game.Net().Active() && !w.Game.Net().Hosting() && m.Local() {
 		return
 	}
 	// Otherwise update the mode.
-	w.Mode = r.Mode
-	fmt.Println("Mode: ", w.Mode.String())
+	w.Mode = m
 
-	if w.Mode == WaveMode {
+	if _, ok := w.Mode.(*WaveMode); ok {
 		w.SetWaves()
 	}
 
 	// Also send the network message if we're the host.
-	if w.Game.Net().Active() && w.Game.Net().Hosting() && r.local {
-		w.Game.Net().SendReliable(SetModeRequest{
-			Mode: r.Mode,
-		})
+	if w.Game.Net().Active() && w.Game.Net().Hosting() && m.Local() {
+		w.Game.Net().SendReliable(m)
 	}
 }
 
@@ -275,27 +280,8 @@ func (w *World) Update() error {
 	// TODO: Process physics
 
 	// TODO: Add delay between mode switching!
-	switch w.Mode {
-	case PreGameMode:
-		// I dunno what this is. Maybe to ensure travel was succesful?
-		w.SetMode(SetModeRequest{Mode: BuildMode, local: true})
-	case BuildMode:
-		if w.ArePlayersReady() {
-			w.SetMode(SetModeRequest{Mode: WaveMode, local: true})
-		}
-	case WaveMode:
-		if w.AreCoresDead() {
-			w.SetMode(SetModeRequest{Mode: LossMode, local: true})
-		} else if w.AreWavesComplete() {
-			w.SetMode(SetModeRequest{Mode: VictoryMode, local: true})
-			// Move onto build mode...?
-		}
-	case LossMode:
-		// See state_play
-	case VictoryMode:
-		// See state_play
-	case PostGameMode:
-		// wat is this
+	if nextMode, _ := w.Mode.Update(w); nextMode != nil {
+		w.SetMode(nextMode)
 	}
 
 	// Update our entities and get any requests.

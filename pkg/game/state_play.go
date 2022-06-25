@@ -35,6 +35,8 @@ func (s *PlayState) Init() error {
 		return err
 	}
 
+	s.world.Mode = &world.PreGameMode{}
+
 	return nil
 }
 
@@ -50,15 +52,15 @@ func (s *PlayState) Dispose() error {
 
 func (s *PlayState) Update() error {
 	// World mode handling.
-	switch s.world.Mode {
-	case world.BuildMode:
+	switch s.world.Mode.(type) {
+	case *world.BuildMode:
 		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			s.game.players[0].ReadyForWave = true
 			if s.game.net.Active() {
 				s.game.net.SendReliable(world.StartModeRequest{})
 			}
 		}
-	case world.LossMode:
+	case *world.LossMode:
 		// TODO: Show hit "R" to restart or something. Also maybe stats.
 		if s.game.net.Hosting() || !s.game.net.Active() {
 			s.game.SetState(&TravelState{
@@ -66,7 +68,7 @@ func (s *PlayState) Update() error {
 				targetLevel: "001", // FIXME: replace with current level!
 			})
 		}
-	case world.VictoryMode:
+	case *world.VictoryMode:
 		// TODO: Show end game stats, if possible! Then some sort of "hit okay" to travel button/key.
 		if s.game.net.Hosting() || !s.game.net.Active() {
 			s.game.SetState(&TravelState{
@@ -186,7 +188,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	}
 
 	// Draw current game mode overlay...?
-	if s.world.Mode == world.BuildMode {
+	if _, ok := s.world.Mode.(*world.BuildMode); ok {
 		bounds := text.BoundString(normalFace, "build mode")
 		text.Draw(
 			screen,
