@@ -36,7 +36,7 @@ func (s *TravelState) Init() (err error) {
 	if s.game.net.Active() {
 		// If we're hosting, send the required travel to other client.
 		if s.game.net.Hosting() {
-			s.game.net.Send(net.TravelMessage{
+			s.game.net.SendReliable(net.TravelMessage{
 				Destination: s.targetLevel,
 			})
 			if err := s.LoadLevel(); err != nil {
@@ -88,9 +88,12 @@ func (s *TravelState) Update() error {
 					return err
 				}
 				// Let server know we traveled.
-				s.game.net.Send(net.TravelMessage{})
+				s.game.net.SendReliable(net.TravelMessage{})
 				s.ready = true
 			default:
+				break
+			}
+			if s.ready {
 				break
 			}
 		}

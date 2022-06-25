@@ -207,7 +207,7 @@ func (w *World) ProcessRequest(r Request) {
 			e := w.SpawnEnemyEntity(r)
 			// Hmm.
 			if w.Game.Net().Active() && w.Game.Net().Hosting() {
-				w.Game.Net().Send(SpawnEnemyRequest{
+				w.Game.Net().SendReliable(SpawnEnemyRequest{
 					X:        r.X,
 					Y:        r.Y,
 					Polarity: r.Polarity,
@@ -221,7 +221,7 @@ func (w *World) ProcessRequest(r Request) {
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
 			r.entity.Trash()
 			if w.Game.Net().Hosting() {
-				w.Game.Net().Send(r)
+				w.Game.Net().SendReliable(r)
 			}
 		} else if w.Game.Net().Active() {
 			if !r.local {
@@ -263,7 +263,7 @@ func (w *World) SetMode(r SetModeRequest) {
 	// Also send the network message if we're the host.
 	if w.Game.Net().Active() && w.Game.Net().Hosting() && r.local {
 		fmt.Println("send mode requset")
-		w.Game.Net().Send(SetModeRequest{
+		w.Game.Net().SendReliable(SetModeRequest{
 			Mode: r.Mode,
 		})
 	}
