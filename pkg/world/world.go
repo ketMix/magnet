@@ -28,7 +28,9 @@ type World struct {
 	CameraX, CameraY float64
 	path             pathing.Path
 	// Our waves, acquired from BuildFromLevel.
-	waves []*data.Wave
+	waves       []*data.Wave
+	CurrentWave int
+	MaxWave     int
 	// Might as well store the core's position.
 	cores        []*CoreEntity
 	coreX, coreY int
@@ -267,6 +269,9 @@ func (w *World) SetMode(m WorldMode) {
 	// Otherwise update the mode.
 	w.Mode = m
 
+	if _, ok := w.Mode.(*BuildMode); ok {
+		w.CurrentWave++
+	}
 	if _, ok := w.Mode.(*WaveMode); ok {
 		// UGH
 		for _, pl := range w.Game.Players() {
@@ -438,15 +443,7 @@ func (w *World) AreSpawnersHolding() bool {
 	return spawnerCount == 0
 }
 
-func (w *World) AreWavesComplete() bool {
-	spawnerCount := len(w.spawners)
-
-	for _, s := range w.spawners {
-		if s.wave == nil {
-			spawnerCount--
-		}
-	}
-
+func (w *World) AreEnemiesDead() bool {
 	// Also check entities.
 	enemyCount := 0
 	for _, entity := range w.entities {
@@ -456,7 +453,19 @@ func (w *World) AreWavesComplete() bool {
 		}
 	}
 
-	return spawnerCount == 0 && enemyCount == 0
+	return enemyCount == 0
+}
+
+func (w *World) AreWavesComplete() bool {
+	spawnerCount := len(w.spawners)
+
+	for _, s := range w.spawners {
+		if s.wave == nil {
+			spawnerCount--
+		}
+	}
+
+	return spawnerCount == 0 && w.AreEnemiesDead()
 }
 
 func (w *World) SetWaves() {
@@ -472,6 +481,14 @@ func (w *World) SetWaves() {
 		}
 		// Make sure to hold until build is done.
 		w.spawners[i].heldWave = true
+		// Okay, this is a bit stupid.
+		count := 1
+		for wave := wave.Next; wave != nil; wave = wave.Next {
+			count++
+		}
+		if w.MaxWave < count {
+			w.MaxWave = count
+		}
 	}
 }
 

@@ -189,6 +189,22 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	// Draw mode.
 	s.world.Mode.Draw(screen)
 
+	// Draw the waves.
+	mx = 8
+	my = 8
+	{
+		t := fmt.Sprintf("wave: %d/%d", s.world.CurrentWave, s.world.MaxWave)
+		bounds := text.BoundString(data.NormalFace, t)
+		text.Draw(
+			screen,
+			t,
+			data.NormalFace,
+			mx,
+			my+bounds.Dy(),
+			color.White,
+		)
+	}
+
 	// Draw our player's belt!
 	s.game.players[0].Toolbelt.Draw(screen)
 }

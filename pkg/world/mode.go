@@ -73,7 +73,7 @@ func (m *BuildMode) Draw(screen *ebiten.Image) {
 		"build mode",
 		data.NormalFace,
 		8,
-		bounds.Dy()+8,
+		bounds.Dy()+24,
 		color.White,
 	)
 	// Hmm.
@@ -104,7 +104,7 @@ func (m WaveMode) Type() net.TypedMessageType {
 	return 502
 }
 func (m *WaveMode) Update(w *World) (next WorldMode, err error) {
-	if w.AreSpawnersHolding() {
+	if w.AreSpawnersHolding() && w.AreEnemiesDead() {
 		next = &BuildMode{local: true}
 	} else if w.AreCoresDead() {
 		next = &LossMode{local: true}
