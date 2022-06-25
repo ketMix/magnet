@@ -2,6 +2,7 @@ T The Start
 S nature
 W 5@200 walker,3@200 runner&walker;10@200 walker
 W 5@200 runner;10@200 walker
+N 002
 
 #####   #####
 ##N##   ##S##
