@@ -19,8 +19,8 @@ const (
 )
 
 type Cell struct {
-	Kind CellKind
-	Alt  bool
+	Kind     CellKind
+	Polarity Polarity
 	// ???
 }
 

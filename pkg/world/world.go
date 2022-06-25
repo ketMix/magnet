@@ -113,8 +113,8 @@ func (w *World) BuildFromLevel(level data.Level) error {
 			}
 			// Create the cell.
 			cell := LiveCell{
-				kind: c.Kind,
-				alt:  c.Alt,
+				kind:     c.Kind,
+				polarity: c.Polarity,
 			}
 			if c.Kind == data.BlockedCell || c.Kind == data.EmptyCell {
 				cell.blocked = true
@@ -356,10 +356,12 @@ func (w *World) Draw(screen *ebiten.Image) {
 			} else if c.kind == data.EmptyCell {
 				// nada
 			} else {
-				if c.alt {
-					screen.DrawImage(w.currentTileset.OpenImage2, op)
+				if c.polarity == data.PositivePolarity {
+					screen.DrawImage(w.currentTileset.OpenPositiveImage, op)
+				} else if c.polarity == data.NegativePolarity {
+					screen.DrawImage(w.currentTileset.OpenNegativeImage, op)
 				} else {
-					screen.DrawImage(w.currentTileset.OpenImage, op)
+					screen.DrawImage(w.currentTileset.OpenNeutralImage, op)
 				}
 			}
 		}
@@ -612,10 +614,10 @@ func (w *World) GetNextNetID() int {
 
 // LiveCell is a position in a live level.
 type LiveCell struct {
-	entity  Entity
-	blocked bool
-	kind    data.CellKind // Same as Level
-	alt     bool          // Same as Level
+	entity   Entity
+	blocked  bool
+	kind     data.CellKind // Same as Level
+	polarity data.Polarity
 }
 
 // IsOpen does what you think it does.

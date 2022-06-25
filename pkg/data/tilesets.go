@@ -9,9 +9,10 @@ import (
 var tilesets = make(map[string]TileSet)
 
 type TileSet struct {
-	OpenImage    *ebiten.Image
-	OpenImage2   *ebiten.Image
-	BlockedImage *ebiten.Image
+	OpenPositiveImage *ebiten.Image
+	OpenNeutralImage  *ebiten.Image
+	OpenNegativeImage *ebiten.Image
+	BlockedImage      *ebiten.Image
 }
 
 func LoadTileSet(n string) (TileSet, error) {
@@ -19,15 +20,20 @@ func LoadTileSet(n string) (TileSet, error) {
 		return t, nil
 	}
 	t := TileSet{}
-	if img, err := ReadImage(path.Join(n, "open.png")); err == nil {
-		t.OpenImage = ebiten.NewImageFromImage(img)
+	if img, err := ReadImage(path.Join(n, "open-neutral.png")); err == nil {
+		t.OpenNeutralImage = ebiten.NewImageFromImage(img)
 	} else {
 		return t, err
 	}
-	if img, err := ReadImage(path.Join(n, "open2.png")); err == nil {
-		t.OpenImage2 = ebiten.NewImageFromImage(img)
+	if img, err := ReadImage(path.Join(n, "open-positive.png")); err == nil {
+		t.OpenPositiveImage = ebiten.NewImageFromImage(img)
 	} else {
-		t.OpenImage2 = t.OpenImage
+		t.OpenPositiveImage = t.OpenNeutralImage
+	}
+	if img, err := ReadImage(path.Join(n, "open-negative.png")); err == nil {
+		t.OpenNegativeImage = ebiten.NewImageFromImage(img)
+	} else {
+		t.OpenNegativeImage = t.OpenNeutralImage
 	}
 	if img, err := ReadImage(path.Join(n, "blocked.png")); err == nil {
 		t.BlockedImage = ebiten.NewImageFromImage(img)

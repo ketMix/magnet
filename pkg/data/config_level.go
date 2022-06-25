@@ -22,9 +22,10 @@ func (l *LevelConfig) newCell(r rune) (c Cell) {
 	switch r {
 	case 'N': // north spawn
 		c.Kind = NorthSpawnCell
-		c.Alt = true
+		c.Polarity = NegativePolarity
 	case 'S': // south spawn
 		c.Kind = SouthSpawnCell
+		c.Polarity = PositivePolarity
 	case 'v': // pathing node
 		c.Kind = PathCell
 	case 'C': // core
@@ -33,8 +34,12 @@ func (l *LevelConfig) newCell(r rune) (c Cell) {
 		c.Kind = PlayerCell
 	case '#': // unbuildable tile
 		c.Kind = BlockedCell
-	case ',': // alternative open cell
-		c.Alt = true
+	case '.': // open negative cell
+		c.Polarity = NegativePolarity
+	case ',': // open positive cell
+		c.Polarity = PositivePolarity
+	case '_': // open neutral cell
+		c.Polarity = NeutralPolarity
 	case ' ': // unpathable tile -- like '#', but no image.
 		c.Kind = EmptyCell
 	case '+': // TEST - positive enemy cell
