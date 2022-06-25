@@ -36,7 +36,11 @@ type Connection struct {
 	lastSent     time.Time
 
 	//
-	messages chan Message
+	messages             chan Message
+	reliableID           int
+	sendingReliables     []ReliableTypedMessage
+	receivedReliables    []ReliableTypedMessage
+	confirmedReliableIDs []int
 }
 
 func NewConnection(name string) Connection {
@@ -250,8 +254,7 @@ func (c *Connection) Loop() {
 		}
 
 		// Attempt to read any pending messages, with a 2 second deadline.
-		var msg TypedMessage
-		b := make([]byte, 10000)
+		b := make([]byte, 1000)
 		c.conn.SetReadDeadline(t.Add(2 * time.Second))
 		n, foreignAddr, err := c.conn.ReadFromUDP(b)
 		if err != nil && !os.IsTimeout(err) {
@@ -264,16 +267,53 @@ func (c *Connection) Loop() {
 			continue
 		}
 		b = b[:n]
+		var msg ReliableTypedMessage
 		if err = json.Unmarshal(b, &msg); err != nil {
 			fmt.Println(err)
 		} else {
 			c.lastReceived = time.Now()
+			// Handle reliable messages such that we send a response whenever we receive it.
+			if msg.InboundID != 0 {
+				// See if we've already confirmed sending this particular message.
+				for _, id := range c.confirmedReliableIDs {
+					if id == msg.InboundID {
+						// Ignore it if we've already confirmed it.
+						goto loopEnd
+					}
+				}
+				for i, m := range c.sendingReliables {
+					if m.OutboundID == msg.InboundID {
+						c.confirmedReliableIDs = append(c.confirmedReliableIDs, m.OutboundID)
+						c.sendingReliables = append(c.sendingReliables[:i], c.sendingReliables[i+1:]...)
+						goto loopEnd
+					}
+				}
+			} else if msg.OutboundID != 0 {
+				// Always send an empty response with the ID.
+				c.sendReliableWithIDs(nil, msg.OutboundID, 0)
+				// Only continue processing if we haven't processed this specific message yet.
+				for _, m := range c.receivedReliables {
+					if m.OutboundID == msg.InboundID {
+						goto loopEnd
+					}
+				}
+				c.receivedReliables = append(c.receivedReliables, msg)
+			}
 			switch m := msg.Message().(type) {
 			case HenloMessage:
 				c.OtherName = m.Name
 			case PingMessage:
 			default:
 				c.messages <- m
+			}
+		}
+	loopEnd:
+		// This is a bit of a bad spot for this, but resend any unconfirmed reliable messages at this point.
+		for _, m := range c.sendingReliables {
+			n := time.Now()
+			if n.Sub(m.lastSent) >= 500*time.Millisecond {
+				c.sendReliableWithIDs(m.Message(), 0, m.OutboundID)
+				m.lastSent = n
 			}
 		}
 	}
@@ -301,6 +341,42 @@ func (c *Connection) Send(msg Message) error {
 	}
 	c.lastSent = time.Now()
 	return err
+}
+
+// SendReliable sends the given message with special resending until a confirmation is received.
+func (c *Connection) SendReliable(msg Message) error {
+	c.reliableID++
+	env, err := c.sendReliableWithIDs(msg, 0, c.reliableID)
+	env.lastSent = time.Now()
+	c.sendingReliables = append(c.sendingReliables, env)
+	return err
+}
+
+func (c *Connection) sendReliableWithIDs(msg Message, inboundID, outboundID int) (ReliableTypedMessage, error) {
+	var envelope ReliableTypedMessage
+
+	payload, err := json.Marshal(msg)
+	if err != nil {
+		return envelope, err
+	}
+
+	if msg != nil {
+		envelope.Type = msg.Type()
+	}
+	envelope.Data = payload
+	envelope.InboundID = inboundID
+	envelope.OutboundID = outboundID
+
+	bytes, err := json.Marshal(envelope)
+	if err != nil {
+		return envelope, err
+	}
+
+	if bytes != nil {
+		_, err = c.conn.WriteTo(bytes, c.otherAddress)
+	}
+	c.lastSent = time.Now()
+	return envelope, err
 }
 
 // Messages returns the current contents of the messages channel as a slice.

@@ -2,6 +2,7 @@ package net
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // HandshakeMessage represents the type for the handshake step of networking.
@@ -30,10 +31,17 @@ const (
 
 var topType TypedMessageType = 100
 
+type ReliableTypedMessage struct {
+	TypedMessage
+	InboundID  int `json:"i"`
+	OutboundID int `json:"o"`
+}
+
 // TypedMessage wraps a Message.
 type TypedMessage struct {
-	Type TypedMessageType `json:"t"`
-	Data json.RawMessage  `json:"d"`
+	Type     TypedMessageType `json:"t"`
+	Data     json.RawMessage  `json:"d"`
+	lastSent time.Time        // Locally used value to determine re-send time.d time.
 }
 
 // TypedMessageHandler represents a dynamically defined unmarshaller for a message.
