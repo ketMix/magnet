@@ -53,13 +53,6 @@ func (s *PlayState) Dispose() error {
 func (s *PlayState) Update() error {
 	// World mode handling.
 	switch s.world.Mode.(type) {
-	case *world.BuildMode:
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			s.game.players[0].ReadyForWave = true
-			if s.game.net.Active() {
-				s.game.net.SendReliable(world.StartModeRequest{})
-			}
-		}
 	case *world.LossMode:
 		// TODO: Show hit "R" to restart or something. Also maybe stats.
 		if s.game.net.Hosting() || !s.game.net.Active() {
@@ -157,16 +150,16 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	s.world.Draw(screen)
 
 	// Draw level text centered at top of screen for now.
-	bounds := text.BoundString(boldFace, s.level.Title)
+	bounds := text.BoundString(data.BoldFace, s.level.Title)
 	centeredX := world.ScreenWidth/2 - bounds.Min.X - bounds.Dx()/2
-	text.Draw(screen, s.level.Title, boldFace, centeredX, bounds.Dy()+1, color.White)
+	text.Draw(screen, s.level.Title, data.BoldFace, centeredX, bounds.Dy()+1, color.White)
 
 	// Draw our messages from most recent to oldest, bottom to top.
 	mx := 8
 	my := world.ScreenHeight - 40
 	for i := len(s.messages) - 1; i >= 0; i-- {
 		m := s.messages[i]
-		bounds := text.BoundString(normalFace, m.content)
+		bounds := text.BoundString(data.NormalFace, m.content)
 
 		d := float64(m.lifetime) / float64(m.deathtime)
 		c := color.RGBA{
@@ -179,7 +172,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		text.Draw(
 			screen,
 			m.content,
-			normalFace,
+			data.NormalFace,
 			mx,
 			my,
 			c,
@@ -187,29 +180,8 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		my -= bounds.Dy() + 2
 	}
 
-	// Draw current game mode overlay...?
-	if _, ok := s.world.Mode.(*world.BuildMode); ok {
-		bounds := text.BoundString(normalFace, "build mode")
-		text.Draw(
-			screen,
-			"build mode",
-			normalFace,
-			8,
-			bounds.Dy()+8,
-			color.White,
-		)
-		// Hmm.
-		msg := "hit <spacebar> to start combat waves"
-		bounds = text.BoundString(normalFace, msg)
-		text.Draw(
-			screen,
-			msg,
-			normalFace,
-			world.ScreenWidth/2-bounds.Dx()/2,
-			world.ScreenHeight-50,
-			color.White,
-		)
-	}
+	// Draw mode.
+	s.world.Mode.Draw(screen)
 
 	// Draw our player's belt!
 	s.game.players[0].Toolbelt.Draw(screen)

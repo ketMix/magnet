@@ -2,8 +2,12 @@ package world
 
 import (
 	"encoding/json"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/net"
 )
 
@@ -50,12 +54,39 @@ func (m BuildMode) Type() net.TypedMessageType {
 	return 501
 }
 func (m *BuildMode) Update(w *World) (next WorldMode, err error) {
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		w.Game.Players()[0].ReadyForWave = true
+		if w.Game.Net().Active() {
+			w.Game.Net().SendReliable(StartModeRequest{})
+		}
+	}
+
 	if w.ArePlayersReady() {
 		next = &WaveMode{local: true}
 	}
 	return
 }
 func (m *BuildMode) Draw(screen *ebiten.Image) {
+	bounds := text.BoundString(data.NormalFace, "build mode")
+	text.Draw(
+		screen,
+		"build mode",
+		data.NormalFace,
+		8,
+		bounds.Dy()+8,
+		color.White,
+	)
+	// Hmm.
+	msg := "hit <spacebar> to start combat waves"
+	bounds = text.BoundString(data.NormalFace, msg)
+	text.Draw(
+		screen,
+		msg,
+		data.NormalFace,
+		ScreenWidth/2-bounds.Dx()/2,
+		ScreenHeight-50,
+		color.White,
+	)
 }
 func (m *BuildMode) Local() bool {
 	return m.local

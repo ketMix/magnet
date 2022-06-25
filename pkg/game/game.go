@@ -10,14 +10,11 @@ import (
 	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 )
 
 // For now...
 var (
-	// Our internal screen width and height.
-	normalFace, boldFace font.Face
+// Our internal screen width and height.
 )
 
 // Game is our ebiten engine interface compliant type.
@@ -45,38 +42,6 @@ func (g *Game) Init() (err error) {
 
 	// Setup audio context.
 	audio.NewContext(44100)
-
-	// Load our global fonts.
-	d, err := data.ReadFile("fonts/OpenSansPX.ttf")
-	if err != nil {
-		return err
-	}
-	tt, err := opentype.Parse(d)
-	if err != nil {
-		return err
-	}
-	if normalFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    16,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	}); err != nil {
-		return err
-	}
-	d, err = data.ReadFile("fonts/OpenSansPXBold.ttf")
-	if err != nil {
-		return err
-	}
-	tt, err = opentype.Parse(d)
-	if err != nil {
-		return err
-	}
-	if boldFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    16,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	}); err != nil {
-		return err
-	}
 
 	// Load configurations
 	err = data.LoadConfigurations()
@@ -157,8 +122,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			)
 			screen.DrawImage(img, op)
 			// Draw other player text.
-			bounds := text.BoundString(normalFace, g.net.OtherName)
-			text.Draw(screen, g.net.OtherName, normalFace, world.ScreenWidth-bounds.Dx()-img.Bounds().Dx()-16, img.Bounds().Dy()/2+bounds.Dy()/2+8, color.White)
+			bounds := text.BoundString(data.NormalFace, g.net.OtherName)
+			text.Draw(screen, g.net.OtherName, data.NormalFace, world.ScreenWidth-bounds.Dx()-img.Bounds().Dx()-16, img.Bounds().Dy()/2+bounds.Dy()/2+8, color.White)
 		}
 	} else {
 	}

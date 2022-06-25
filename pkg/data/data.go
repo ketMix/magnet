@@ -5,6 +5,8 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 var (
@@ -13,6 +15,7 @@ var (
 	EmptySubImage *ebiten.Image
 
 	CellWidth, CellHeight int
+	NormalFace, BoldFace  font.Face
 )
 
 // Images is the map of all loaded images.
@@ -54,6 +57,38 @@ func LoadData() error {
 	EmptyImage = ebiten.NewImage(3, 3)
 	EmptySubImage = EmptyImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
 	EmptyImage.Fill(color.White)
+
+	// Load the fonts.
+	d, err := ReadFile("fonts/OpenSansPX.ttf")
+	if err != nil {
+		return err
+	}
+	tt, err := opentype.Parse(d)
+	if err != nil {
+		return err
+	}
+	if NormalFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	}); err != nil {
+		return err
+	}
+	d, err = ReadFile("fonts/OpenSansPXBold.ttf")
+	if err != nil {
+		return err
+	}
+	tt, err = opentype.Parse(d)
+	if err != nil {
+		return err
+	}
+	if BoldFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	}); err != nil {
+		return err
+	}
 
 	return nil
 }
