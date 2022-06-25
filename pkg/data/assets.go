@@ -34,6 +34,15 @@ func ReadSound(p string) (*Sound, error) {
 	return snd, err
 }
 
+func ReadMusic(p string) (*Sound, error) {
+	data, err := ReadFile(path.Join("music", p))
+	if err != nil {
+		return nil, err
+	}
+	bgm, err := NewSound(data)
+	return bgm, err
+}
+
 func ReadImagesByPrefix(prefix string) ([]image.Image, error) {
 	var images []image.Image
 	fileList, err := assets.ReadDir(path.Join("assets", "images"))

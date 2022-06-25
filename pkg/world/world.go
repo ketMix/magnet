@@ -210,6 +210,9 @@ func (w *World) ProcessRequest(r Request) {
 			}
 		}
 	case SpawnProjecticleRequest:
+		if snd, err := data.GetSound("shot.ogg"); err == nil {
+			snd.Play(1)
+		}
 		w.PlaceEntityAt(r.projectile, r.x, r.y)
 	case SpawnEnemyRequest:
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
@@ -270,6 +273,7 @@ func (w *World) SetMode(m WorldMode) {
 	w.Mode = m
 
 	if _, ok := w.Mode.(*BuildMode); ok {
+		data.BGM.Set("build-phase.ogg")
 		w.CurrentWave++
 	}
 	if _, ok := w.Mode.(*WaveMode); ok {

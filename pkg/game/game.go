@@ -95,6 +95,9 @@ func (g *Game) Net() *net.Connection {
 
 // Update updates, how about that.
 func (g *Game) Update() error {
+	// Call update on our BGM to ensure it's playing
+	data.BGM.Update()
+
 	if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
 		ebiten.SetFullscreen(!ebiten.IsFullscreen())
 	}

@@ -50,6 +50,17 @@ func GetSound(p string) (*Sound, error) {
 		return snd, nil
 	}
 }
+func GetMusic(p string) (*Sound, error) {
+	if v, ok := Sounds[p]; ok {
+		return v, nil
+	}
+	if snd, err := ReadMusic(p); err != nil {
+		return nil, err
+	} else {
+		Sounds[p] = snd
+		return snd, nil
+	}
+}
 
 // LoadData loads some data.
 func LoadData() error {
