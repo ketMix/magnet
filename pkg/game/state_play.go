@@ -51,6 +51,13 @@ func (s *PlayState) Dispose() error {
 func (s *PlayState) Update() error {
 	// World mode handling.
 	switch s.world.Mode {
+	case world.BuildMode:
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			s.game.players[0].ReadyForWave = true
+			if s.game.net.Active() {
+				s.game.net.SendReliable(world.StartModeRequest{})
+			}
+		}
 	case world.LossMode:
 		// TODO: Show hit "R" to restart or something. Also maybe stats.
 		if s.game.net.Hosting() || !s.game.net.Active() {
@@ -95,6 +102,13 @@ func (s *PlayState) Update() error {
 			} else {
 				s.AddMessage(Message{
 					content: fmt.Sprintf("%s wants to restart! Hit 'r' to conform.", s.game.net.OtherName),
+				})
+			}
+		case world.StartModeRequest:
+			s.game.players[1].ReadyForWave = true
+			if !s.world.ArePlayersReady() {
+				s.AddMessage(Message{
+					content: fmt.Sprintf("%s wants to start! Hit '<spacebar>' to conform.", s.game.net.OtherName),
 				})
 			}
 		default:

@@ -29,10 +29,23 @@ func (r SetModeRequest) Type() net.TypedMessageType {
 	return 500
 }
 
+type StartModeRequest struct {
+}
+
+func (r StartModeRequest) Type() net.TypedMessageType {
+	return 501
+}
+
 func init() {
 	net.AddTypedMessage(500, func(data json.RawMessage) net.Message {
 		var m SetModeRequest
 		json.Unmarshal(data, &m)
 		return m
 	})
+	net.AddTypedMessage(501, func(data json.RawMessage) net.Message {
+		var m StartModeRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+
 }
