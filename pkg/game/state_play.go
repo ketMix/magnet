@@ -59,7 +59,7 @@ func (s *PlayState) Update() error {
 		if s.game.net.Hosting() || !s.game.net.Active() {
 			s.game.SetState(&TravelState{
 				game:        s.game,
-				targetLevel: s.level.Next,
+				targetLevel: s.levelDataName,
 			})
 		}
 	case *world.VictoryMode:
