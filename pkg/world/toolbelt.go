@@ -1,8 +1,12 @@
 package world
 
 import (
+	"fmt"
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
 )
 
@@ -69,14 +73,14 @@ func (t *Toolbelt) Draw(screen *ebiten.Image) {
 	}
 }
 
-type ToolKind int
+type ToolKind string
 
 const (
-	ToolNone ToolKind = iota
-	ToolGun
-	ToolTurret
-	ToolWall
-	ToolDestroy
+	ToolNone    ToolKind = "none"
+	ToolGun              = "gun"
+	ToolTurret           = "turret"
+	ToolWall             = "wall"
+	ToolDestroy          = "destroy"
 )
 
 // ToolbeltItem is a toolbelt entry.
@@ -128,6 +132,46 @@ func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
 	if t.active {
 		op.GeoM.Translate(float64(t.x-toolSlotActiveImage.Bounds().Dx()/2), float64(t.y-toolSlotActiveImage.Bounds().Dy()/2))
 		screen.DrawImage(toolSlotActiveImage, &op)
+
+		// Let's draw the title for active item here too
+		{
+			// Create title label
+			label := t.kind.Title
+			if label == "" {
+				label = string(t.tool)
+			}
+
+			// Create polarity label
+			polarity := ""
+			if t.tool == ToolGun || t.tool == ToolTurret {
+				polarity = "(N)"
+				if t.polarity == data.NegativePolarity {
+					polarity = "(-)"
+				} else if t.polarity == data.PositivePolarity {
+					polarity = "(+)"
+				}
+			}
+
+			// Create cost label
+			cost := ""
+			if t.tool == ToolTurret {
+				config := data.TurretConfigs[t.kind.Title]
+				cost = fmt.Sprintf("%dpts", config.Points)
+			} else if t.tool == ToolWall {
+				cost = "5pts"
+			}
+
+			// Combine labels
+			label = fmt.Sprintf("%s %s %s", label, polarity, cost)
+			text.Draw(
+				screen,
+				label,
+				data.NormalFace,
+				t.x-toolSlotActiveImage.Bounds().Dx()/2,
+				t.y-toolSlotActiveImage.Bounds().Dy(),
+				color.White,
+			)
+		}
 	} else {
 		op.GeoM.Translate(float64(t.x-toolSlotImage.Bounds().Dx()/2), float64(t.y-toolSlotImage.Bounds().Dy()/2))
 		screen.DrawImage(toolSlotImage, &op)
