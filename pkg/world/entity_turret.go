@@ -15,6 +15,7 @@ type TurretEntity struct {
 	owner           string
 	headAnimation   Animation
 	cost            int
+	showRange       bool
 }
 
 func NewTurretEntity(config data.EntityConfig) *TurretEntity {
@@ -99,7 +100,7 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 	e.animation.Draw(screen, op)
 
 	// This is temporary, as all things in life are.
-	{
+	if e.showRange {
 		c := getCircleImage(int(e.turret.attackRange))
 		cop := &ebiten.DrawImageOptions{}
 		cop.ColorM.Scale(data.GetPolarityColorScale(e.physics.polarity))

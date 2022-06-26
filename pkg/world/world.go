@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/goro/pathing"
@@ -487,7 +488,21 @@ func (w *World) Update() error {
 		}
 		w.backgroundImage = w.currentTileset.BackgroundImages[w.backgroundIndex]
 	}
-	// TODO: Process physics
+
+	// TODO: Move this elsewhere
+	if inpututil.IsKeyJustPressed(ebiten.KeyAlt) {
+		for _, e := range w.entities {
+			if e, ok := e.(*TurretEntity); ok {
+				e.showRange = true
+			}
+		}
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyAlt) {
+		for _, e := range w.entities {
+			if e, ok := e.(*TurretEntity); ok {
+				e.showRange = false
+			}
+		}
+	}
 
 	// TODO: Add delay between mode switching!
 	if nextMode, _ := w.Mode.Update(w); nextMode != nil {
