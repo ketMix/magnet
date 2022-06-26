@@ -100,7 +100,7 @@ func (e *ActorEntity) Update(world *World) (requests MultiRequest, err error) {
 					physics: PhysicsObject{
 						vX:       v.vX * e.turret.speed,
 						vY:       v.vY * e.turret.speed,
-						polarity: e.physics.polarity,
+						polarity: e.player.Toolbelt.activeItem.polarity,
 					},
 				},
 				lifetime: 500,
