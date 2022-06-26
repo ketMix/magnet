@@ -49,14 +49,18 @@ func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 
 func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 	if e.health <= 0 {
-		request = TrashEntityRequest{
+		var requests MultiRequest
+		requests.Requests = append(requests.Requests, TrashEntityRequest{
 			NetID:  e.netID,
 			entity: e,
 			local:  true,
-		}
-		// Enemy killed, we can reward the player now
-		world.Points += e.points
-		return
+		})
+		requests.Requests = append(requests.Requests, SpawnOrbRequest{
+			X:     e.physics.X,
+			Y:     e.physics.Y,
+			Worth: e.points,
+		})
+		return requests, nil
 	}
 	e.lifetime++
 	// Update animation.

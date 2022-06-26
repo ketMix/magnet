@@ -164,6 +164,10 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 			w.Game.Players()[1].Entity.SetAction(&msg)
 		case SpawnEnemyRequest:
 			w.SpawnEnemyEntity(msg)
+		case SpawnOrbRequest:
+			w.SpawnOrbEntity(msg)
+		case CollectOrbRequest:
+			w.CollectOrb(msg)
 		case SpawnProjecticleRequest:
 			w.SpawnProjecticleEntity(msg)
 		case TrashEntityRequest:
@@ -295,6 +299,24 @@ func (w *World) ProcessRequest(r Request) {
 				})
 			}
 		}
+	case SpawnOrbRequest:
+		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+			e := w.SpawnOrbEntity(r)
+			// Hmm.
+			if w.Game.Net().Active() && w.Game.Net().Hosting() {
+				r.NetID = e.NetID()
+				w.Game.Net().SendReliable(r)
+			}
+		}
+	case CollectOrbRequest:
+		// Only handle orb requests if we're the server or solo.
+		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+			w.CollectOrb(r)
+			// Send it to client so they can play a sound if they collected it.
+			if w.Game.Net().Hosting() {
+				w.Game.Net().Send(r)
+			}
+		}
 	case TrashEntityRequest:
 		// Trash entities if we are local or host.
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
@@ -422,6 +444,34 @@ func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
 	w.UpdatePathing()
 
 	return e
+}
+
+func (w *World) SpawnOrbEntity(r SpawnOrbRequest) *OrbEntity {
+	e := NewOrbEntity(r.Worth)
+	if w.Game.Net().Hosting() {
+		e.netID = w.GetNextNetID()
+	} else {
+		e.netID = r.NetID
+	}
+	w.PlaceEntityAt(e, r.X, r.Y)
+
+	return e
+}
+
+func (w *World) CollectOrb(r CollectOrbRequest) {
+	if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+		w.Points += r.Worth
+	}
+	if r.Collector == w.Game.Players()[0].Name {
+		s := data.SFX.Play("pop.ogg")
+		if r.Worth <= 10 {
+			s.SetVolume(0.5)
+		} else if r.Worth <= 15 {
+			s.SetVolume(1)
+		} else {
+			s.SetVolume(1.5)
+		}
+	}
 }
 
 func (w *World) SpawnProjecticleEntity(r SpawnProjecticleRequest) *ProjecticleEntity {

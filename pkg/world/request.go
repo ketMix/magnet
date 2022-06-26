@@ -42,6 +42,19 @@ type SpawnEnemyRequest struct {
 	NetID       int    `json:"i"`
 }
 
+type SpawnOrbRequest struct {
+	X     float64
+	Y     float64
+	Worth int `json:"w"`
+	NetID int `json:"i"`
+}
+
+type CollectOrbRequest struct {
+	Worth     int    `json:"w"`
+	Collector string `json:"c"`
+	local     bool
+}
+
 // SpawnToolEntityRequest is used to tell the client to spawn an entity tied to a tool.
 type SpawnToolEntityRequest struct {
 	X, Y     int
@@ -95,6 +108,14 @@ func (r SpawnToolEntityRequest) Type() net.TypedMessageType {
 	return 304
 }
 
+func (r SpawnOrbRequest) Type() net.TypedMessageType {
+	return 305
+}
+
+func (r CollectOrbRequest) Type() net.TypedMessageType {
+	return 306
+}
+
 func (r SelectToolbeltItemRequest) Type() net.TypedMessageType {
 	return net.MissingMessageType
 }
@@ -133,6 +154,17 @@ func init() {
 		json.Unmarshal(data, &m)
 		return m
 	})
+	net.AddTypedMessage(305, func(data json.RawMessage) net.Message {
+		var m SpawnOrbRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(306, func(data json.RawMessage) net.Message {
+		var m CollectOrbRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+
 	net.AddTypedMessage(310, func(data json.RawMessage) net.Message {
 		var m TrashEntityRequest
 		json.Unmarshal(data, &m)
