@@ -63,8 +63,16 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		x := math.Cos(r) * e.speed
 		y := math.Sin(r) * e.speed
 
-		e.physics.X -= x
-		e.physics.Y -= y
+		targetX := e.physics.X - x
+		targetY := e.physics.Y - y
+		cellX := world.GetCell(world.GetClosestCellPosition(int(targetX), int(e.physics.Y)))
+		cellY := world.GetCell(world.GetClosestCellPosition(int(e.physics.X), int(targetY)))
+		if cellX != nil && cellX.kind != data.EmptyCell {
+			e.physics.X = targetX
+		}
+		if cellY != nil && cellY.kind != data.EmptyCell {
+			e.physics.Y = targetY
+		}
 
 		if x < 0 {
 			e.right = true
@@ -82,6 +90,7 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		}
 	case *EntityActionShoot:
 		image := e.animation.Image()
+
 		// Get our player position for spawning.
 		px := e.Physics().X
 		py := e.Physics().Y - float64(image.Bounds().Dy())/2
@@ -89,7 +98,6 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		// Get direction vector from difference of player and target.
 		vX, vY := GetDirection(px, py, float64(a.TargetX), float64(a.TargetY))
 
-		// Can apply player's speed to action vector
 		a.complete = true
 
 		const spreadArc = 45.0

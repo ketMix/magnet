@@ -82,7 +82,7 @@ func IsWithinRadius(sx, sy, tx, ty, radius float64) bool {
 	return withinX && withinY
 }
 
-// Returns a list of vectors with length num that span the spread around vX and vY
+// Returns a list of length num populated with vectors that span the given spread centered about vX and vY
 func SplitVectorByDegree(spreadArc, vX, vY float64, num int) (vectors []PhysicsObject) {
 	spreadDist := spreadArc / float64(num)
 
