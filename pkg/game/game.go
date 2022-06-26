@@ -97,6 +97,15 @@ func (g *Game) Players() []*world.Player {
 	return g.players
 }
 
+func (g *Game) GetPlayerByName(p string) *world.Player {
+	for _, pl := range g.players {
+		if pl.Name == p {
+			return pl
+		}
+	}
+	return nil
+}
+
 func (g *Game) Net() *net.Connection {
 	return &g.net
 }
