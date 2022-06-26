@@ -10,10 +10,11 @@ import (
 
 type TurretEntity struct {
 	BaseEntity
-	target Entity
-	// owner ActorEntity // ???
-	headAnimation Animation
-	cost          int
+	target          Entity
+	colorMultiplier [3]float64 // Color multiplier, passed in when in multiplayer.
+	owner           string
+	headAnimation   Animation
+	cost            int
 }
 
 func NewTurretEntity(config data.EntityConfig) *TurretEntity {
@@ -36,7 +37,8 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 		headAnimation: Animation{
 			images: config.HeadImages,
 		},
-		cost: config.Points,
+		colorMultiplier: [3]float64{1, 1, 1},
+		cost:            config.Points,
 	}
 }
 
@@ -91,6 +93,8 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 		e.physics.X,
 		e.physics.Y,
 	)
+
+	op.ColorM.Scale(e.colorMultiplier[0], e.colorMultiplier[1], e.colorMultiplier[2], 1)
 
 	e.animation.Draw(screen, op)
 

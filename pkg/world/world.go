@@ -206,6 +206,12 @@ func (w *World) ProcessRequest(r Request) {
 			if w.Points >= config.Points {
 				if c := w.GetCell(r.X, r.Y); c != nil {
 					if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
+						if r.local {
+							r.Owner = w.Game.Players()[0].Name
+						} else {
+							r.Owner = w.Game.Players()[1].Name
+						}
+
 						e := w.HandleToolRequest(r)
 
 						// Also adjust our points.
@@ -220,12 +226,22 @@ func (w *World) ProcessRequest(r Request) {
 				}
 			}
 		} else if r.Tool == ToolDestroy {
+			if r.local {
+				r.Owner = w.Game.Players()[0].Name
+			} else {
+				r.Owner = w.Game.Players()[1].Name
+			}
 			w.HandleToolRequest(r)
 			// TODO: Refund points.
 			if w.Game.Net().Hosting() {
 				w.Game.Net().SendReliable(r)
 			}
 		} else if r.Tool == ToolWall {
+			if r.local {
+				r.Owner = w.Game.Players()[0].Name
+			} else {
+				r.Owner = w.Game.Players()[1].Name
+			}
 			// Wall points? 5? :shrug:
 			wallCost := 5
 			if w.Points >= wallCost {
@@ -311,6 +327,7 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 	if r.Tool == ToolTurret {
 		config := data.TurretConfigs[r.Kind]
 		e := NewTurretEntity(config)
+		e.owner = r.Owner
 		if w.Game.Net().Hosting() {
 			e.netID = w.GetNextNetID()
 		} else {
@@ -319,6 +336,13 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 		e.physics.polarity = r.Polarity
 		w.PlaceEntityInCell(e, r.X, r.Y)
 		data.SFX.Play("turret-place.ogg")
+
+		// Hmm... this feels kind of gross.
+		if r.Owner != "" {
+			if pl := w.Game.GetPlayerByName(r.Owner); pl != nil {
+				e.colorMultiplier = pl.Entity.(*ActorEntity).colorMultiplier
+			}
+		}
 
 		if c := w.GetCell(r.X, r.Y); c != nil {
 			c.entity = e
@@ -330,13 +354,28 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 		c := w.GetCell(r.X, r.Y)
 		if c != nil {
 			if c.entity != nil {
-				c.entity.Trash()
-				c.entity = nil
-				w.UpdatePathing()
+				ownerName := r.Owner
+				switch e := c.entity.(type) {
+				case *TurretEntity:
+					ownerName = e.owner
+				case *WallEntity:
+					ownerName = e.owner
+				}
+				if ownerName != r.Owner {
+					if r.Owner == w.Game.Players()[0].Name {
+						// TODO: Show some sort of "that isn't yours!" message on screen.
+						fmt.Printf("that is %s's, not yours!\n", ownerName)
+					}
+				} else {
+					c.entity.Trash()
+					c.entity = nil
+					w.UpdatePathing()
+				}
 			}
 		}
 	} else if r.Tool == ToolWall {
 		e := NewWallEntity()
+		e.owner = r.Owner
 		w.PlaceEntityInCell(e, r.X, r.Y)
 		data.SFX.Play("turret-place.ogg")
 
@@ -344,6 +383,13 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 			e.netID = w.GetNextNetID()
 		} else {
 			e.netID = r.NetID
+		}
+
+		// Hmm... this feels kind of gross.
+		if r.Owner != "" {
+			if pl := w.Game.GetPlayerByName(r.Owner); pl != nil {
+				e.colorMultiplier = pl.Entity.(*ActorEntity).colorMultiplier
+			}
 		}
 
 		if c := w.GetCell(r.X, r.Y); c != nil {

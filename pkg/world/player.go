@@ -15,6 +15,8 @@ type Player struct {
 	Toolbelt Toolbelt
 	// ReadyForWave means the players are done building and ready to start the waves.
 	ReadyForWave bool
+	// Name is acquired from the initial connection name.
+	Name string
 }
 
 func NewPlayer() *Player {

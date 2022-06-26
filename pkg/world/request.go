@@ -19,6 +19,8 @@ type UseToolRequest struct {
 	Kind     string        `json:"k"`
 	Polarity data.Polarity `json:"p"`
 	NetID    int           `json:"i"` // Yeah, yeah, we shouldn't have NetID here, but it's easier to reuse UseToolRequest rather than implement some new SpawnTurret/SpawnWall/RemoveWall Request set.
+	Owner    string        `json:"o"` // The owner's name. This is a little excessive to send, but it's easier than mucking about with client/server index checking. Also enables more players if we ever want that.
+	local    bool          // Used to determine if the result of this tool use should be considered the server's or the client's.
 }
 
 // SpawnProjecticleRequest attempts to spawn a projecticle at given location with given direction

@@ -7,6 +7,8 @@ import (
 
 type WallEntity struct {
 	BaseEntity
+	owner           string
+	colorMultiplier [3]float64
 }
 
 func NewWallEntity() *WallEntity {
@@ -18,6 +20,7 @@ func NewWallEntity() *WallEntity {
 				images: []*ebiten.Image{wallImg},
 			},
 		},
+		colorMultiplier: [3]float64{1, 1, 1},
 	}
 }
 
@@ -32,6 +35,8 @@ func (e *WallEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOption
 		e.physics.X,
 		e.physics.Y,
 	)
+
+	op.ColorM.Scale(e.colorMultiplier[0], e.colorMultiplier[1], e.colorMultiplier[2], 1)
 
 	e.animation.Draw(screen, op)
 }

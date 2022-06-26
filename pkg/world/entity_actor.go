@@ -10,12 +10,13 @@ import (
 
 type ActorEntity struct {
 	BaseEntity
-	player        *Player
-	speed         float64
-	walking       bool
-	right         bool
-	walkAnimation Animation
-	idleAnimation Animation
+	player          *Player
+	speed           float64
+	walking         bool
+	right           bool
+	walkAnimation   Animation
+	idleAnimation   Animation
+	colorMultiplier [3]float64
 }
 
 func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
@@ -30,6 +31,7 @@ func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
 		idleAnimation: Animation{
 			images: config.Images,
 		},
+		colorMultiplier: config.ColorMultiplier,
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images: config.Images,
@@ -87,6 +89,7 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 			Tool:     a.Tool,
 			Kind:     a.Kind,
 			Polarity: a.Polarity,
+			local:    true,
 		}
 	case *EntityActionShoot:
 		image := e.animation.Image()
