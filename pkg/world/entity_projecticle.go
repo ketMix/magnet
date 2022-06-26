@@ -82,3 +82,7 @@ func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImag
 	// Linear filtering would make edges blurred.
 	screen.DrawImage(data.EmptySubImage, op2)
 }
+
+func (e *ProjecticleEntity) IsProjectile() bool {
+	return true
+}

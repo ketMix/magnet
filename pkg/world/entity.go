@@ -21,6 +21,7 @@ type Entity interface {
 	CanPathfind() bool
 	SetSteps(p []pathing.Step)
 	NetID() int
+	IsProjectile() bool
 }
 
 type BaseEntity struct {
@@ -71,6 +72,10 @@ func (e *BaseEntity) SetSteps(s []pathing.Step) {
 
 func (e *BaseEntity) NetID() int {
 	return e.netID
+}
+
+func (e *BaseEntity) IsProjectile() bool {
+	return false
 }
 
 // Check whether or not the provided entity collides
