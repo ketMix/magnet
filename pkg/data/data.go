@@ -14,6 +14,11 @@ var (
 	EmptyImage    *ebiten.Image
 	EmptySubImage *ebiten.Image
 
+	// I'm sorry for violating our principles.
+	OrbSmallImages  []*ebiten.Image
+	OrbMediumImages []*ebiten.Image
+	OrbLargeImages  []*ebiten.Image
+
 	CellWidth, CellHeight int
 	NormalFace, BoldFace  font.Face
 )
@@ -99,6 +104,29 @@ func LoadData() error {
 		Hinting: font.HintingFull,
 	}); err != nil {
 		return err
+	}
+
+	// Load the orbs.
+	imgs, err := ReadImagesByPrefix("orb-small")
+	if err != nil {
+		return err
+	}
+	for _, img := range imgs {
+		OrbSmallImages = append(OrbSmallImages, ebiten.NewImageFromImage(img))
+	}
+	imgs, err = ReadImagesByPrefix("orb-medium")
+	if err != nil {
+		return err
+	}
+	for _, img := range imgs {
+		OrbMediumImages = append(OrbMediumImages, ebiten.NewImageFromImage(img))
+	}
+	imgs, err = ReadImagesByPrefix("orb-large")
+	if err != nil {
+		return err
+	}
+	for _, img := range imgs {
+		OrbLargeImages = append(OrbLargeImages, ebiten.NewImageFromImage(img))
 	}
 
 	return nil
