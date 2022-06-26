@@ -48,7 +48,7 @@ func (e *TurretEntity) Update(world *World) (request Request, err error) {
 	e.AcquireTarget(world)
 
 	// Rotate head to face target (or just SPEEN)
-	if e.target == nil {
+	if e.target == nil || e.target.Trashed() {
 		e.headAnimation.rotation += 0.02 * world.Speed
 	} else {
 		e.headAnimation.rotation = math.Atan2(e.physics.Y-e.target.Physics().Y, e.physics.X-e.target.Physics().X)
