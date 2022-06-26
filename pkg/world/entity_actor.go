@@ -86,15 +86,11 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 
 		// Get direction vector from difference of player and target.
 		vX, vY := GetDirection(px, py, float64(a.TargetX), float64(a.TargetY))
-		xSide := 1.0
-		if vX < 0 {
-			xSide = -xSide
-		}
 
 		// Can apply player's speed to action vector
 		a.complete = true
 		request = SpawnProjecticleRequest{
-			x: px + (float64(image.Bounds().Dx()/2) * xSide),
+			x: px,
 			y: py,
 			projectile: &ProjecticleEntity{
 				BaseEntity: BaseEntity{
