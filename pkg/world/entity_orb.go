@@ -98,8 +98,8 @@ func (e *OrbEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions
 		e.physics.Y,
 	)
 
-	if e.lifetime-e.elapsed < 200 {
-		op.ColorM.Scale(1, 1, 1, float64(e.lifetime)/200)
+	if e.lifetime-e.elapsed < 500 {
+		op.ColorM.Scale(1, 1, 1, float64(e.lifetime-e.elapsed)/500)
 	}
 
 	// Draw animation.
