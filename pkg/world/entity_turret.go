@@ -95,6 +95,16 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 
 	e.animation.Draw(screen, op)
 
+	// This is temporary, as all things in life are.
+	{
+		c := getCircleImage(int(e.turret.attackRange))
+		cop := &ebiten.DrawImageOptions{}
+		cop.ColorM.Scale(data.GetPolarityColorScale(e.physics.polarity))
+		cop.GeoM.Concat(op.GeoM)
+		cop.GeoM.Translate(-float64(c.Bounds().Dx())/2, -float64(c.Bounds().Dy())/2)
+		screen.DrawImage(c, cop)
+	}
+
 	headColor := ebiten.ColorM{}
 	headColor.Scale(data.GetPolarityColorScale(e.physics.polarity))
 
