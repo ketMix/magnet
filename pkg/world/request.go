@@ -55,6 +55,12 @@ type CollectOrbRequest struct {
 	local     bool
 }
 
+type EntityPropertySync struct {
+	X, Y   float64
+	Health int `json:"h"`
+	NetID  int `json:"i"`
+}
+
 // SpawnToolEntityRequest is used to tell the client to spawn an entity tied to a tool.
 type SpawnToolEntityRequest struct {
 	X, Y     int
@@ -116,6 +122,10 @@ func (r CollectOrbRequest) Type() net.TypedMessageType {
 	return 306
 }
 
+func (r EntityPropertySync) Type() net.TypedMessageType {
+	return 309
+}
+
 func (r SelectToolbeltItemRequest) Type() net.TypedMessageType {
 	return net.MissingMessageType
 }
@@ -161,6 +171,11 @@ func init() {
 	})
 	net.AddTypedMessage(306, func(data json.RawMessage) net.Message {
 		var m CollectOrbRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(309, func(data json.RawMessage) net.Message {
+		var m EntityPropertySync
 		json.Unmarshal(data, &m)
 		return m
 	})

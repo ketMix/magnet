@@ -160,6 +160,8 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 		}
 	} else {
 		switch msg := msg.(type) {
+		case EntityPropertySync:
+			w.SyncEntity(msg)
 		case EntityActionMove:
 			w.Game.Players()[1].Entity.SetAction(&msg)
 		case SpawnEnemyRequest:
@@ -196,6 +198,10 @@ func (w *World) ProcessRequest(r Request) {
 	case MultiRequest:
 		for _, rq := range r.Requests {
 			w.ProcessRequest(rq)
+		}
+	case EntityPropertySync:
+		if w.Game.Net().Hosting() {
+			w.Game.Net().Send(r)
 		}
 	case UseToolRequest:
 		// NOTE: Technically a client could just send this request and we won't do any distance checking.
@@ -491,6 +497,20 @@ func (w *World) SpawnProjecticleEntity(r SpawnProjecticleRequest) *ProjecticleEn
 	data.SFX.Play("shot.ogg")
 
 	return e
+}
+
+func (w *World) SyncEntity(r EntityPropertySync) {
+	for _, e := range w.entities {
+		if e.NetID() == r.NetID {
+			e.Physics().X = r.X
+			e.Physics().Y = r.Y
+			switch e := e.(type) {
+			case *EnemyEntity:
+				e.health = r.Health
+			}
+			break
+		}
+	}
 }
 
 // SetMode sets the current game mode to the one indicated. If we're a client and the mode set is local, this does nothing.

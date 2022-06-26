@@ -17,6 +17,8 @@ type EnemyEntity struct {
 	lifetime  float64
 	// How many points are awarded upon defeat?
 	points int
+	//
+	lastSync int
 }
 
 func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
@@ -102,6 +104,24 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 		// We have reached a core, we should decrease the health on that core
 		// Gotta figure out what core it reached...
 	}
+
+	// Send periodic sync every 100 ticks. This is ignored during processing if the host is not set.
+	e.lastSync++
+	if e.lastSync > 100 {
+		e.lastSync = 0
+		var r MultiRequest
+		r.Requests = append(r.Requests, EntityPropertySync{
+			X:      e.physics.X,
+			Y:      e.physics.Y,
+			NetID:  e.netID,
+			Health: e.health,
+		})
+		if request != nil {
+			r.Requests = append(r.Requests, request)
+		}
+		request = r
+	}
+
 	return request, nil
 }
 
