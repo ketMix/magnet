@@ -2,6 +2,7 @@ package data
 
 import (
 	"path"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -13,6 +14,7 @@ type TileSet struct {
 	OpenNeutralImage  *ebiten.Image
 	OpenNegativeImage *ebiten.Image
 	BlockedImage      *ebiten.Image
+	BackgroundImages  []*ebiten.Image
 }
 
 func LoadTileSet(n string) (TileSet, error) {
@@ -39,6 +41,21 @@ func LoadTileSet(n string) (TileSet, error) {
 		t.BlockedImage = ebiten.NewImageFromImage(img)
 	} else {
 		return t, err
+	}
+
+	// Forgive me.
+	p := path.Join("assets", "images", n)
+	if fileList, err := assets.ReadDir(p); err == nil {
+		for _, file := range fileList {
+			if !file.IsDir() && strings.HasPrefix(file.Name(), "bg-") {
+				image, err := ReadImage(path.Join(n, file.Name()))
+				if err != nil {
+					continue
+				}
+				img := ebiten.NewImageFromImage(image)
+				t.BackgroundImages = append(t.BackgroundImages, img)
+			}
+		}
 	}
 
 	tilesets[n] = t

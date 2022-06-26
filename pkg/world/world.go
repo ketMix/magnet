@@ -39,6 +39,10 @@ type World struct {
 	Speed float64
 	// Current points (sync across players? or each player has their own points)
 	Points int
+	//
+	backgroundTimer int
+	backgroundImage *ebiten.Image
+	backgroundIndex int
 }
 
 // BuildFromLevel builds the world's cells and entities from a given base level.
@@ -471,6 +475,18 @@ func (w *World) SetMode(m WorldMode) {
 
 // Update updates the world.
 func (w *World) Update() error {
+	// Silly background processing.
+	if len(w.currentTileset.BackgroundImages) > 0 {
+		w.backgroundTimer++
+		if w.backgroundTimer >= 10 {
+			w.backgroundTimer = 0
+			w.backgroundIndex++
+		}
+		if w.backgroundIndex >= len(w.currentTileset.BackgroundImages) {
+			w.backgroundIndex = 0
+		}
+		w.backgroundImage = w.currentTileset.BackgroundImages[w.backgroundIndex]
+	}
 	// TODO: Process physics
 
 	// TODO: Add delay between mode switching!
@@ -518,6 +534,22 @@ func (w *World) Draw(screen *ebiten.Image) {
 		w.CameraX,
 		w.CameraY,
 	)
+
+	// Draw da background.
+	if w.backgroundImage != nil {
+		width := w.backgroundImage.Bounds().Dx()
+		height := w.backgroundImage.Bounds().Dy()
+		rows := math.Ceil(float64(ScreenHeight)/float64(height)) + 1
+		cols := math.Ceil(float64(ScreenWidth)/float64(width)) + 1
+		for y := 0.0; y < rows; y++ {
+			for x := 0.0; x < cols; x++ {
+				bgOp := &ebiten.DrawImageOptions{}
+				bgOp.GeoM.Translate(-w.CameraX/float64(width/16), -w.CameraY/float64(height/16))
+				bgOp.GeoM.Translate(x*float64(width), y*float64(height))
+				screen.DrawImage(w.backgroundImage, bgOp)
+			}
+		}
+	}
 
 	// Draw the map.
 	for y, r := range w.cells {
