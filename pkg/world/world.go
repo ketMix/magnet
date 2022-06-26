@@ -224,7 +224,7 @@ func (w *World) ProcessRequest(r Request) {
 		}
 	case SpawnProjecticleRequest:
 		data.SFX.Play("shot.ogg")
-		w.PlaceEntityAt(r.projectile, r.x, r.y)
+		w.PlaceEntityAt(r.projectile, r.X, r.Y)
 	case SpawnEnemyRequest:
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
 			e := w.SpawnEnemyEntity(r)

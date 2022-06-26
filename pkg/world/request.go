@@ -22,9 +22,12 @@ type UseToolRequest struct {
 
 // SpawnProjecticleRequest attempts to spawn a projecticle at given location with given direction
 type SpawnProjecticleRequest struct {
-	x, y       float64 // Position
+	X, Y       float64 // Position
 	projectile *ProjecticleEntity
 	NetID      int `json:"i"`
+	VX, VY     float64
+	Polarity   data.Polarity `json:"p"`
+	Damage     int           `json:"d"`
 }
 
 type SpawnEnemyRequest struct {
