@@ -79,8 +79,8 @@ func (e *TurretEntity) Update(world *World) (requests MultiRequest, err error) {
 				damage:   e.turret.damage,
 			}
 			request := SpawnProjecticleRequest{
-				x:          px,
-				y:          py,
+				X:          px,
+				Y:          py,
 				projectile: projecticle,
 			}
 			requests.Requests = append(requests.Requests, request)
