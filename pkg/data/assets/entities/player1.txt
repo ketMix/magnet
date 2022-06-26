@@ -12,3 +12,4 @@ Y 1
 Z 100
 I player-idle
 W player-walk
+c 1.5,1.5,1
