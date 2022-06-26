@@ -478,7 +478,7 @@ func (w *World) Update() error {
 	// Silly background processing.
 	if len(w.currentTileset.BackgroundImages) > 0 {
 		w.backgroundTimer++
-		if w.backgroundTimer >= 10 {
+		if w.backgroundTimer >= 30 {
 			w.backgroundTimer = 0
 			w.backgroundIndex++
 		}
