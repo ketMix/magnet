@@ -47,13 +47,13 @@ func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 	}
 }
 
-func (e *EnemyEntity) Update(world *World) (requests MultiRequest, err error) {
+func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 	if e.health <= 0 {
-		requests.Requests = append(requests.Requests, TrashEntityRequest{
+		request = TrashEntityRequest{
 			NetID:  e.netID,
 			entity: e,
 			local:  true,
-		})
+		}
 		// Enemy killed, we can reward the player now
 		world.Points += e.points
 		return
@@ -90,15 +90,15 @@ func (e *EnemyEntity) Update(world *World) (requests MultiRequest, err error) {
 		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
 	} else {
 		// No mo steppes
-		requests.Requests = append(requests.Requests, TrashEntityRequest{
+		request = TrashEntityRequest{
 			NetID:  e.netID,
 			entity: e,
 			local:  true,
-		})
+		}
 		// We have reached a core, we should decrease the health on that core
 		// Gotta figure out what core it reached...
 	}
-	return requests, nil
+	return request, nil
 }
 
 func (e *EnemyEntity) CanPathfind() bool {

@@ -30,7 +30,7 @@ func NewCoreEntity(config data.EntityConfig) *CoreEntity {
 	}
 }
 
-func (e *CoreEntity) Update(world *World) (request MultiRequest, err error) {
+func (e *CoreEntity) Update(world *World) (request Request, err error) {
 	e.animation.Update()
 
 	// Update healthbar

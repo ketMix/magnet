@@ -21,8 +21,8 @@ func NewWallEntity() *WallEntity {
 	}
 }
 
-func (e *WallEntity) Update(world *World) (requests MultiRequest, err error) {
-	return requests, nil
+func (e *WallEntity) Update(world *World) (request Request, err error) {
+	return request, nil
 }
 
 func (e *WallEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

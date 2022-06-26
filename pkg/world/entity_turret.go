@@ -40,7 +40,7 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 	}
 }
 
-func (e *TurretEntity) Update(world *World) (requests MultiRequest, err error) {
+func (e *TurretEntity) Update(world *World) (request Request, err error) {
 	// Tick the turret
 	e.turret.Tick(world.Speed)
 
@@ -66,6 +66,7 @@ func (e *TurretEntity) Update(world *World) (requests MultiRequest, err error) {
 
 		const spreadArc = 45.0
 		var vectors = SplitVectorByDegree(spreadArc, vX, vY, e.turret.projecticleNum)
+		var projecticleRequests MultiRequest
 		for _, v := range vectors {
 			projecticle := &ProjecticleEntity{
 				BaseEntity: BaseEntity{
@@ -83,11 +84,12 @@ func (e *TurretEntity) Update(world *World) (requests MultiRequest, err error) {
 				y:          py,
 				projectile: projecticle,
 			}
-			requests.Requests = append(requests.Requests, request)
+			projecticleRequests.Requests = append(projecticleRequests.Requests, request)
 		}
+		request = projecticleRequests
 	}
 
-	return requests, nil
+	return request, nil
 }
 
 func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

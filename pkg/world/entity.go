@@ -11,7 +11,7 @@ type Entity interface {
 	Animation() *Animation
 	Trashed() bool
 	Trash()
-	Update(world *World) (MultiRequest, error)
+	Update(world *World) (Request, error)
 	Draw(screen *ebiten.Image, op *ebiten.DrawImageOptions) // Eh, might as well allow the entities to draw themselves.
 	Action() EntityAction
 	SetAction(a EntityAction)

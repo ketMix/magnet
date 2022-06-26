@@ -49,7 +49,7 @@ func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
 	}
 }
 
-func (e *ActorEntity) Update(world *World) (requests MultiRequest, err error) {
+func (e *ActorEntity) Update(world *World) (request Request, err error) {
 	e.animation.Update()
 	switch a := e.action.(type) {
 	case *EntityActionMove:
@@ -73,13 +73,13 @@ func (e *ActorEntity) Update(world *World) (requests MultiRequest, err error) {
 		}
 	case *EntityActionPlace:
 		a.complete = true
-		requests.Requests = append(requests.Requests, UseToolRequest{
+		request = UseToolRequest{
 			x:          a.X,
 			y:          a.Y,
 			tool:       a.Tool,
 			toolConfig: data.TurretConfigs[a.Kind],
 			polarity:   a.Polarity,
-		})
+		}
 	case *EntityActionShoot:
 		image := e.animation.Image()
 		// Get our player position for spawning.
@@ -94,6 +94,7 @@ func (e *ActorEntity) Update(world *World) (requests MultiRequest, err error) {
 
 		const spreadArc = 45.0
 		var vectors = SplitVectorByDegree(spreadArc, vX, vY, e.turret.projecticleNum)
+		var projecticleRequests MultiRequest
 		for _, v := range vectors {
 			projecticle := &ProjecticleEntity{
 				BaseEntity: BaseEntity{
@@ -106,12 +107,13 @@ func (e *ActorEntity) Update(world *World) (requests MultiRequest, err error) {
 				lifetime: 500,
 				damage:   e.turret.damage,
 			}
-			request := SpawnProjecticleRequest{
+			req := SpawnProjecticleRequest{
 				x:          px,
 				y:          py,
 				projectile: projecticle,
 			}
-			requests.Requests = append(requests.Requests, request)
+			projecticleRequests.Requests = append(projecticleRequests.Requests, req)
+			request = projecticleRequests
 		}
 	}
 
@@ -133,7 +135,7 @@ func (e *ActorEntity) Update(world *World) (requests MultiRequest, err error) {
 		}
 	}
 
-	return requests, nil
+	return request, nil
 }
 
 func (e *ActorEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
