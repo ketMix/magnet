@@ -52,6 +52,14 @@ func (g *Game) Init() (err error) {
 	// Load data
 	err = data.LoadData()
 
+	// Mute sound/music if flag exists.
+	if g.Options.NoMusic {
+		data.BGM.Muted = true
+	}
+	if g.Options.NoSound {
+		data.SFX.Muted = true
+	}
+
 	// FIXME: Don't manually network connect here. This should be handled in some intermediate state, like "preplay" or a lobby.
 	if g.Options.Host != "" || g.Options.Join != "" || g.Options.Await || g.Options.Search != "" {
 		g.net = net.NewConnection(g.Options.Name)
