@@ -24,6 +24,7 @@ type World struct {
 	entities         []Entity
 	netIDs           int
 	spawners         []*SpawnerEntity
+	enemies          []*EnemyEntity
 	currentTileset   data.TileSet
 	CameraX, CameraY float64
 	path             pathing.Path
@@ -233,6 +234,12 @@ func (w *World) ProcessRequest(r Request) {
 		// Trash entities if we are local or host.
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
 			r.entity.Trash()
+			for i, e := range w.enemies {
+				if e == r.entity {
+					w.enemies = append(w.enemies[:i], w.enemies[i+1:]...)
+					break
+				}
+			}
 			if w.Game.Net().Hosting() {
 				w.Game.Net().SendReliable(r)
 			}
@@ -241,6 +248,12 @@ func (w *World) ProcessRequest(r Request) {
 				for _, e := range w.entities {
 					if e.NetID() == r.NetID {
 						e.Trash()
+						for i, e := range w.enemies {
+							if e == r.entity {
+								w.enemies = append(w.enemies[:i], w.enemies[i+1:]...)
+								break
+							}
+						}
 						break
 					}
 				}
@@ -258,6 +271,7 @@ func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
 		e.netID = r.NetID
 	}
 	e.physics.polarity = r.Polarity
+	w.enemies = append(w.enemies, e)
 	w.PlaceEntityAt(e, r.X, r.Y)
 	w.UpdatePathing()
 
@@ -451,16 +465,7 @@ func (w *World) AreSpawnersHolding() bool {
 }
 
 func (w *World) AreEnemiesDead() bool {
-	// Also check entities.
-	enemyCount := 0
-	for _, entity := range w.entities {
-		switch entity.(type) {
-		case *EnemyEntity:
-			enemyCount++
-		}
-	}
-
-	return enemyCount == 0
+	return len(w.enemies) == 0
 }
 
 func (w *World) AreWavesComplete() bool {
