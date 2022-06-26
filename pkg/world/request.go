@@ -76,7 +76,7 @@ func (r UseToolRequest) Type() net.TypedMessageType {
 }
 
 func (r SpawnProjecticleRequest) Type() net.TypedMessageType {
-	return net.MissingMessageType
+	return 302
 }
 
 func (r SelectToolbeltItemRequest) Type() net.TypedMessageType {
@@ -99,6 +99,11 @@ func init() {
 	})
 	net.AddTypedMessage(301, func(data json.RawMessage) net.Message {
 		var m SpawnEnemyRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(302, func(data json.RawMessage) net.Message {
+		var m SpawnProjecticleRequest
 		json.Unmarshal(data, &m)
 		return m
 	})

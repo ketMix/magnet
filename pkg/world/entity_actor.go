@@ -104,21 +104,13 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		var vectors = SplitVectorByDegree(spreadArc, vX, vY, e.turret.projecticleNum)
 		var projecticleRequests MultiRequest
 		for _, v := range vectors {
-			projecticle := &ProjecticleEntity{
-				BaseEntity: BaseEntity{
-					physics: PhysicsObject{
-						vX:       v.vX * e.turret.speed,
-						vY:       v.vY * e.turret.speed,
-						polarity: e.player.Toolbelt.activeItem.polarity,
-					},
-				},
-				lifetime: 500,
-				damage:   e.turret.damage,
-			}
 			req := SpawnProjecticleRequest{
-				X:          px,
-				Y:          py,
-				projectile: projecticle,
+				X:        px,
+				Y:        py,
+				VX:       v.vX * e.turret.speed,
+				VY:       v.vY * e.turret.speed,
+				Polarity: a.Polarity,
+				Damage:   e.turret.damage,
 			}
 			projecticleRequests.Requests = append(projecticleRequests.Requests, req)
 			request = projecticleRequests

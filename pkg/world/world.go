@@ -143,25 +143,37 @@ func (w *World) BuildFromLevel(level data.Level) error {
 }
 
 func (w *World) ProcessNetMessage(msg net.Message) error {
-	switch msg := msg.(type) {
-	case EntityActionMove:
-		w.Game.Players()[1].Entity.SetAction(&msg)
-	case SpawnEnemyRequest:
-		w.SpawnEnemyEntity(msg)
-	case TrashEntityRequest:
-		w.ProcessRequest(msg)
-	case BuildMode:
-		w.SetMode(&msg)
-	case WaveMode:
-		w.SetMode(&msg)
-	case VictoryMode:
-		w.SetMode(&msg)
-	case LossMode:
-		w.SetMode(&msg)
-	case PostGameMode:
-		w.SetMode(&msg)
-	default:
-		fmt.Printf("unhandled net %+v\n", msg)
+	if w.Game.Net().Hosting() {
+		switch msg := msg.(type) {
+		case EntityActionMove:
+			w.Game.Players()[1].Entity.SetAction(&msg)
+		case EntityActionShoot:
+			// let th' boy shoot
+			w.Game.Players()[1].Entity.SetAction(&msg)
+		}
+	} else {
+		switch msg := msg.(type) {
+		case EntityActionMove:
+			w.Game.Players()[1].Entity.SetAction(&msg)
+		case SpawnEnemyRequest:
+			w.SpawnEnemyEntity(msg)
+		case SpawnProjecticleRequest:
+			w.SpawnProjecticleEntity(msg)
+		case TrashEntityRequest:
+			w.ProcessRequest(msg)
+		case BuildMode:
+			w.SetMode(&msg)
+		case WaveMode:
+			w.SetMode(&msg)
+		case VictoryMode:
+			w.SetMode(&msg)
+		case LossMode:
+			w.SetMode(&msg)
+		case PostGameMode:
+			w.SetMode(&msg)
+		default:
+			fmt.Printf("unhandled net %+v\n", msg)
+		}
 	}
 	return nil
 }
@@ -223,8 +235,20 @@ func (w *World) ProcessRequest(r Request) {
 			}
 		}
 	case SpawnProjecticleRequest:
-		data.SFX.Play("shot.ogg")
-		w.PlaceEntityAt(r.projectile, r.X, r.Y)
+		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+			e := w.SpawnProjecticleEntity(r)
+			if w.Game.Net().Active() && w.Game.Net().Hosting() {
+				w.Game.Net().SendReliable(SpawnProjecticleRequest{
+					X:        r.X,
+					Y:        r.Y,
+					VX:       r.VX,
+					VY:       r.VY,
+					Polarity: r.Polarity,
+					Damage:   r.Damage,
+					NetID:    e.netID,
+				})
+			}
+		}
 	case SpawnEnemyRequest:
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
 			e := w.SpawnEnemyEntity(r)
@@ -283,6 +307,25 @@ func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
 	w.enemies = append(w.enemies, e)
 	w.PlaceEntityAt(e, r.X, r.Y)
 	w.UpdatePathing()
+
+	return e
+}
+
+func (w *World) SpawnProjecticleEntity(r SpawnProjecticleRequest) *ProjecticleEntity {
+	e := NewProjecticleEntity()
+	e.physics.vX = r.VX
+	e.physics.vY = r.VY
+	if w.Game.Net().Hosting() {
+		e.netID = w.GetNextNetID()
+	} else {
+		e.netID = r.NetID
+	}
+	e.physics.polarity = r.Polarity
+	e.damage = r.Damage
+	w.PlaceEntityAt(e, r.X, r.Y)
+
+	// We should probably control how loud we shot web in accordance to the source -- as in, if it is the other player's shot, it should be quieter.
+	data.SFX.Play("shot.ogg")
 
 	return e
 }
