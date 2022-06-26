@@ -208,6 +208,9 @@ func (w *World) ProcessRequest(r Request) {
 					if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
 						e := w.HandleToolRequest(r)
 
+						// Also adjust our points.
+						w.Points -= config.Points
+
 						// Let the client know to make our turret.
 						if w.Game.Net().Hosting() {
 							r.NetID = e.NetID()
@@ -230,6 +233,9 @@ func (w *World) ProcessRequest(r Request) {
 				if c != nil {
 					if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
 						e := w.HandleToolRequest(r)
+
+						// these cost money you know!
+						w.Points -= wallCost
 
 						if w.Game.Net().Hosting() {
 							r.NetID = e.NetID()
@@ -307,8 +313,6 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 		e := NewTurretEntity(config)
 		if w.Game.Net().Hosting() {
 			e.netID = w.GetNextNetID()
-			// Also adjust our points.
-			w.Points -= config.Points
 		} else {
 			e.netID = r.NetID
 		}
@@ -338,10 +342,6 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 
 		if w.Game.Net().Hosting() {
 			e.netID = w.GetNextNetID()
-			// Wall points? 5? :shrug: // FIXME
-			wallCost := 5
-			// these cost money you know!
-			w.Points -= wallCost
 		} else {
 			e.netID = r.NetID
 		}
