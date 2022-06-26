@@ -41,7 +41,7 @@ func (g *Game) Init() (err error) {
 	ebiten.SetWindowSize(1280, 720)
 
 	// Setup audio context.
-	audio.NewContext(44100)
+	audio.NewContext(48000)
 
 	// Load configurations
 	err = data.LoadConfigurations()

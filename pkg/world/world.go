@@ -181,9 +181,7 @@ func (w *World) ProcessRequest(r Request) {
 					e := NewTurretEntity(data.TurretConfigs["basic"])
 					e.physics.polarity = r.polarity
 					w.PlaceEntityInCell(e, r.x, r.y)
-					if snd, err := data.GetSound("turret-place.ogg"); err == nil {
-						snd.Play(1)
-					}
+					data.SFX.Play("turret-place.ogg")
 					c.entity = e
 					w.UpdatePathing()
 				}
@@ -203,18 +201,14 @@ func (w *World) ProcessRequest(r Request) {
 				if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
 					e := NewWallEntity()
 					w.PlaceEntityInCell(e, r.x, r.y)
-					if snd, err := data.GetSound("turret-place.ogg"); err == nil {
-						snd.Play(1)
-					}
+					data.SFX.Play("turret-place.ogg")
 					c.entity = e
 					w.UpdatePathing()
 				}
 			}
 		}
 	case SpawnProjecticleRequest:
-		if snd, err := data.GetSound("shot.ogg"); err == nil {
-			snd.Play(1)
-		}
+		data.SFX.Play("shot.ogg")
 		w.PlaceEntityAt(r.projectile, r.x, r.y)
 	case SpawnEnemyRequest:
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {

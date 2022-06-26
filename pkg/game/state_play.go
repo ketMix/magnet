@@ -18,6 +18,7 @@ type PlayState struct {
 	level         data.Level
 	world         world.World
 	messages      []Message
+	clickables    []ClickableUI
 }
 
 func (s *PlayState) Init() error {
@@ -38,7 +39,10 @@ func (s *PlayState) Init() error {
 	}
 
 	s.world.Mode = &world.PreGameMode{}
-
+	s.clickables = []ClickableUI{
+		NewBGMIcon(),
+		NewSFXIcon(),
+	}
 	return nil
 }
 
@@ -53,6 +57,11 @@ func (s *PlayState) Dispose() error {
 }
 
 func (s *PlayState) Update() error {
+	// Update the clickables
+	for _, c := range s.clickables {
+		c.Update()
+	}
+
 	// World mode handling.
 	switch s.world.Mode.(type) {
 	case *world.LossMode:
@@ -204,6 +213,16 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 			my+bounds.Dy(),
 			color.White,
 		)
+		mx += bounds.Dx()
+	}
+
+	// Draw our clickables
+	offset := 16
+	if s.clickables != nil {
+		for i, c := range s.clickables {
+			c.SetPos(float64(mx+(i+1)*offset), float64(12))
+			c.Draw(screen, &ebiten.DrawImageOptions{})
+		}
 	}
 
 	// Draw our player's belt!

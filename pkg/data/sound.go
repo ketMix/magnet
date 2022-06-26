@@ -7,13 +7,22 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 )
 
+var SFX = SoundPlayer{
+	volume: 0.5,
+}
+
+type SoundPlayer struct {
+	Muted  bool
+	volume float64
+}
+
 type Sound struct {
 	bytes []byte
 }
 
 func NewSound(data []byte) (*Sound, error) {
 	// Attempt to read the vorbis file in 44100 sample rate.
-	stream, err := vorbis.DecodeWithSampleRate(44100, bytes.NewReader(data))
+	stream, err := vorbis.DecodeWithSampleRate(48000, bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
@@ -38,4 +47,22 @@ func (s *Sound) Play(volume float64) *audio.Player {
 	player.SetVolume(volume)
 	player.Play()
 	return player
+}
+
+func (sp *SoundPlayer) PlaySound(s *Sound) {
+	if sp.Muted {
+		s.Play(0)
+	} else {
+		s.Play(sp.volume)
+	}
+}
+
+// Wraps sound in SoundPlayer context to set muted and volume
+func (sp *SoundPlayer) Play(p string) {
+	sound, _ := GetSound(p)
+	sp.PlaySound(sound)
+}
+
+func (sp *SoundPlayer) ToggleMute() {
+	sp.Muted = !sp.Muted
 }

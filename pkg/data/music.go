@@ -4,30 +4,33 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
-type MusicPlayer struct {
-	CurrentMusic *audio.Player
-	Muted        bool
-	Volume       float64
+var BGM MusicPlayer = MusicPlayer{
+	volume: 0.35,
 }
 
-// Play constructs a new ebiten audio player, starts playing, and returns it. Volume is 0-1.
+type MusicPlayer struct {
+	currentMusic *audio.Player
+	Muted        bool
+	volume       float64
+}
+
 func (mp *MusicPlayer) Play(s *Sound) {
-	if mp.CurrentMusic != nil {
-		mp.CurrentMusic.Close()
+	if mp.currentMusic != nil {
+		mp.currentMusic.Close()
 	}
 
 	var player *audio.Player
 	if mp.Muted {
 		player = s.Play(0)
 	} else {
-		player = s.Play(mp.Volume)
+		player = s.Play(mp.volume)
 	}
-	mp.CurrentMusic = player
+	mp.currentMusic = player
 }
 
 func (mp *MusicPlayer) Stop() {
-	if mp.CurrentMusic != nil {
-		mp.CurrentMusic.Close()
+	if mp.currentMusic != nil {
+		mp.currentMusic.Close()
 	}
 }
 
@@ -39,26 +42,21 @@ func (mp *MusicPlayer) Set(p string) {
 }
 
 func (mp *MusicPlayer) SetVolume(v float64) {
-	mp.Volume = v
-	mp.CurrentMusic.SetVolume(mp.Volume)
+	mp.volume = v
+	mp.currentMusic.SetVolume(mp.volume)
 }
 
-func (mp *MusicPlayer) ToggleMuted() {
+func (mp *MusicPlayer) ToggleMute() {
+	mp.Muted = !mp.Muted
 	if mp.Muted {
-		mp.Muted = false
-		mp.CurrentMusic.SetVolume(mp.Volume)
+		mp.currentMusic.SetVolume(0)
 	} else {
-		mp.Muted = true
-		mp.CurrentMusic.SetVolume(0)
+		mp.currentMusic.SetVolume(mp.volume)
 	}
 }
 
 func (mp *MusicPlayer) Update() {
-	if mp.CurrentMusic != nil && !mp.CurrentMusic.IsPlaying() {
-		mp.CurrentMusic.Rewind()
+	if mp.currentMusic != nil && !mp.currentMusic.IsPlaying() {
+		mp.currentMusic.Rewind()
 	}
-}
-
-var BGM MusicPlayer = MusicPlayer{
-	Volume: 0.25,
 }
