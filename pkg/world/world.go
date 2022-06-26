@@ -286,6 +286,7 @@ func (w *World) SetMode(m WorldMode) {
 		w.CurrentWave++
 	}
 	if _, ok := w.Mode.(*WaveMode); ok {
+		data.BGM.Set("wave-phase.ogg")
 		// UGH
 		for _, pl := range w.Game.Players() {
 			pl.ReadyForWave = false
