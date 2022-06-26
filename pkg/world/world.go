@@ -160,6 +160,8 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 		}
 	} else {
 		switch msg := msg.(type) {
+		case PointsSync:
+			w.SyncPoints(msg)
 		case EntityPropertySync:
 			w.SyncEntity(msg)
 		case EntityActionMove:
@@ -230,7 +232,7 @@ func (w *World) ProcessRequest(r Request) {
 						e := w.HandleToolRequest(r)
 
 						// Also adjust our points.
-						w.Points -= config.Points
+						w.AdjustPoints(-config.Points)
 
 						// Let the client know to make our turret.
 						if w.Game.Net().Hosting() {
@@ -266,7 +268,7 @@ func (w *World) ProcessRequest(r Request) {
 						e := w.HandleToolRequest(r)
 
 						// these cost money you know!
-						w.Points -= wallCost
+						w.AdjustPoints(-wallCost)
 
 						if w.Game.Net().Hosting() {
 							r.NetID = e.NetID()
@@ -466,7 +468,7 @@ func (w *World) SpawnOrbEntity(r SpawnOrbRequest) *OrbEntity {
 
 func (w *World) CollectOrb(r CollectOrbRequest) {
 	if !w.Game.Net().Active() || w.Game.Net().Hosting() {
-		w.Points += r.Worth
+		w.AdjustPoints(r.Worth)
 	}
 	if r.Collector == w.Game.Players()[0].Name {
 		s := data.SFX.Play("pop.ogg")
@@ -510,6 +512,32 @@ func (w *World) SyncEntity(r EntityPropertySync) {
 			}
 			break
 		}
+	}
+}
+
+// AdjustPoints adjusts the points total and sends the points to connected players.
+func (w *World) AdjustPoints(p int) {
+	w.Points += p
+	if w.Game.Net().Hosting() {
+		m := PointsSync{
+			Points: make(map[string]int),
+		}
+		// Generate a points sync message.
+		for _, pl := range w.Game.Players() {
+			// TODO: Use players for points!
+			m.Points[pl.Name] = w.Points
+		}
+		w.Game.Net().Send(m)
+	}
+}
+
+// SyncPoints synchronizes the players' points to match the provided data.
+func (w *World) SyncPoints(r PointsSync) {
+	for name, value := range r.Points {
+		if pl := w.Game.GetPlayerByName(name); pl != nil {
+			// TODO
+		}
+		w.Points = value
 	}
 }
 

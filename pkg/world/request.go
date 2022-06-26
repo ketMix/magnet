@@ -61,6 +61,10 @@ type EntityPropertySync struct {
 	NetID  int `json:"i"`
 }
 
+type PointsSync struct {
+	Points map[string]int `json:"p"`
+}
+
 // SpawnToolEntityRequest is used to tell the client to spawn an entity tied to a tool.
 type SpawnToolEntityRequest struct {
 	X, Y     int
@@ -126,6 +130,10 @@ func (r EntityPropertySync) Type() net.TypedMessageType {
 	return 309
 }
 
+func (r PointsSync) Type() net.TypedMessageType {
+	return 311
+}
+
 func (r SelectToolbeltItemRequest) Type() net.TypedMessageType {
 	return net.MissingMessageType
 }
@@ -176,6 +184,11 @@ func init() {
 	})
 	net.AddTypedMessage(309, func(data json.RawMessage) net.Message {
 		var m EntityPropertySync
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(311, func(data json.RawMessage) net.Message {
+		var m PointsSync
 		json.Unmarshal(data, &m)
 		return m
 	})
