@@ -103,19 +103,30 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 
 		a.complete = true
 
-		const spreadArc = 45.0
-		var vectors = SplitVectorByDegree(spreadArc, vX, vY, e.turret.projecticleNum)
-		var projecticleRequests MultiRequest
-		for _, v := range vectors {
-			req := SpawnProjecticleRequest{
+		if e.turret.projecticleNum == 1 {
+			request = SpawnProjecticleRequest{
 				X:        px,
 				Y:        py,
-				VX:       v.vX * e.turret.speed,
-				VY:       v.vY * e.turret.speed,
+				VX:       vX * e.turret.speed,
+				VY:       vY * e.turret.speed,
 				Polarity: a.Polarity,
 				Damage:   e.turret.damage,
 			}
-			projecticleRequests.Requests = append(projecticleRequests.Requests, req)
+		} else {
+			var projecticleRequests MultiRequest
+			const spreadArc = 45.0
+			vectors := SplitVectorByDegree(spreadArc, vX, vY, e.turret.projecticleNum)
+			for _, v := range vectors {
+				req := SpawnProjecticleRequest{
+					X:        px,
+					Y:        py,
+					VX:       v.vX * e.turret.speed,
+					VY:       v.vY * e.turret.speed,
+					Polarity: a.Polarity,
+					Damage:   e.turret.damage,
+				}
+				projecticleRequests.Requests = append(projecticleRequests.Requests, req)
+			}
 			request = projecticleRequests
 		}
 	}
