@@ -115,27 +115,18 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 // !! Iterates through world entity list, could probably be optimized !!
 func (e *TurretEntity) AcquireTarget(world *World) {
 	// Collect our entities within our attack radius.
-	entities := world.EntitiesWithinRadius(e.physics.X, e.physics.Y, e.turret.attackRange)
-
-	// Filter out non-enemies.
-	var filtered []Entity
-	for _, entity := range entities {
-		switch entity.(type) {
-		case *EnemyEntity:
-			filtered = append(filtered, entity)
-		}
-	}
+	entities := ObjectsWithinRadius(world.enemies, e.physics.X, e.physics.Y, e.turret.attackRange)
 
 	// Sort from closest to further. This is a bit inefficient but I don't care.
-	sort.Slice(filtered, func(i, j int) bool {
+	sort.Slice(entities, func(i, j int) bool {
 		a := GetMagnitude(GetDistanceVector(e.physics.X, e.physics.Y, entities[i].Physics().X, entities[i].Physics().Y))
 		b := GetMagnitude(GetDistanceVector(e.physics.X, e.physics.Y, entities[j].Physics().X, entities[j].Physics().Y))
 		return a < b
 	})
 
 	// Set it to the first entry, as it should be the closest.
-	if len(filtered) > 0 {
-		e.target = filtered[0]
+	if len(entities) > 0 {
+		e.target = entities[0]
 	} else {
 		e.target = nil
 	}

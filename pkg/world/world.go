@@ -597,15 +597,15 @@ func (w *World) PlaceEntityAt(e Entity, x, y float64) {
 	w.entities = append(w.entities, e)
 }
 
-// EntitiesWithinRadius returns a slice of all entities within the radius of x, y
-func (w *World) EntitiesWithinRadius(x, y float64, radius float64) []Entity {
-	var entities []Entity
-	for _, entity := range w.entities {
-		if IsWithinRadius(x, y, entity.Physics().X, entity.Physics().Y, radius) {
-			entities = append(entities, entity)
+// ObjectsWithinRadius is a generic function that can apply to a slice of any object that has a Physics() *PhysicsObject method.
+func ObjectsWithinRadius[K interface{ Physics() *PhysicsObject }](l []K, x, y, radius float64) []K {
+	var results []K
+	for _, target := range l {
+		if IsWithinRadius(x, y, target.Physics().X, target.Physics().Y, radius) {
+			results = append(results, target)
 		}
 	}
-	return entities
+	return results
 }
 
 /** CELLS **/
