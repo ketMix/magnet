@@ -412,7 +412,14 @@ func (w *World) Draw(screen *ebiten.Image) {
 	sortedEntities := make([]Entity, len(w.entities))
 	copy(sortedEntities, w.entities)
 	sort.SliceStable(sortedEntities, func(i, j int) bool {
-		return sortedEntities[i].Physics().Y < sortedEntities[j].Physics().Y
+		a := sortedEntities[i]
+		b := sortedEntities[j]
+		if a.IsProjectile() && !b.IsProjectile() {
+			return false
+		} else if !a.IsProjectile() && b.IsProjectile() {
+			return true
+		}
+		return a.Physics().Y < b.Physics().Y
 	})
 	// Draw our entities.
 	for _, e := range sortedEntities {
@@ -507,7 +514,7 @@ func (w *World) SetWaves() {
 /** PATHING **/
 func (w *World) UpdatePathing() {
 	// Hmm.
-	for _, e := range w.entities {
+	for _, e := range w.enemies {
 		w.UpdateEntityPathing(e)
 	}
 }
