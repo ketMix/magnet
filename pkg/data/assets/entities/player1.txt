@@ -2,7 +2,7 @@ T PLAYER
 H 100
 D 1
 R 0
-X 0.25
+X 0.23076923076
 O 2
 S 1
 P positive

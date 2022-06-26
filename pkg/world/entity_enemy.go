@@ -15,6 +15,8 @@ type EnemyEntity struct {
 	healthBar *ProgressBar
 	speed     float64
 	lifetime  float64
+	// How many points are awarded upon defeat?
+	points int
 }
 
 func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
@@ -40,7 +42,8 @@ func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 			1,
 			color.RGBA{255, 0, 0, 1},
 		),
-		speed: config.Speed,
+		speed:  config.Speed,
+		points: config.Points,
 	}
 }
 
@@ -51,6 +54,8 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 			entity: e,
 			local:  true,
 		}
+		// Enemy killed, we can reward the player now
+		world.Points += e.points
 		return
 	}
 	e.lifetime++
@@ -90,6 +95,8 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 			entity: e,
 			local:  true,
 		}
+		// We have reached a core, we should decrease the health on that core
+		// Gotta figure out what core it reached...
 	}
 
 	return request, nil

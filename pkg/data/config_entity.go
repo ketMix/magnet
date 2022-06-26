@@ -13,6 +13,7 @@ import (
 
 type EntityConfig struct {
 	Title            string
+	Points           int
 	Health           int
 	Speed            float64
 	Radius           float64
@@ -42,6 +43,8 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 		switch t[0] {
 		case 'T':
 			e.Title = value
+		case 'C':
+			e.Points, err = strconv.Atoi(value)
 		case 'H':
 			e.Health, err = strconv.Atoi(value)
 		case 'D':

@@ -6,6 +6,14 @@
 
 Self explanatory.
 
+## C (Cost/Points) **int**
+
+### *How many points something is worth*
+
+For turrets, how many points they cost to build.
+For enemies, how many points you get for defeating them.
+For players, you get nothing.
+
 ## H (Health) **int**
 
 ### *The number of hit points*

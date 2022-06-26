@@ -35,7 +35,10 @@ type World struct {
 	// Might as well store the core's position.
 	cores        []*CoreEntity
 	coreX, coreY int
-	Speed        float64
+	// Overall game speed
+	Speed float64
+	// Current points (sync across players? or each player has their own points)
+	Points int
 }
 
 // BuildFromLevel builds the world's cells and entities from a given base level.
@@ -49,7 +52,7 @@ func (w *World) BuildFromLevel(level data.Level) error {
 		return err
 	}
 	w.currentTileset = ts
-
+	w.Points = level.Points
 	w.width = 0
 	w.height = 0
 	w.cells = make([][]LiveCell, 0)
@@ -175,15 +178,20 @@ func (w *World) ProcessRequest(r Request) {
 			return
 		}
 		if r.kind == ToolTurret {
-			c := w.GetCell(r.x, r.y)
-			if c != nil {
-				if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
-					e := NewTurretEntity(data.TurretConfigs["basic"])
-					e.physics.polarity = r.polarity
-					w.PlaceEntityInCell(e, r.x, r.y)
-					data.SFX.Play("turret-place.ogg")
-					c.entity = e
-					w.UpdatePathing()
+			config := data.TurretConfigs["basic"]
+			// If we have enough points to place the turret
+			if w.Points >= config.Points {
+				c := w.GetCell(r.x, r.y)
+				if c != nil {
+					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
+						e := NewTurretEntity(config)
+						e.physics.polarity = r.polarity
+						w.PlaceEntityInCell(e, r.x, r.y)
+						data.SFX.Play("turret-place.ogg")
+						c.entity = e
+						w.UpdatePathing()
+						w.Points -= config.Points
+					}
 				}
 			}
 		} else if r.kind == ToolDestroy {
@@ -193,17 +201,24 @@ func (w *World) ProcessRequest(r Request) {
 					c.entity.Trash()
 					c.entity = nil
 					w.UpdatePathing()
+					// add refund
 				}
 			}
 		} else if r.kind == ToolWall {
-			c := w.GetCell(r.x, r.y)
-			if c != nil {
-				if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
-					e := NewWallEntity()
-					w.PlaceEntityInCell(e, r.x, r.y)
-					data.SFX.Play("turret-place.ogg")
-					c.entity = e
-					w.UpdatePathing()
+			// Wall points? 5? :shrug:
+			wallCost := 5
+			if w.Points >= wallCost {
+				c := w.GetCell(r.x, r.y)
+				if c != nil {
+					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
+						e := NewWallEntity()
+						w.PlaceEntityInCell(e, r.x, r.y)
+						data.SFX.Play("turret-place.ogg")
+						c.entity = e
+						w.UpdatePathing()
+						// these cost money you know!
+						w.Points -= wallCost
+					}
 				}
 			}
 		}

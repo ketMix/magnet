@@ -199,11 +199,11 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	// Draw mode.
 	s.world.Mode.Draw(screen)
 
-	// Draw the waves.
+	// Draw the waves and current points.
 	mx = 8
 	my = 8
 	{
-		t := fmt.Sprintf("wave: %d/%d", s.world.CurrentWave, s.world.MaxWave)
+		t := fmt.Sprintf("wave: %d/%d points: %d", s.world.CurrentWave, s.world.MaxWave, s.world.Points)
 		bounds := text.BoundString(data.NormalFace, t)
 		text.Draw(
 			screen,

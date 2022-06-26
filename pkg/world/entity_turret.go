@@ -13,6 +13,7 @@ type TurretEntity struct {
 	target Entity
 	// owner ActorEntity // ???
 	headAnimation Animation
+	cost          int
 }
 
 func NewTurretEntity(config data.EntityConfig) *TurretEntity {
@@ -34,6 +35,7 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 		headAnimation: Animation{
 			images: config.HeadImages,
 		},
+		cost: config.Points,
 	}
 }
 

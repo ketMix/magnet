@@ -16,6 +16,7 @@ type LevelConfig struct {
 	Height  int
 	Cells   [][]Cell
 	Waves   []*Wave
+	Points  int
 }
 
 func (l *LevelConfig) newCell(r rune) (c Cell) {
@@ -71,6 +72,8 @@ func (l *LevelConfig) LoadFromFile(p string) (err error) {
 				l.Tileset = strings.TrimSpace(t[1:])
 			} else if t[0] == 'N' {
 				l.Next = strings.TrimSpace(t[1:])
+			} else if t[0] == 'P' {
+				l.Points, err = strconv.Atoi(strings.TrimSpace(t[1:]))
 			} else if t[0] == 'W' {
 				s := strings.TrimSpace(t[1:])
 				waveStrs := strings.Split(s, ";")

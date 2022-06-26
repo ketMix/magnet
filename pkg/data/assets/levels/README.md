@@ -12,6 +12,12 @@ As it says.
 
 The tileset to use for map cells. The name corresponds to a subdirectory in the images directory.
 
+## P (Points) **int**
+
+### *Amount of points ya start wit*
+
+How many points you get when you load the level. Useful for building during the first build phase!
+
 ## W (Waves) **[]Wave**
 
 ### *The waves configuration*
