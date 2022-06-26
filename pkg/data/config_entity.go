@@ -29,6 +29,7 @@ type EntityConfig struct {
 	Images           []*ebiten.Image
 	WalkImages       []*ebiten.Image
 	HeadImages       []*ebiten.Image
+	ColorMultiplier  [3]float64
 }
 
 func (e *EntityConfig) LoadFromFile(p string) error {
@@ -108,6 +109,21 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 			for _, image := range images {
 				img := ebiten.NewImageFromImage(image)
 				e.HeadImages = append(e.HeadImages, img)
+			}
+		case 'c':
+			parts := strings.Split(value, ",")
+			for i, p := range parts {
+				p = strings.TrimSpace(p)
+				if i == 0 {
+					v, _ := strconv.ParseFloat(p, 64)
+					e.ColorMultiplier[0] = v
+				} else if i == 1 {
+					v, _ := strconv.ParseFloat(p, 64)
+					e.ColorMultiplier[1] = v
+				} else if i == 2 {
+					v, _ := strconv.ParseFloat(p, 64)
+					e.ColorMultiplier[2] = v
+				}
 			}
 		}
 		if err != nil {
