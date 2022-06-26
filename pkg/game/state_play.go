@@ -22,6 +22,7 @@ type PlayState struct {
 
 func (s *PlayState) Init() error {
 	s.world.Game = s.game // Eww
+	s.world.Speed = s.game.Options.Speed
 
 	// Add players here...?
 	s.game.players = append(s.game.players, world.NewPlayer())

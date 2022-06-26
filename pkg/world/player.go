@@ -34,7 +34,7 @@ func NewPlayer() *Player {
 func (p *Player) Update(w *World) (EntityAction, error) {
 	// Increment turret tick
 	if p.Entity != nil {
-		p.Entity.Turret().Tick()
+		p.Entity.Turret().Tick(w.Speed)
 	}
 
 	// Just bail if this player is not a local entity.
@@ -96,7 +96,7 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 				}
 			case ToolGun:
 				// Check if we can fire
-				if p.Entity.Turret().CanFire() {
+				if p.Entity.Turret().CanFire(w.Speed) {
 					action = &EntityActionShoot{
 						TargetX:  float64(cx),
 						TargetY:  float64(cy),

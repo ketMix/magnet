@@ -40,8 +40,8 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 		// If our projecticle has polarity, we need to potentially update projecticle vector
 		if e.physics.polarity != data.NeutralPolarity && entity.IsWithinMagneticField(e) {
 			mX, mY := entity.Physics().GetMagneticVector(e.physics)
-			e.physics.vX = e.physics.vX + mX
-			e.physics.vY = e.physics.vY + mY
+			e.physics.vX = (e.physics.vX + mX) * world.Speed
+			e.physics.vY = (e.physics.vY + mY) * world.Speed
 		}
 	}
 

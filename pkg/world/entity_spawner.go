@@ -10,12 +10,12 @@ import (
 
 type SpawnerEntity struct {
 	BaseEntity
-	floatTick   int
+	floatTick   float64
 	shouldSpawn bool
 	wave        *data.Wave
 	heldWave    bool // heldWave indicicates if the spawner has a held wave waiting to be spawned.
 	// spawnTargets []EnemyKind ???
-	spawnElapsed int
+	spawnElapsed float64
 }
 
 func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
@@ -25,7 +25,7 @@ func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 				polarity: p,
 			},
 		},
-		floatTick:   rand.Intn(60), // Lightly randomize that start.
+		floatTick:   rand.Float64() * 60.0, // Lightly randomize that start.
 		shouldSpawn: true,
 	}
 }
@@ -33,7 +33,7 @@ func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 	if e.wave != nil && !e.heldWave {
 		if e.wave.Spawns != nil {
-			if e.spawnElapsed >= e.wave.Spawns.Spawnrate {
+			if e.spawnElapsed >= float64(e.wave.Spawns.Spawnrate) {
 				var spawnRequests MultiRequest
 				// Spread out our spawns if more than 1 kind is to spawn.
 				for i, k := range e.wave.Spawns.Kinds {
@@ -66,9 +66,9 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 			}
 		}
 	}
-	e.spawnElapsed++
+	e.spawnElapsed += world.Speed
 
-	e.floatTick++
+	e.floatTick += 1 * world.Speed
 	/*n := math.Sin(float64(e.floatTick)/30) * 2
 	max := 1.0
 	if n < -max && e.shouldSpawn {
@@ -128,7 +128,7 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 	// Draw from center.
 	op.GeoM.Translate(
 		0,
-		-float64(img.Bounds().Dy())/2-math.Sin(float64(e.floatTick)/30)*2,
+		-float64(img.Bounds().Dy())/2-math.Sin(e.floatTick/30)*2,
 	)
 
 	if e.wave != nil {

@@ -34,6 +34,7 @@ type World struct {
 	// Might as well store the core's position.
 	cores        []*CoreEntity
 	coreX, coreY int
+	Speed        float64
 }
 
 // BuildFromLevel builds the world's cells and entities from a given base level.
@@ -483,7 +484,7 @@ func (w *World) SetWaves() {
 		w.spawners[i].wave = wave
 		// Set the spawn elapsed to the first spawn's spawn rate so as to ensure immediate spawning.
 		if wave.Spawns != nil {
-			w.spawners[i].spawnElapsed = wave.Spawns.Spawnrate
+			w.spawners[i].spawnElapsed = float64(wave.Spawns.Spawnrate)
 		}
 		// Make sure to hold until build is done.
 		w.spawners[i].heldWave = true

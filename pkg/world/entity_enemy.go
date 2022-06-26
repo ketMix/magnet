@@ -69,8 +69,8 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 			e.steps = e.steps[1:]
 		} else {
 			r := math.Atan2(e.physics.Y-ty, e.physics.X-tx)
-			x := math.Cos(r) * e.speed
-			y := math.Sin(r) * e.speed
+			x := math.Cos(r) * e.speed * world.Speed
+			y := math.Sin(r) * e.speed * world.Speed
 
 			e.physics.X -= x
 			e.physics.Y -= y

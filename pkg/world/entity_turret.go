@@ -39,24 +39,27 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 
 func (e *TurretEntity) Update(world *World) (request Request, err error) {
 	// Tick the turret
-	e.turret.Tick()
+	e.turret.Tick(world.Speed)
 
 	// Attempt to acquire target
 	e.AcquireTarget(world)
 
 	// Rotate head to face target (or just SPEEN)
 	if e.target == nil {
-		e.headAnimation.rotation += 0.02
+		e.headAnimation.rotation += 0.02 * world.Speed
 	} else {
 		e.headAnimation.rotation = math.Atan2(e.physics.Y-e.target.Physics().Y, e.physics.X-e.target.Physics().X)
 	}
 
 	// Make request to fire if we have target and can fire
-	if e.target != nil && !e.target.Trashed() && e.turret.CanFire() {
+	if e.target != nil && !e.target.Trashed() && e.turret.CanFire(world.Speed) {
 		px, py := e.physics.X, e.physics.Y
 		tx, ty := e.target.Physics().X, e.target.Physics().Y
 
 		vX, vY := GetDirection(px, py, tx, ty)
+
+		vX *= world.Speed
+		vY *= world.Speed
 
 		projectile := &ProjecticleEntity{
 			BaseEntity: BaseEntity{
