@@ -150,6 +150,8 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 		case EntityActionShoot:
 			// let th' boy shoot
 			w.Game.Players()[1].Entity.SetAction(&msg)
+		case UseToolRequest:
+			w.ProcessRequest(msg)
 		}
 	} else {
 		switch msg := msg.(type) {
@@ -161,6 +163,8 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 			w.SpawnProjecticleEntity(msg)
 		case TrashEntityRequest:
 			w.ProcessRequest(msg)
+		case UseToolRequest:
+			w.HandleToolRequest(msg)
 		case BuildMode:
 			w.SetMode(&msg)
 		case WaveMode:
@@ -185,51 +189,52 @@ func (w *World) ProcessRequest(r Request) {
 			w.ProcessRequest(rq)
 		}
 	case UseToolRequest:
+		// NOTE: Technically a client could just send this request and we won't do any distance checking.
 		// Disallow tool use during wave mode.
 		if _, ok := w.Mode.(*WaveMode); ok {
 			return
 		}
-		if r.tool == ToolTurret {
-			config := r.toolConfig
+		// Deny clients from directly processing tool request. Sorry, lil buckaroos.
+		if w.Game.Net().Active() && !w.Game.Net().Hosting() {
+			// Send it to the overlord.
+			w.Game.Net().SendReliable(r)
+			return
+		}
+		if r.Tool == ToolTurret {
+			config := data.TurretConfigs[r.Kind]
 			// If we have enough points to place the turret
 			if w.Points >= config.Points {
-				c := w.GetCell(r.x, r.y)
-				if c != nil {
-					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
-						e := NewTurretEntity(config)
-						e.physics.polarity = r.polarity
-						w.PlaceEntityInCell(e, r.x, r.y)
-						data.SFX.Play("turret-place.ogg")
-						c.entity = e
-						w.UpdatePathing()
-						w.Points -= config.Points
+				if c := w.GetCell(r.X, r.Y); c != nil {
+					if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
+						e := w.HandleToolRequest(r)
+
+						// Let the client know to make our turret.
+						if w.Game.Net().Hosting() {
+							r.NetID = e.NetID()
+							w.Game.Net().SendReliable(r)
+						}
 					}
 				}
 			}
-		} else if r.tool == ToolDestroy {
-			c := w.GetCell(r.x, r.y)
-			if c != nil {
-				if c.entity != nil {
-					c.entity.Trash()
-					c.entity = nil
-					w.UpdatePathing()
-					// add refund
-				}
+		} else if r.Tool == ToolDestroy {
+			w.HandleToolRequest(r)
+			// TODO: Refund points.
+			if w.Game.Net().Hosting() {
+				w.Game.Net().SendReliable(r)
 			}
-		} else if r.tool == ToolWall {
+		} else if r.Tool == ToolWall {
 			// Wall points? 5? :shrug:
 			wallCost := 5
 			if w.Points >= wallCost {
-				c := w.GetCell(r.x, r.y)
+				c := w.GetCell(r.X, r.Y)
 				if c != nil {
-					if w.IsPlacementValid(r.x, r.y) && c.IsOpen() {
-						e := NewWallEntity()
-						w.PlaceEntityInCell(e, r.x, r.y)
-						data.SFX.Play("turret-place.ogg")
-						c.entity = e
-						w.UpdatePathing()
-						// these cost money you know!
-						w.Points -= wallCost
+					if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
+						e := w.HandleToolRequest(r)
+
+						if w.Game.Net().Hosting() {
+							r.NetID = e.NetID()
+							w.Game.Net().SendReliable(r)
+						}
 					}
 				}
 			}
@@ -293,6 +298,63 @@ func (w *World) ProcessRequest(r Request) {
 			}
 		}
 	}
+}
+
+// ???
+func (w *World) HandleToolRequest(r UseToolRequest) Entity {
+	if r.Tool == ToolTurret {
+		config := data.TurretConfigs[r.Kind]
+		e := NewTurretEntity(config)
+		if w.Game.Net().Hosting() {
+			e.netID = w.GetNextNetID()
+			// Also adjust our points.
+			w.Points -= config.Points
+		} else {
+			e.netID = r.NetID
+		}
+		e.physics.polarity = r.Polarity
+		w.PlaceEntityInCell(e, r.X, r.Y)
+		data.SFX.Play("turret-place.ogg")
+
+		if c := w.GetCell(r.X, r.Y); c != nil {
+			c.entity = e
+		}
+		w.UpdatePathing()
+
+		return e
+	} else if r.Tool == ToolDestroy {
+		c := w.GetCell(r.X, r.Y)
+		if c != nil {
+			if c.entity != nil {
+				c.entity.Trash()
+				c.entity = nil
+				w.UpdatePathing()
+			}
+		}
+	} else if r.Tool == ToolWall {
+		e := NewWallEntity()
+		w.PlaceEntityInCell(e, r.X, r.Y)
+		data.SFX.Play("turret-place.ogg")
+
+		if w.Game.Net().Hosting() {
+			e.netID = w.GetNextNetID()
+			// Wall points? 5? :shrug: // FIXME
+			wallCost := 5
+			// these cost money you know!
+			w.Points -= wallCost
+		} else {
+			e.netID = r.NetID
+		}
+
+		if c := w.GetCell(r.X, r.Y); c != nil {
+			c.entity = e
+		}
+		w.UpdatePathing()
+
+		return e
+	}
+
+	return nil
 }
 
 func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {

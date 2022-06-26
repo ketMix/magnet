@@ -82,11 +82,11 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 	case *EntityActionPlace:
 		a.complete = true
 		request = UseToolRequest{
-			x:          a.X,
-			y:          a.Y,
-			tool:       a.Tool,
-			toolConfig: data.TurretConfigs[a.Kind],
-			polarity:   a.Polarity,
+			X:        a.X,
+			Y:        a.Y,
+			Tool:     a.Tool,
+			Kind:     a.Kind,
+			Polarity: a.Polarity,
 		}
 	case *EntityActionShoot:
 		image := e.animation.Image()

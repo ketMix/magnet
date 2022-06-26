@@ -14,10 +14,11 @@ type Request interface {
 
 // UseToolRequest attempts to use the tool at a given cell.
 type UseToolRequest struct {
-	x, y       int
-	tool       ToolKind // ???
-	toolConfig data.EntityConfig
-	polarity   data.Polarity
+	X, Y     int
+	Tool     ToolKind      `json:"t"`
+	Kind     string        `json:"k"`
+	Polarity data.Polarity `json:"p"`
+	NetID    int           `json:"i"` // Yeah, yeah, we shouldn't have NetID here, but it's easier to reuse UseToolRequest rather than implement some new SpawnTurret/SpawnWall/RemoveWall Request set.
 }
 
 // SpawnProjecticleRequest attempts to spawn a projecticle at given location with given direction
@@ -37,6 +38,15 @@ type SpawnEnemyRequest struct {
 	enemyConfig data.EntityConfig
 	Kind        string `json:"k"`
 	NetID       int    `json:"i"`
+}
+
+// SpawnToolEntityRequest is used to tell the client to spawn an entity tied to a tool.
+type SpawnToolEntityRequest struct {
+	X, Y     int
+	Tool     ToolKind      `json:"t"`
+	Kind     string        `json:"k"`
+	Polarity data.Polarity `json:"p"`
+	NetID    int           `json:"i"`
 }
 
 // TrashEntityRequest is send from the server to client(s) to let them know to delete the given entity.
@@ -71,12 +81,16 @@ func (r SpawnEnemyRequest) Type() net.TypedMessageType {
 	return 301
 }
 
-func (r UseToolRequest) Type() net.TypedMessageType {
-	return net.MissingMessageType
-}
-
 func (r SpawnProjecticleRequest) Type() net.TypedMessageType {
 	return 302
+}
+
+func (r UseToolRequest) Type() net.TypedMessageType {
+	return 303
+}
+
+func (r SpawnToolEntityRequest) Type() net.TypedMessageType {
+	return 304
 }
 
 func (r SelectToolbeltItemRequest) Type() net.TypedMessageType {
@@ -104,6 +118,16 @@ func init() {
 	})
 	net.AddTypedMessage(302, func(data json.RawMessage) net.Message {
 		var m SpawnProjecticleRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(303, func(data json.RawMessage) net.Message {
+		var m UseToolRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(304, func(data json.RawMessage) net.Message {
+		var m SpawnToolEntityRequest
 		json.Unmarshal(data, &m)
 		return m
 	})
