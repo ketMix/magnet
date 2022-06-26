@@ -81,7 +81,8 @@ const (
 
 // ToolbeltItem is a toolbelt entry.
 type ToolbeltItem struct {
-	kind     ToolKind
+	tool     ToolKind
+	kind     data.EntityConfig
 	polarity data.Polarity
 	x, y     int
 	key      ebiten.Key // Key to check against for activation.
@@ -92,7 +93,7 @@ func (t *ToolbeltItem) Update() (request Request) {
 	toolSlotImage, _ := data.GetImage("toolslot.png")
 	// Does the cursor intersect us?
 	if inpututil.IsKeyJustPressed(t.key) {
-		return SelectToolbeltItemRequest{t.kind}
+		return SelectToolbeltItemRequest{t.tool}
 	} else {
 		x, y := ebiten.CursorPosition()
 		x1, x2 := t.x-toolSlotImage.Bounds().Dx()/2, t.x+toolSlotImage.Bounds().Dx()/2
@@ -100,7 +101,7 @@ func (t *ToolbeltItem) Update() (request Request) {
 
 		if x >= x1 && x <= x2 && y >= y1 && y <= y2 {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-				return SelectToolbeltItemRequest{t.kind}
+				return SelectToolbeltItemRequest{t.tool}
 			}
 			// Do a dummy return to prevent click through.
 			return DummyRequest{}
@@ -139,7 +140,7 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 	// Move to the center of our item.
 	op.GeoM.Translate(float64(t.x), float64(t.y))
 
-	image := GetToolKindImage(t.kind)
+	image := GetToolImage(t.tool, t.kind.Title)
 
 	if image != nil {
 		op.ColorM.Scale(data.GetPolarityColorScale(t.polarity))
@@ -150,7 +151,7 @@ func (t *ToolbeltItem) Draw(screen *ebiten.Image) {
 
 // Cycles through available selections for the toolbelt item
 func (t *ToolbeltItem) Cycle() {
-	switch t.kind {
+	switch t.tool {
 	// Abuse the fact that polarities have value
 	case ToolGun:
 		t.polarity++
@@ -164,11 +165,11 @@ func (t *ToolbeltItem) Cycle() {
 
 // Retrieves the image for a toolkind
 // TODO: perhaps intialize toolbelt items with these instead?
-func GetToolKindImage(k ToolKind) *ebiten.Image {
+func GetToolImage(t ToolKind, k string) *ebiten.Image {
 	var image *ebiten.Image
-	switch k {
+	switch t {
 	case ToolTurret:
-		image = data.TurretConfigs["basic"].Images[0]
+		image = data.TurretConfigs[k].Images[0]
 	case ToolDestroy:
 		image, _ = data.GetImage("tool-destroy.png")
 	case ToolGun:

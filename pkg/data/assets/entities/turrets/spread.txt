@@ -1,9 +1,9 @@
-T BASIC
-C 10
+T SPREAD
+C 15
 H 1
-D 2
+D 1
 R 50
-N 1
+N 3
 X 1
 O 1
 S 1

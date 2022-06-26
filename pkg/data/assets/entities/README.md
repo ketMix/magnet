@@ -4,7 +4,7 @@
 
 ### *The name of the entity*
 
-Self explanatory.
+Needs to match the name of the config file.
 
 ## C (Cost/Points) **int**
 
@@ -53,6 +53,12 @@ Ignored for player and enemies.
 For players and turrets, this is the rate at which they can fire projecticles.
 
 Ignored for enemies (perhaps this could be the rate of contact damage).
+
+## N (Number of Projecticles) **int**
+
+## *How many projecticles are shot each attack*
+
+For turrets and players, this determines how many projecticles they fire in a 45degree angle with one shot
 
 ## O (Projecticle Speed) **float**
 

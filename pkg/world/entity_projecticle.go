@@ -20,9 +20,8 @@ func NewProjecticleEntity() *ProjecticleEntity {
 	}
 }
 
-func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
+func (e *ProjecticleEntity) Update(world *World) (requests MultiRequest, err error) {
 	e.elapsed++
-
 	// Grab set of physics objects from entities where projecticle collides with magnet radius
 	// For each collision
 	//  - get magnetic vector
@@ -53,8 +52,7 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 	if e.elapsed >= e.lifetime {
 		e.Trash()
 	}
-
-	return request, nil
+	return requests, nil
 }
 
 func (e *ProjecticleEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

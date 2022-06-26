@@ -14,9 +14,10 @@ type Request interface {
 
 // UseToolRequest attempts to use the tool at a given cell.
 type UseToolRequest struct {
-	x, y     int
-	kind     ToolKind // ???
-	polarity data.Polarity
+	x, y       int
+	tool       ToolKind // ???
+	toolConfig data.EntityConfig
+	polarity   data.Polarity
 }
 
 // SpawnProjecticleRequest attempts to spawn a projecticle at given location with given direction

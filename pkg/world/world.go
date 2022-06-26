@@ -177,8 +177,8 @@ func (w *World) ProcessRequest(r Request) {
 		if _, ok := w.Mode.(*WaveMode); ok {
 			return
 		}
-		if r.kind == ToolTurret {
-			config := data.TurretConfigs["basic"]
+		if r.tool == ToolTurret {
+			config := r.toolConfig
 			// If we have enough points to place the turret
 			if w.Points >= config.Points {
 				c := w.GetCell(r.x, r.y)
@@ -194,7 +194,7 @@ func (w *World) ProcessRequest(r Request) {
 					}
 				}
 			}
-		} else if r.kind == ToolDestroy {
+		} else if r.tool == ToolDestroy {
 			c := w.GetCell(r.x, r.y)
 			if c != nil {
 				if c.entity != nil {
@@ -204,7 +204,7 @@ func (w *World) ProcessRequest(r Request) {
 					// add refund
 				}
 			}
-		} else if r.kind == ToolWall {
+		} else if r.tool == ToolWall {
 			// Wall points? 5? :shrug:
 			wallCost := 5
 			if w.Points >= wallCost {
@@ -327,20 +327,17 @@ func (w *World) Update() error {
 		w.SetMode(nextMode)
 	}
 
+	var mr MultiRequest
 	// Update our entities and get any requests.
-	var requests []Request
 	for _, e := range w.entities {
-		if request, err := e.Update(w); err != nil {
+		if multiRequest, err := e.Update(w); err != nil {
 			return err
-		} else if request != nil {
-			requests = append(requests, request)
+		} else if multiRequest.Requests != nil {
+			mr.Requests = append(mr.Requests, multiRequest.Requests...)
 		}
 	}
 
-	// Iterate through our requests.
-	for _, r := range requests {
-		w.ProcessRequest(r)
-	}
+	w.ProcessRequest(mr)
 
 	// Clean up any destroyed entities.
 	t := w.entities[:0]
@@ -399,8 +396,8 @@ func (w *World) Draw(screen *ebiten.Image) {
 				switch a := p.Entity.Action().GetNext().(type) {
 				case *EntityActionPlace:
 					// Draw transparent version of tool for placement
-					if a.Kind == ToolTurret || a.Kind == ToolWall {
-						image := GetToolKindImage(a.Kind)
+					if a.Tool == ToolTurret || a.Tool == ToolWall {
+						image := GetToolImage(a.Tool, a.Kind)
 						op := &ebiten.DrawImageOptions{}
 						op.ColorM.Scale(data.GetPolarityColorScale(a.Polarity))
 						op.ColorM.Scale(1, 1, 1, 0.5)

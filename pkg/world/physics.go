@@ -81,3 +81,20 @@ func IsWithinRadius(sx, sy, tx, ty, radius float64) bool {
 	withinY := minY < ty && ty < maxY
 	return withinX && withinY
 }
+
+// Returns a list of vectors with length num that span the spread around vX and vY
+func SplitVectorByDegree(spreadArc, vX, vY float64, num int) (vectors []PhysicsObject) {
+	spreadDist := spreadArc / float64(num)
+
+	for i := 0; i < num; i++ {
+		degrees := (spreadDist * float64(i)) - spreadArc/2
+		radians := degrees * (math.Pi / 180)
+		cosRad := math.Cos(radians)
+		sinRad := math.Sin(radians) // sinbad lol
+		vectors = append(vectors, PhysicsObject{
+			vX: cosRad*vX - sinRad*vY,
+			vY: sinRad*vX + cosRad*vY,
+		})
+	}
+	return vectors
+}

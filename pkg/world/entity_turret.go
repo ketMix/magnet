@@ -26,10 +26,11 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 				polarity: config.Polarity,
 			},
 			turret: Turret{
-				damage:      config.Damage,
-				speed:       config.ProjecticleSpeed,
-				rate:        config.AttackRate,
-				attackRange: config.AttackRange,
+				damage:         config.Damage,
+				speed:          config.ProjecticleSpeed,
+				rate:           config.AttackRate,
+				attackRange:    config.AttackRange,
+				projecticleNum: config.ProjecticleNum,
 			},
 		},
 		headAnimation: Animation{
@@ -39,7 +40,7 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 	}
 }
 
-func (e *TurretEntity) Update(world *World) (request Request, err error) {
+func (e *TurretEntity) Update(world *World) (requests MultiRequest, err error) {
 	// Tick the turret
 	e.turret.Tick(world.Speed)
 
@@ -63,26 +64,30 @@ func (e *TurretEntity) Update(world *World) (request Request, err error) {
 		vX *= world.Speed
 		vY *= world.Speed
 
-		projectile := &ProjecticleEntity{
-			BaseEntity: BaseEntity{
-				physics: PhysicsObject{
-					vX:       vX * e.turret.speed,
-					vY:       vY * e.turret.speed,
-					polarity: e.physics.polarity,
+		const spreadArc = 45.0
+		var vectors = SplitVectorByDegree(spreadArc, vX, vY, e.turret.projecticleNum)
+		for _, v := range vectors {
+			projecticle := &ProjecticleEntity{
+				BaseEntity: BaseEntity{
+					physics: PhysicsObject{
+						vX:       v.vX * e.turret.speed,
+						vY:       v.vY * e.turret.speed,
+						polarity: e.physics.polarity,
+					},
 				},
-			},
-			lifetime: 500,
-			damage:   e.turret.damage,
-		}
-
-		request = SpawnProjecticleRequest{
-			x:          px,
-			y:          py,
-			projectile: projectile,
+				lifetime: 500,
+				damage:   e.turret.damage,
+			}
+			request := SpawnProjecticleRequest{
+				x:          px,
+				y:          py,
+				projectile: projecticle,
+			}
+			requests.Requests = append(requests.Requests, request)
 		}
 	}
 
-	return request, nil
+	return requests, nil
 }
 
 func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

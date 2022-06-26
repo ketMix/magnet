@@ -30,11 +30,10 @@ func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
 	}
 }
 
-func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
+func (e *SpawnerEntity) Update(world *World) (requests MultiRequest, err error) {
 	if e.wave != nil && !e.heldWave {
 		if e.wave.Spawns != nil {
 			if e.spawnElapsed >= float64(e.wave.Spawns.Spawnrate) {
-				var spawnRequests MultiRequest
 				// Spread out our spawns if more than 1 kind is to spawn.
 				for i, k := range e.wave.Spawns.Kinds {
 					// FIXME: Spread from center.
@@ -42,7 +41,7 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 					spreadX := spread * float64(data.CellWidth/2)
 					spreadY := spread * float64(data.CellHeight/2)
 
-					spawnRequests.Requests = append(spawnRequests.Requests,
+					requests.Requests = append(requests.Requests,
 						SpawnEnemyRequest{
 							X:        e.physics.X + spreadX,
 							Y:        e.physics.Y + spreadY,
@@ -51,7 +50,7 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 						},
 					)
 				}
-				request = spawnRequests
+
 				e.wave.Spawns.Count--
 				e.spawnElapsed = 0
 				if e.wave.Spawns.Count <= 0 {
@@ -88,7 +87,7 @@ func (e *SpawnerEntity) Update(world *World) (request Request, err error) {
 	} else if n > max {
 		e.shouldSpawn = true
 	}*/
-	return request, nil
+	return requests, nil
 }
 
 func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

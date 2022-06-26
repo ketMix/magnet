@@ -49,7 +49,8 @@ type EntityActionPlace struct {
 	X        int
 	Y        int
 	complete bool
-	Kind     ToolKind      `json:"k"`
+	Tool     ToolKind      `json:"t"`
+	Kind     string        `json:"k"`
 	Polarity data.Polarity `json:"p"`
 }
 

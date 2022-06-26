@@ -20,6 +20,7 @@ type EntityConfig struct {
 	Damage           int
 	AttackRange      float64
 	AttackRate       float64
+	ProjecticleNum   int
 	ProjecticleSpeed float64
 	Polarity         Polarity
 	Magnetic         bool
@@ -42,7 +43,7 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 		value := strings.TrimSpace(t[1:])
 		switch t[0] {
 		case 'T':
-			e.Title = value
+			e.Title = strings.ToLower(value)
 		case 'C':
 			e.Points, err = strconv.Atoi(value)
 		case 'H':
@@ -55,6 +56,8 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 			e.AttackRate, err = strconv.ParseFloat(value, 64)
 		case 'O':
 			e.ProjecticleSpeed, err = strconv.ParseFloat(value, 64)
+		case 'N':
+			e.ProjecticleNum, err = strconv.Atoi(value)
 		case 'S':
 			e.Speed, err = strconv.ParseFloat(value, 64)
 		case 'r':

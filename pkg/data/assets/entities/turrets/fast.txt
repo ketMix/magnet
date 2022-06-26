@@ -1,10 +1,10 @@
-T BASIC
-C 10
+T FAST
+C 15
 H 1
-D 2
-R 50
+D 1
+R 25
 N 1
-X 1
+X 0.33
 O 1
 S 1
 P neutral

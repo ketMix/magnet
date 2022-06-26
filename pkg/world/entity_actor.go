@@ -39,16 +39,17 @@ func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
 				polarity: config.Polarity,
 			},
 			turret: Turret{
-				damage: config.Damage,
-				speed:  config.ProjecticleSpeed,
-				rate:   config.AttackRate,
+				damage:         config.Damage,
+				speed:          config.ProjecticleSpeed,
+				rate:           config.AttackRate,
+				projecticleNum: config.ProjecticleNum,
 			},
 		},
 		player: player,
 	}
 }
 
-func (e *ActorEntity) Update(world *World) (request Request, err error) {
+func (e *ActorEntity) Update(world *World) (requests MultiRequest, err error) {
 	e.animation.Update()
 	switch a := e.action.(type) {
 	case *EntityActionMove:
@@ -72,12 +73,13 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		}
 	case *EntityActionPlace:
 		a.complete = true
-		request = UseToolRequest{
-			x:        a.X,
-			y:        a.Y,
-			kind:     a.Kind,
-			polarity: a.Polarity,
-		}
+		requests.Requests = append(requests.Requests, UseToolRequest{
+			x:          a.X,
+			y:          a.Y,
+			tool:       a.Tool,
+			toolConfig: data.TurretConfigs[a.Kind],
+			polarity:   a.Polarity,
+		})
 	case *EntityActionShoot:
 		image := e.animation.Image()
 		// Get our player position for spawning.
@@ -89,20 +91,27 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 
 		// Can apply player's speed to action vector
 		a.complete = true
-		request = SpawnProjecticleRequest{
-			x: px,
-			y: py,
-			projectile: &ProjecticleEntity{
+
+		const spreadArc = 45.0
+		var vectors = SplitVectorByDegree(spreadArc, vX, vY, e.turret.projecticleNum)
+		for _, v := range vectors {
+			projecticle := &ProjecticleEntity{
 				BaseEntity: BaseEntity{
 					physics: PhysicsObject{
-						vX:       vX * e.turret.speed,
-						vY:       vY * e.turret.speed,
-						polarity: a.Polarity,
+						vX:       v.vX * e.turret.speed,
+						vY:       v.vY * e.turret.speed,
+						polarity: e.physics.polarity,
 					},
 				},
 				lifetime: 500,
 				damage:   e.turret.damage,
-			},
+			}
+			request := SpawnProjecticleRequest{
+				x:          px,
+				y:          py,
+				projectile: projecticle,
+			}
+			requests.Requests = append(requests.Requests, request)
 		}
 	}
 
@@ -124,7 +133,7 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		}
 	}
 
-	return request, nil
+	return requests, nil
 }
 
 func (e *ActorEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {

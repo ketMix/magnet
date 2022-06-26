@@ -21,10 +21,12 @@ func NewPlayer() *Player {
 	return &Player{
 		Toolbelt: Toolbelt{
 			items: []*ToolbeltItem{
-				{kind: ToolGun, key: ebiten.Key1},
-				{kind: ToolTurret, key: ebiten.Key2, polarity: data.NegativePolarity},
-				{kind: ToolWall, key: ebiten.Key3},
-				{kind: ToolDestroy, key: ebiten.Key4},
+				{tool: ToolGun, key: ebiten.Key1},
+				{tool: ToolTurret, key: ebiten.Key2, polarity: data.NegativePolarity, kind: data.TurretConfigs["basic"]},
+				{tool: ToolTurret, key: ebiten.Key3, polarity: data.NegativePolarity, kind: data.TurretConfigs["spread"]},
+				{tool: ToolTurret, key: ebiten.Key4, polarity: data.NegativePolarity, kind: data.TurretConfigs["fast"]},
+				{tool: ToolWall, key: ebiten.Key5},
+				{tool: ToolDestroy, key: ebiten.Key6},
 			},
 		},
 	}
@@ -68,7 +70,7 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 				Next: &EntityActionPlace{
 					X:    tx,
 					Y:    ty,
-					Kind: ToolDestroy,
+					Tool: ToolDestroy,
 				},
 			}
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
@@ -76,7 +78,7 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 			cx, cy := w.GetCursorPosition()
 			tx, ty := w.GetClosestCellPosition(cx, cy)
 
-			switch p.Toolbelt.activeItem.kind {
+			switch p.Toolbelt.activeItem.tool {
 			case ToolTurret:
 				fallthrough
 			case ToolWall:
@@ -90,7 +92,8 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 					Next: &EntityActionPlace{
 						X:        tx,
 						Y:        ty,
-						Kind:     p.Toolbelt.activeItem.kind,
+						Kind:     p.Toolbelt.activeItem.kind.Title,
+						Tool:     p.Toolbelt.activeItem.tool,
 						Polarity: p.Toolbelt.activeItem.polarity,
 					},
 				}
