@@ -112,7 +112,6 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 }
 
 // Finds the closest entity within attack radius and sets the current target if found
-// !! Iterates through world entity list, could probably be optimized !!
 func (e *TurretEntity) AcquireTarget(world *World) {
 	// Collect our entities within our attack radius.
 	entities := ObjectsWithinRadius(world.enemies, e.physics.X, e.physics.Y, e.turret.attackRange)
