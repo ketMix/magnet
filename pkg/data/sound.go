@@ -49,18 +49,18 @@ func (s *Sound) Play(volume float64) *audio.Player {
 	return player
 }
 
-func (sp *SoundPlayer) PlaySound(s *Sound) {
+func (sp *SoundPlayer) PlaySound(s *Sound) *audio.Player {
 	if sp.Muted {
-		s.Play(0)
+		return s.Play(0)
 	} else {
-		s.Play(sp.volume)
+		return s.Play(sp.volume)
 	}
 }
 
 // Wraps sound in SoundPlayer context to set muted and volume
-func (sp *SoundPlayer) Play(p string) {
+func (sp *SoundPlayer) Play(p string) *audio.Player {
 	sound, _ := GetSound(p)
-	sp.PlaySound(sound)
+	return sp.PlaySound(sound)
 }
 
 func (sp *SoundPlayer) ToggleMute() {
