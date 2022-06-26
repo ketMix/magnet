@@ -31,6 +31,9 @@ func (s *PlayState) Init() error {
 	// Add other player!
 	if s.game.net.Active() {
 		s.game.players = append(s.game.players, world.NewPlayer())
+		// Set player names if networked.
+		s.game.players[0].Name = s.game.net.Name
+		s.game.players[1].Name = s.game.net.OtherName
 	}
 
 	// Build the level.
