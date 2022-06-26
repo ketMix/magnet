@@ -9,6 +9,6 @@ type Options struct {
 	Map        string  `short:"m" long:"map" description:"Map to start the game on" default:"001"`
 	Name       string  `short:"n" long:"name" description:"Name to user in multiplayer"`
 	Speed      float64 `short:"S" long:"speed" description:"Game speed multiplier" default:"1.0"`
-	NoMusic    bool    `short:"nm" long:"nomusic" description:"Disable in-game music"`
-	NoSound    bool    `short:"ns" long:"nosound" description:"Disable in-game sound"`
+	NoMusic    bool    `long:"nomusic" description:"Disable in-game music"`
+	NoSound    bool    `long:"nosound" description:"Disable in-game sound"`
 }
