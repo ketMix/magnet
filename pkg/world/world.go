@@ -327,17 +327,20 @@ func (w *World) Update() error {
 		w.SetMode(nextMode)
 	}
 
-	var mr MultiRequest
 	// Update our entities and get any requests.
+	var requests []Request
 	for _, e := range w.entities {
-		if multiRequest, err := e.Update(w); err != nil {
+		if request, err := e.Update(w); err != nil {
 			return err
-		} else if multiRequest.Requests != nil {
-			mr.Requests = append(mr.Requests, multiRequest.Requests...)
+		} else if request != nil {
+			requests = append(requests, request)
 		}
 	}
 
-	w.ProcessRequest(mr)
+	// Iterate through our requests.
+	for _, r := range requests {
+		w.ProcessRequest(r)
+	}
 
 	// Clean up any destroyed entities.
 	t := w.entities[:0]
