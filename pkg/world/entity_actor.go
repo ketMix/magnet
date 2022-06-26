@@ -67,10 +67,10 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		targetY := e.physics.Y - y
 		cellX := world.GetCell(world.GetClosestCellPosition(int(targetX), int(e.physics.Y)))
 		cellY := world.GetCell(world.GetClosestCellPosition(int(e.physics.X), int(targetY)))
-		if cellX != nil && cellX.kind != data.EmptyCell {
+		if cellX != nil && cellX.kind != data.EmptyCell && cellX.kind != data.BlockedCell {
 			e.physics.X = targetX
 		}
-		if cellY != nil && cellY.kind != data.EmptyCell {
+		if cellY != nil && cellY.kind != data.EmptyCell && cellY.kind != data.BlockedCell {
 			e.physics.Y = targetY
 		}
 
