@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -41,6 +42,7 @@ type Connection struct {
 	sendingReliables     []ReliableTypedMessage
 	receivedReliables    []ReliableTypedMessage
 	confirmedReliableIDs []int
+	reliableLock         sync.Mutex
 }
 
 func NewConnection(name string) Connection {
@@ -274,9 +276,11 @@ func (c *Connection) Loop() {
 			c.lastReceived = time.Now()
 			// Handle reliable messages such that we send a response whenever we receive it.
 			if msg.InboundID != 0 {
+				c.reliableLock.Lock()
 				// See if we've already confirmed sending this particular message.
 				for _, id := range c.confirmedReliableIDs {
 					if id == msg.InboundID {
+						c.reliableLock.Unlock()
 						// Ignore it if we've already confirmed it.
 						goto loopEnd
 					}
@@ -285,19 +289,24 @@ func (c *Connection) Loop() {
 					if m.OutboundID == msg.InboundID {
 						c.confirmedReliableIDs = append(c.confirmedReliableIDs, m.OutboundID)
 						c.sendingReliables = append(c.sendingReliables[:i], c.sendingReliables[i+1:]...)
+						c.reliableLock.Unlock()
 						goto loopEnd
 					}
 				}
+				c.reliableLock.Unlock()
 			} else if msg.OutboundID != 0 {
+				c.reliableLock.Lock()
 				// Always send an empty response with the ID.
 				c.sendReliableWithIDs(nil, msg.OutboundID, 0)
 				// Only continue processing if we haven't processed this specific message yet.
 				for _, m := range c.receivedReliables {
 					if m.OutboundID == msg.InboundID {
+						c.reliableLock.Unlock()
 						goto loopEnd
 					}
 				}
 				c.receivedReliables = append(c.receivedReliables, msg)
+				c.reliableLock.Unlock()
 			}
 			switch m := msg.Message().(type) {
 			case HenloMessage:
@@ -312,7 +321,9 @@ func (c *Connection) Loop() {
 		for _, m := range c.sendingReliables {
 			n := time.Now()
 			if n.Sub(m.lastSent) >= 500*time.Millisecond {
+				c.reliableLock.Lock()
 				c.sendReliableWithIDs(m.Message(), 0, m.OutboundID)
+				c.reliableLock.Unlock()
 				m.lastSent = n
 			}
 		}
@@ -345,10 +356,12 @@ func (c *Connection) Send(msg Message) error {
 
 // SendReliable sends the given message with special resending until a confirmation is received.
 func (c *Connection) SendReliable(msg Message) error {
+	c.reliableLock.Lock()
 	c.reliableID++
 	env, err := c.sendReliableWithIDs(msg, 0, c.reliableID)
 	env.lastSent = time.Now()
 	c.sendingReliables = append(c.sendingReliables, env)
+	c.reliableLock.Unlock()
 	return err
 }
 
