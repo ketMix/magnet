@@ -17,9 +17,11 @@ type OrbEntity struct {
 func NewOrbEntity(worth int) *OrbEntity {
 	// Get our animation images.
 	var images []*ebiten.Image
-	if worth <= 10 {
+	if worth <= 3 {
+		images = data.OrbTinyImages
+	} else if worth <= 10 {
 		images = data.OrbSmallImages
-	} else if worth <= 15 {
+	} else if worth <= 20 {
 		images = data.OrbMediumImages
 	} else {
 		images = data.OrbLargeImages

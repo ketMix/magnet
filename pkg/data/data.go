@@ -15,6 +15,7 @@ var (
 	EmptySubImage *ebiten.Image
 
 	// I'm sorry for violating our principles.
+	OrbTinyImages   []*ebiten.Image
 	OrbSmallImages  []*ebiten.Image
 	OrbMediumImages []*ebiten.Image
 	OrbLargeImages  []*ebiten.Image
@@ -107,7 +108,14 @@ func LoadData() error {
 	}
 
 	// Load the orbs.
-	imgs, err := ReadImagesByPrefix("orb-small")
+	imgs, err := ReadImagesByPrefix("orb-tiny")
+	if err != nil {
+		return err
+	}
+	for _, img := range imgs {
+		OrbTinyImages = append(OrbTinyImages, ebiten.NewImageFromImage(img))
+	}
+	imgs, err = ReadImagesByPrefix("orb-small")
 	if err != nil {
 		return err
 	}
