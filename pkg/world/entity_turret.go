@@ -97,31 +97,12 @@ func (e *TurretEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpti
 
 	op.ColorM.Scale(e.colorMultiplier[0], e.colorMultiplier[1], e.colorMultiplier[2], 1)
 
-	e.animation.Draw(screen, op)
+	DrawTurret(screen, op, e.animation, e.headAnimation, e.physics.polarity)
 
 	// This is temporary, as all things in life are.
 	if e.showRange {
-		c := getCircleImage(int(e.turret.attackRange))
-		cop := &ebiten.DrawImageOptions{}
-		cop.ColorM.Scale(data.GetPolarityColorScale(e.physics.polarity))
-		cop.GeoM.Concat(op.GeoM)
-		cop.GeoM.Translate(-float64(c.Bounds().Dx())/2, -float64(c.Bounds().Dy())/2)
-		screen.DrawImage(c, cop)
-	}
-
-	headColor := ebiten.ColorM{}
-	headColor.Scale(data.GetPolarityColorScale(e.physics.polarity))
-
-	// Draw da head
-	op.GeoM.Translate(0, -5)
-	for i := float64(0); i < 3; i++ {
-		darken := .25 + i - (i / 3)
-		headOp := &ebiten.DrawImageOptions{}
-		headOp.GeoM.Concat(op.GeoM)
-		headOp.GeoM.Translate(0, -i)
-		headOp.ColorM.Scale(darken, darken, darken, 1)
-		headOp.ColorM.Concat(headColor)
-		e.headAnimation.Draw(screen, headOp)
+		r, g, b, a := data.GetPolarityColorScale(e.physics.polarity)
+		drawCircle(screen, op, int(e.turret.attackRange), r, g, b, a)
 	}
 }
 
@@ -142,5 +123,29 @@ func (e *TurretEntity) AcquireTarget(world *World) {
 		e.target = entities[0]
 	} else {
 		e.target = nil
+	}
+}
+
+func DrawTurret(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions, bodyAnimation Animation, headAnimation Animation, polarity data.Polarity) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Concat(screenOp.GeoM)
+	op.ColorM.Concat(screenOp.ColorM)
+
+	bodyAnimation.Draw(screen, op)
+
+	headColor := ebiten.ColorM{}
+	headColor.Concat(screenOp.ColorM)
+	headColor.Scale(data.GetPolarityColorScale(polarity))
+
+	// Draw da head
+	op.GeoM.Translate(0, -5)
+	for i := float64(0); i < 3; i++ {
+		darken := .25 + i - (i / 3)
+		headOp := &ebiten.DrawImageOptions{}
+		headOp.GeoM.Concat(op.GeoM)
+		headOp.GeoM.Translate(0, -i)
+		headOp.ColorM.Scale(darken, darken, darken, 1)
+		headOp.ColorM.Concat(headColor)
+		headAnimation.Draw(screen, headOp)
 	}
 }

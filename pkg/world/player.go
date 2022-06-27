@@ -19,8 +19,9 @@ type Player struct {
 	// Name is acquired from the initial connection name.
 	Name string
 	//
-	HoveringPlacement bool
-	HoveringPlace     EntityActionPlace
+	HoveringPlacement     bool
+	HoveringPlace         EntityActionPlace
+	HoverColumn, HoverRow int // X and Y hover coordinate in terms of columns/rows
 }
 
 func NewPlayer() *Player {
@@ -62,11 +63,15 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 	if req := p.Toolbelt.Update(); req != nil {
 		return nil, nil
 	}
+
+	cx, cy := w.GetCursorPosition()
+	tx, ty := w.GetClosestCellPosition(cx, cy)
+	p.HoverColumn = tx
+	p.HoverRow = ty
+
 	if p.Entity != nil {
 		var action EntityAction
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			cx, cy := w.GetCursorPosition()
-			tx, ty := w.GetClosestCellPosition(cx, cy)
 			// TODO: Show placement preview
 			p.HoveringPlacement = true
 			p.HoveringPlace = EntityActionPlace{

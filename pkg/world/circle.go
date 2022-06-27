@@ -55,3 +55,12 @@ func getCircleImage(radius int) *ebiten.Image {
 	circles[radius] = img
 	return img
 }
+
+func drawCircle(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions, radius int, r, g, b, a float64) {
+	c := getCircleImage(radius)
+	cop := &ebiten.DrawImageOptions{}
+	cop.ColorM.Scale(r, g, b, a)
+	cop.GeoM.Concat(screenOp.GeoM)
+	cop.GeoM.Translate(-float64(c.Bounds().Dx())/2, -float64(c.Bounds().Dy())/2)
+	screen.DrawImage(c, cop)
+}
