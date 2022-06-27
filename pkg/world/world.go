@@ -383,10 +383,35 @@ func (w *World) ProcessRequest(r Request) {
 func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 	if r.Tool == ToolTurret {
 		config := data.TurretConfigs[r.Kind]
-		e := NewTurretEntity(config)
-		e.owner = r.Owner
+		// This is kind of stupid.
+		var e Entity
+		if config.AttackType == "beam" {
+			te := NewTurretBeamEntity(config)
+			te.owner = r.Owner
+
+			// Hmm... this feels kind of gross.
+			if r.Owner != "" {
+				if pl := w.Game.GetPlayerByName(r.Owner); pl != nil {
+					te.colorMultiplier = pl.Entity.(*ActorEntity).colorMultiplier
+				}
+			}
+
+			e = te
+		} else {
+			te := NewTurretEntity(config)
+			te.owner = r.Owner
+
+			// Hmm... this feels kind of gross.
+			if r.Owner != "" {
+				if pl := w.Game.GetPlayerByName(r.Owner); pl != nil {
+					te.colorMultiplier = pl.Entity.(*ActorEntity).colorMultiplier
+				}
+			}
+
+			e = te
+		}
 		if w.Game.Net().Hosting() {
-			e.netID = w.GetNextNetID()
+			e.SetNetID(w.GetNextNetID())
 		} else {
 			if r.NetID != 0 {
 				for _, trashedID := range w.trashedIDs {
@@ -395,19 +420,12 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 						return nil
 					}
 				}
-				e.netID = r.NetID
+				e.SetNetID(r.NetID)
 			}
 		}
-		e.physics.polarity = r.Polarity
+		e.Physics().polarity = r.Polarity
 		w.PlaceEntityInCell(e, r.X, r.Y)
 		data.SFX.Play("turret-place.ogg")
-
-		// Hmm... this feels kind of gross.
-		if r.Owner != "" {
-			if pl := w.Game.GetPlayerByName(r.Owner); pl != nil {
-				e.colorMultiplier = pl.Entity.(*ActorEntity).colorMultiplier
-			}
-		}
 
 		if c := w.GetCell(r.X, r.Y); c != nil {
 			c.entity = e
@@ -963,6 +981,16 @@ func ObjectsWithinRadius[K interface{ Physics() *PhysicsObject }](l []K, x, y, r
 	var results []K
 	for _, target := range l {
 		if IsWithinRadius(x, y, target.Physics().X, target.Physics().Y, radius) {
+			results = append(results, target)
+		}
+	}
+	return results
+}
+
+func ObjectsWithPolarity[K interface{ Physics() *PhysicsObject }](l []K, p data.Polarity) []K {
+	var results []K
+	for _, target := range l {
+		if target.Physics().polarity == p {
 			results = append(results, target)
 		}
 	}

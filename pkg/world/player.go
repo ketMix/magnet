@@ -25,16 +25,25 @@ type Player struct {
 }
 
 func NewPlayer() *Player {
+	// Hehehe
+	items := []*ToolbeltItem{
+		{tool: ToolGun, key: ebiten.Key1},
+	}
+
+	i := 2
+	for _, v := range data.TurretConfigs {
+		items = append(items, &ToolbeltItem{
+			tool: ToolTurret, key: ebiten.Key0 + ebiten.Key(i), polarity: data.NegativePolarity, kind: v,
+		})
+		i++
+	}
+	items = append(items, &ToolbeltItem{tool: ToolWall, key: ebiten.Key0 + ebiten.Key(i)})
+	i++
+	items = append(items, &ToolbeltItem{tool: ToolDestroy, key: ebiten.Key0 + ebiten.Key(i)})
+
 	return &Player{
 		Toolbelt: Toolbelt{
-			items: []*ToolbeltItem{
-				{tool: ToolGun, key: ebiten.Key1},
-				{tool: ToolTurret, key: ebiten.Key2, polarity: data.NegativePolarity, kind: data.TurretConfigs["basic"]},
-				{tool: ToolTurret, key: ebiten.Key3, polarity: data.NegativePolarity, kind: data.TurretConfigs["spread"]},
-				{tool: ToolTurret, key: ebiten.Key4, polarity: data.NegativePolarity, kind: data.TurretConfigs["fast"]},
-				{tool: ToolWall, key: ebiten.Key5},
-				{tool: ToolDestroy, key: ebiten.Key6},
-			},
+			items: items,
 		},
 	}
 }

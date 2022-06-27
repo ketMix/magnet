@@ -97,43 +97,45 @@ func (m *BuildMode) Draw(w *World, screen *ebiten.Image) {
 
 	// Draw current active item if placeable
 	pl := w.Game.Players()[0]
-	if pl.Toolbelt.activeItem.tool == "turret" {
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(
-			w.CameraX,
-			w.CameraY,
-		)
-		op.GeoM.Translate(
-			float64(pl.HoverColumn*data.CellWidth)+float64(data.CellWidth/2),
-			float64(pl.HoverRow*data.CellHeight)+float64(data.CellHeight/2),
-		)
-		op.ColorM.Scale(1, 1, 1, 0.5)
-		if cfg, ok := data.TurretConfigs[pl.Toolbelt.activeItem.kind.Title]; ok {
-			DrawTurret(screen, op, Animation{images: cfg.Images}, Animation{images: cfg.HeadImages}, pl.Toolbelt.activeItem.polarity)
+	if pl.Toolbelt.activeItem != nil {
+		if pl.Toolbelt.activeItem.tool == "turret" {
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(
+				w.CameraX,
+				w.CameraY,
+			)
+			op.GeoM.Translate(
+				float64(pl.HoverColumn*data.CellWidth)+float64(data.CellWidth/2),
+				float64(pl.HoverRow*data.CellHeight)+float64(data.CellHeight/2),
+			)
+			op.ColorM.Scale(1, 1, 1, 0.5)
+			if cfg, ok := data.TurretConfigs[pl.Toolbelt.activeItem.kind.Title]; ok {
+				DrawTurret(screen, op, Animation{images: cfg.Images}, Animation{images: cfg.HeadImages}, pl.Toolbelt.activeItem.polarity)
 
-			r, g, b, _ := data.GetPolarityColorScale(pl.Toolbelt.activeItem.polarity)
-			a := 0.5
-			drawCircle(screen, op, int(cfg.AttackRange), r, g, b, a)
+				r, g, b, _ := data.GetPolarityColorScale(pl.Toolbelt.activeItem.polarity)
+				a := 0.5
+				drawCircle(screen, op, int(cfg.AttackRange), r, g, b, a)
+			}
+		} else if pl.Toolbelt.activeItem.tool == "wall" {
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(
+				w.CameraX,
+				w.CameraY,
+			)
+			op.GeoM.Translate(
+				float64(pl.HoverColumn*data.CellWidth)+float64(data.CellWidth/2),
+				float64(pl.HoverRow*data.CellHeight)+float64(data.CellHeight/2),
+			)
+			op.ColorM.Scale(1, 1, 1, 0.5)
+
+			wallImg, _ := data.GetImage("wall.png")
+
+			op.GeoM.Translate(
+				-float64(wallImg.Bounds().Dx()/2),
+				-float64(wallImg.Bounds().Dy()/2),
+			)
+			screen.DrawImage(wallImg, op)
 		}
-	} else if pl.Toolbelt.activeItem.tool == "wall" {
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(
-			w.CameraX,
-			w.CameraY,
-		)
-		op.GeoM.Translate(
-			float64(pl.HoverColumn*data.CellWidth)+float64(data.CellWidth/2),
-			float64(pl.HoverRow*data.CellHeight)+float64(data.CellHeight/2),
-		)
-		op.ColorM.Scale(1, 1, 1, 0.5)
-
-		wallImg, _ := data.GetImage("wall.png")
-
-		op.GeoM.Translate(
-			-float64(wallImg.Bounds().Dx()/2),
-			-float64(wallImg.Bounds().Dy()/2),
-		)
-		screen.DrawImage(wallImg, op)
 	}
 
 	bounds := text.BoundString(data.NormalFace, "build mode")

@@ -1,0 +1,16 @@
+T BEAM
+C 50
+H 1
+D 1
+R 150
+N 1
+X 0.75
+A beam
+O 1
+S 1
+P neutral
+M false
+Y 1
+Z 1
+I turret-basic
+i turret-beam

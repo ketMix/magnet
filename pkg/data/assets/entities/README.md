@@ -68,6 +68,15 @@ For players and turrets, this is the speed of their projecticles.
 
 Ignored for enemies.
 
+## A (Attack Type) **string**
+
+### *A special string indicating attack type*
+
+For turrets, this can be missing or any of the following:
+
+  * normal
+  * beam
+
 ## S (Speed) **float**
 
 ### *The speed of the entity*

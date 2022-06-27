@@ -20,6 +20,7 @@ type EntityConfig struct {
 	Damage           int
 	AttackRange      float64
 	AttackRate       float64
+	AttackType       string
 	ProjecticleNum   int
 	ProjecticleSpeed float64
 	Polarity         Polarity
@@ -55,6 +56,8 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 			e.AttackRange, err = strconv.ParseFloat(value, 64)
 		case 'X':
 			e.AttackRate, err = strconv.ParseFloat(value, 64)
+		case 'A':
+			e.AttackType = strings.ToLower(value)
 		case 'O':
 			e.ProjecticleSpeed, err = strconv.ParseFloat(value, 64)
 		case 'N':

@@ -21,6 +21,7 @@ type Entity interface {
 	CanPathfind() bool
 	SetSteps(p []pathing.Step)
 	NetID() int
+	SetNetID(nid int)
 	IsProjectile() bool
 }
 
@@ -72,6 +73,10 @@ func (e *BaseEntity) SetSteps(s []pathing.Step) {
 
 func (e *BaseEntity) NetID() int {
 	return e.netID
+}
+
+func (e *BaseEntity) SetNetID(nid int) {
+	e.netID = nid
 }
 
 func (e *BaseEntity) IsProjectile() bool {
