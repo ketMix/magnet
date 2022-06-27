@@ -3,6 +3,7 @@ package world
 import (
 	"encoding/json"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -220,7 +221,7 @@ func (m LossMode) Type() net.TypedMessageType {
 func (m *LossMode) Init(w *World) error {
 	// cry tiem
 	data.BGM.Set("loss.ogg")
-	// Lock those lil actors an' make em weep. Or, if they're enemies, do a jig.
+	// Lock those lil actors an' make em weep. Or, if they're enemies, do a jig. Also make turrets turn to player and shake their heads in disappointment.
 	for _, e := range w.entities {
 		switch e := e.(type) {
 		case *ActorEntity:
@@ -231,6 +232,14 @@ func (m *LossMode) Init(w *World) error {
 			e.animation = e.victoryAnimation
 		case *SpawnerEntity:
 			e.heldWave = true
+		case *TurretEntity:
+			e.locked = true
+			closestPlayer := ObjectsNearest(w.actors, e.physics.X, e.physics.Y)[0]
+			e.headAnimation.rotation = math.Atan2(e.physics.Y-closestPlayer.physics.Y, e.physics.X-closestPlayer.physics.X)
+		case *TurretBeamEntity:
+			e.locked = true
+			closestPlayer := ObjectsNearest(w.actors, e.physics.X, e.physics.Y)[0]
+			e.headAnimation.rotation = math.Atan2(e.physics.Y-closestPlayer.physics.Y, e.physics.X-closestPlayer.physics.X)
 		}
 	}
 	return nil

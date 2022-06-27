@@ -17,6 +17,8 @@ type TurretEntity struct {
 	cost            int
 	showRange       bool
 	polarizer       bool
+	locked          bool // locked is used to lock the entity when the mode changes to a loss.
+	lockedTicker    int
 }
 
 func NewTurretEntity(config data.EntityConfig) *TurretEntity {
@@ -54,6 +56,15 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 }
 
 func (e *TurretEntity) Update(world *World) (request Request, err error) {
+	if e.locked {
+		e.lockedTicker++
+		if e.lockedTicker%60 < 30 {
+			e.headAnimation.rotation += 0.02 * world.Speed
+		} else {
+			e.headAnimation.rotation -= 0.02 * world.Speed
+		}
+		return
+	}
 	// Tick the turret
 	e.turret.Tick(world.Speed)
 

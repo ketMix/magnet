@@ -27,6 +27,7 @@ type World struct {
 	trashedIDs       []int // This is a slice of trashed IDs for the current wave. This is used to ensure entities are not created if they're marked as trashed. This can happen due to out of order arrival of packets.
 	spawners         []*SpawnerEntity
 	enemies          []*EnemyEntity
+	actors           []*ActorEntity
 	currentTileset   data.TileSet
 	CameraX, CameraY float64
 	path             pathing.Path
@@ -95,9 +96,9 @@ func (w *World) BuildFromLevel(level data.Level) error {
 						// Tie 'em together.
 						e.player = p
 						p.Entity = e
+						w.actors = append(w.actors, e)
 						// And place.
 						w.PlaceEntityInCell(e, x+xoffset, y)
-						fmt.Printf("%d %+v\n", i, e)
 					}
 				}
 			} else if c.Kind == data.SouthSpawnCell {
@@ -1022,6 +1023,21 @@ func ObjectsWithPolarity[K interface{ Physics() *PhysicsObject }](l []K, p data.
 			results = append(results, target)
 		}
 	}
+	return results
+}
+
+func ObjectsNearest[K interface{ Physics() *PhysicsObject }](l []K, x, y float64) []K {
+	var results []K
+
+	results = make([]K, len(l))
+	copy(results, l)
+
+	sort.Slice(results, func(i, j int) bool {
+		a := GetMagnitude(GetDistanceVector(x, y, results[i].Physics().X, results[i].Physics().Y))
+		b := GetMagnitude(GetDistanceVector(x, y, results[j].Physics().X, results[j].Physics().Y))
+		return a < b
+	})
+
 	return results
 }
 

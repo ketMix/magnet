@@ -21,6 +21,16 @@ func NewTurretBeamEntity(config data.EntityConfig) *TurretBeamEntity {
 }
 
 func (e *TurretBeamEntity) Update(world *World) (request Request, err error) {
+	if e.locked {
+		e.lockedTicker++
+		if e.lockedTicker%60 < 30 {
+			e.headAnimation.rotation += 0.02 * world.Speed
+		} else {
+			e.headAnimation.rotation -= 0.02 * world.Speed
+		}
+		return
+
+	}
 	// Tick the turret
 	e.turret.Tick(world.Speed)
 
