@@ -96,17 +96,22 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 
 		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
 	} else {
+		var requests MultiRequest
 		for _, core := range world.cores {
 			if e.IsCollided(core) {
-				core.health--
+				requests.Requests = append(requests.Requests, DamageCoreRequest{
+					ID:     core.id,
+					Damage: 1, // Should this be based upon some enemy damage value?
+				})
 			}
 		}
 		// No mo steppes
-		request = TrashEntityRequest{
+		requests.Requests = append(requests.Requests, TrashEntityRequest{
 			NetID:  e.netID,
 			entity: e,
 			local:  true,
-		}
+		})
+		request = requests
 		// We have reached a core, we should decrease the health on that core
 		// Gotta figure out what core it reached...
 	}

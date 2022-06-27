@@ -10,6 +10,8 @@ import (
 type CoreEntity struct {
 	BaseEntity
 	healthBar *ProgressBar
+	id        int // Simplified core ID that can be shared between clients, as it is based on map construction.
+	destroyed bool
 }
 
 func NewCoreEntity(config data.EntityConfig) *CoreEntity {

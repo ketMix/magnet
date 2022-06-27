@@ -81,6 +81,11 @@ type TrashEntityRequest struct {
 	local  bool   // Used to determine in the trash request is local.
 }
 
+type DamageCoreRequest struct {
+	ID     int `json:"i"` // The ID of the core that took damage.
+	Damage int `json:"d"` // The Damage value.
+}
+
 type PlaySoundRequest struct {
 	Sound string `json:"s"`
 }
@@ -128,6 +133,10 @@ func (r SpawnOrbRequest) Type() net.TypedMessageType {
 
 func (r CollectOrbRequest) Type() net.TypedMessageType {
 	return 306
+}
+
+func (r DamageCoreRequest) Type() net.TypedMessageType {
+	return 307
 }
 
 func (r EntityPropertySync) Type() net.TypedMessageType {
@@ -187,6 +196,11 @@ func init() {
 	})
 	net.AddTypedMessage(306, func(data json.RawMessage) net.Message {
 		var m CollectOrbRequest
+		json.Unmarshal(data, &m)
+		return m
+	})
+	net.AddTypedMessage(307, func(data json.RawMessage) net.Message {
+		var m DamageCoreRequest
 		json.Unmarshal(data, &m)
 		return m
 	})

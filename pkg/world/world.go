@@ -119,6 +119,7 @@ func (w *World) BuildFromLevel(level data.Level) error {
 				w.PlaceEntityInCell(e, x, y)
 				w.coreX = x
 				w.coreY = y
+				e.id = len(w.cores)
 				// Do we want more than 1 core...?
 				w.cores = append(w.cores, e)
 			}
@@ -207,6 +208,13 @@ func (w *World) ProcessRequest(r Request) {
 	case EntityPropertySync:
 		if w.Game.Net().Hosting() {
 			w.Game.Net().Send(r)
+		}
+	case DamageCoreRequest:
+		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+			w.DamageCore(r)
+			if w.Game.Net().Hosting() {
+				w.Game.Net().Send(r)
+			}
 		}
 	case UseToolRequest:
 		// NOTE: Technically a client could just send this request and we won't do any distance checking.
@@ -542,6 +550,21 @@ func (w *World) CollectOrb(r CollectOrbRequest) {
 			s.SetVolume(1)
 		} else {
 			s.SetVolume(1.5)
+		}
+	}
+}
+
+func (w *World) DamageCore(r DamageCoreRequest) {
+	for _, c := range w.cores {
+		if c.id == r.ID {
+			c.health -= r.Damage
+			data.SFX.Play("core-damage.ogg")
+			if c.health <= 0 && !c.destroyed {
+				c.destroyed = true
+				data.SFX.Play("loss-hit.ogg")
+			}
+			// Screen shake?
+			return
 		}
 	}
 }
