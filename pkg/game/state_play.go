@@ -200,7 +200,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	}
 
 	// Draw mode.
-	s.world.Mode.Draw(screen)
+	s.world.Mode.Draw(&s.world, screen)
 
 	// Draw the waves and current points.
 	mx = 8

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/goro/pathing"
 )
 
 type SpawnerEntity struct {
@@ -16,6 +17,7 @@ type SpawnerEntity struct {
 	heldWave    bool // heldWave indicicates if the spawner has a held wave waiting to be spawned.
 	// spawnTargets []EnemyKind ???
 	spawnElapsed float64
+	steps        []pathing.Step
 }
 
 func NewSpawnerEntity(p data.Polarity) *SpawnerEntity {
@@ -138,4 +140,12 @@ func (e *SpawnerEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOpt
 	}
 
 	screen.DrawImage(img, op)
+}
+
+func (e *SpawnerEntity) CanPathfind() bool {
+	return true
+}
+
+func (e *SpawnerEntity) SetSteps(s []pathing.Step) {
+	e.steps = s
 }

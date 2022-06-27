@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
@@ -16,7 +17,7 @@ type WorldMode interface {
 	Type() net.TypedMessageType
 	Init(w *World) error
 	Update(w *World) (WorldMode, error)
-	Draw(screen *ebiten.Image)
+	Draw(w *World, screen *ebiten.Image)
 	String() string
 	Local() bool
 }
@@ -44,7 +45,7 @@ func (m *PreGameMode) Update(w *World) (next WorldMode, err error) {
 	next = &BuildMode{local: true}
 	return
 }
-func (m *PreGameMode) Draw(screen *ebiten.Image) {
+func (m *PreGameMode) Draw(w *World, screen *ebiten.Image) {
 }
 func (m *PreGameMode) Local() bool {
 	return m.local
@@ -79,7 +80,21 @@ func (m *BuildMode) Update(w *World) (next WorldMode, err error) {
 	}
 	return
 }
-func (m *BuildMode) Draw(screen *ebiten.Image) {
+func (m *BuildMode) Draw(w *World, screen *ebiten.Image) {
+	// First draw/get pathing overlay for spawners.
+	for _, e := range w.spawners {
+		lastX, lastY := e.physics.X, e.physics.Y
+		for _, s := range e.steps {
+			x := float64(s.X()*data.CellWidth + data.CellWidth/2)
+			y := float64(s.Y()*data.CellHeight + data.CellHeight/2)
+			c := data.GetPolarityColor(e.physics.polarity)
+			c.A = 128
+			ebitenutil.DrawLine(screen, w.CameraX+lastX, w.CameraY+lastY, w.CameraX+float64(x), w.CameraY+float64(y), c)
+			lastX = float64(x)
+			lastY = float64(y)
+		}
+	}
+
 	bounds := text.BoundString(data.NormalFace, "build mode")
 	text.Draw(
 		screen,
@@ -141,7 +156,7 @@ func (m *WaveMode) Update(w *World) (next WorldMode, err error) {
 	}
 	return
 }
-func (m *WaveMode) Draw(screen *ebiten.Image) {
+func (m *WaveMode) Draw(w *World, screen *ebiten.Image) {
 }
 func (m *WaveMode) Local() bool {
 	return m.local
@@ -164,7 +179,7 @@ func (m *LossMode) Init(w *World) error {
 func (m *LossMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
-func (m *LossMode) Draw(screen *ebiten.Image) {
+func (m *LossMode) Draw(w *World, screen *ebiten.Image) {
 }
 func (m *LossMode) Local() bool {
 	return m.local
@@ -187,7 +202,7 @@ func (m *VictoryMode) Init(w *World) error {
 func (m *VictoryMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
-func (m *VictoryMode) Draw(screen *ebiten.Image) {
+func (m *VictoryMode) Draw(w *World, screen *ebiten.Image) {
 }
 func (m *VictoryMode) Local() bool {
 	return m.local
@@ -210,7 +225,7 @@ func (m *PostGameMode) Init(w *World) error {
 func (m *PostGameMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
-func (m *PostGameMode) Draw(screen *ebiten.Image) {
+func (m *PostGameMode) Draw(w *World, screen *ebiten.Image) {
 }
 func (m *PostGameMode) Local() bool {
 	return m.local

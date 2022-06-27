@@ -866,6 +866,9 @@ func (w *World) UpdatePathing() {
 	for _, e := range w.enemies {
 		w.UpdateEntityPathing(e)
 	}
+	for _, e := range w.spawners {
+		w.UpdateEntityPathing(e)
+	}
 }
 
 func (w *World) UpdateEntityPathing(e Entity) {
