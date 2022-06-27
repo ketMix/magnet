@@ -48,6 +48,7 @@ func (e *TurretBeamEntity) Update(world *World) (request Request, err error) {
 		// Damage?
 		if e.turret.CanFire(world.Speed) {
 			if e2, ok := e.target.(*EnemyEntity); ok {
+				data.SFX.Play("turret-beam.ogg")
 				e2.health -= e.turret.damage
 			}
 		}
