@@ -65,6 +65,8 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		x := math.Cos(r) * e.speed
 		y := math.Sin(r) * e.speed
 
+		origX := e.physics.X
+		origY := e.physics.Y
 		targetX := e.physics.X - x
 		targetY := e.physics.Y - y
 		cellX := world.GetCell(world.GetClosestCellPosition(int(targetX), int(e.physics.Y)))
@@ -74,6 +76,9 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 		}
 		if cellY != nil && cellY.kind != data.EmptyCell && cellY.kind != data.BlockedCell {
 			e.physics.Y = targetY
+		}
+		if origX == e.physics.X && origY == e.physics.Y {
+			a.complete = true
 		}
 
 		if x < 0 {
