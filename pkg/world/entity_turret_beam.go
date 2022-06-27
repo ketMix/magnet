@@ -11,8 +11,7 @@ import (
 
 type TurretBeamEntity struct {
 	TurretEntity
-	targetX, targetY float64
-	beamTick         int
+	beamTick int
 }
 
 func NewTurretBeamEntity(config data.EntityConfig) *TurretBeamEntity {

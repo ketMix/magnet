@@ -361,12 +361,11 @@ func (w *World) ProcessRequest(r Request) {
 			if !r.local {
 				// Mark it as trashed.
 				w.trashedIDs = append(w.trashedIDs, r.NetID)
-				fmt.Println("trashing it", r.NetID)
 				for _, e := range w.entities {
 					if e.NetID() == r.NetID {
 						e.Trash()
-						for i, e := range w.enemies {
-							if e == r.entity {
+						for i, e2 := range w.enemies {
+							if e2 == e {
 								w.enemies = append(w.enemies[:i], w.enemies[i+1:]...)
 								break
 							}
