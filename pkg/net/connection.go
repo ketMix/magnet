@@ -318,6 +318,7 @@ func (c *Connection) Loop() {
 		}
 	loopEnd:
 		// This is a bit of a bad spot for this, but resend any unconfirmed reliable messages at this point.
+		// FIXME: We should have some sort of "back off" algorithm that adjusts the time to wait to resend in according to time last received, so as to prevent spamming a d/ced connection into oblivion.
 		for _, m := range c.sendingReliables {
 			n := time.Now()
 			if n.Sub(m.lastSent) >= 500*time.Millisecond {
