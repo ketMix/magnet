@@ -175,7 +175,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 
 	// Draw our messages from most recent to oldest, bottom to top.
 	mx := 8
-	my := world.ScreenHeight - 40
+	my := world.ScreenHeight - 80
 	for i := len(s.messages) - 1; i >= 0; i-- {
 		m := s.messages[i]
 		bounds := text.BoundString(data.NormalFace, m.content)
