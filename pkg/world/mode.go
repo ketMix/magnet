@@ -220,6 +220,13 @@ func (m LossMode) Type() net.TypedMessageType {
 func (m *LossMode) Init(w *World) error {
 	// cry tiem
 	data.BGM.Set("loss.ogg")
+	// Lock those lil actors an' make em weep
+	for _, e := range w.entities {
+		if e, ok := e.(*ActorEntity); ok {
+			e.locked = true
+			e.animation = e.lossAnimation
+		}
+	}
 	return nil
 }
 func (m *LossMode) Update(w *World) (next WorldMode, err error) {

@@ -16,7 +16,9 @@ type ActorEntity struct {
 	right           bool
 	walkAnimation   Animation
 	idleAnimation   Animation
+	lossAnimation   Animation
 	colorMultiplier [3]float64
+	locked          bool // locked is used to lock the player when the mode changes to a loss.
 }
 
 func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
@@ -30,6 +32,11 @@ func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
 		},
 		idleAnimation: Animation{
 			images: config.Images,
+		},
+		lossAnimation: Animation{
+			images:    config.LossImages,
+			frameTime: 20,
+			speed:     1,
 		},
 		colorMultiplier: config.ColorMultiplier,
 		BaseEntity: BaseEntity{
@@ -48,11 +55,15 @@ func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
 			},
 		},
 		player: player,
+		locked: false,
 	}
 }
 
 func (e *ActorEntity) Update(world *World) (request Request, err error) {
 	e.animation.Update()
+	if e.locked {
+		return
+	}
 	switch a := e.action.(type) {
 	case *EntityActionMove:
 		if math.Abs(e.physics.X-a.X) < a.Distance && math.Abs(e.physics.Y-a.Y) < a.Distance {

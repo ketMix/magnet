@@ -130,3 +130,9 @@ For turrets, this is used to set their "barrel" image
 ### *The prefix used to identify an entity's walk images*
 
 For players, this is to used to identify the images for the walk animation
+
+## L (Loss Image Prefix) **string**
+
+### *The prefix used to identify an entity's loss images*
+
+For players, this is to used to identify the images for when the player loses.
