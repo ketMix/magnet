@@ -162,6 +162,8 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 		}
 	} else {
 		switch msg := msg.(type) {
+		case DamageCoreRequest:
+			w.DamageCore(msg)
 		case PlaySoundRequest:
 			data.SFX.Play(msg.Sound)
 		case PointsSync:
@@ -213,7 +215,7 @@ func (w *World) ProcessRequest(r Request) {
 		if !w.Game.Net().Active() || w.Game.Net().Hosting() {
 			w.DamageCore(r)
 			if w.Game.Net().Hosting() {
-				w.Game.Net().Send(r)
+				w.Game.Net().SendReliable(r)
 			}
 		}
 	case UseToolRequest:
