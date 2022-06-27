@@ -1,8 +1,11 @@
 package game
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
 )
 
@@ -12,13 +15,13 @@ type ClickableUI interface {
 	Update()
 	Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions)
 	IsClicked() bool
-	OnClick()
 }
 
 type Clickable struct {
-	image *ebiten.Image
-	x     float64
-	y     float64
+	image   *ebiten.Image
+	x       float64
+	y       float64
+	onClick func()
 }
 
 func (c *Clickable) SetPos(x, y float64) {
@@ -32,7 +35,7 @@ func (c *Clickable) Image() *ebiten.Image {
 
 func (c *Clickable) Update() {
 	if c.IsClicked() {
-		c.OnClick()
+		c.onClick()
 	}
 }
 
@@ -62,10 +65,6 @@ func (c *Clickable) IsClicked() bool {
 	return false
 }
 
-func (c *Clickable) OnClick() {
-	return
-}
-
 type BGMIcon struct {
 	Clickable
 }
@@ -78,18 +77,17 @@ func NewBGMIcon() *BGMIcon {
 	return &BGMIcon{
 		Clickable: Clickable{
 			image: image,
+			onClick: func() {
+				data.BGM.ToggleMute()
+			},
 		},
 	}
 }
 
 func (bgm *BGMIcon) Update() {
 	if bgm.IsClicked() {
-		bgm.OnClick()
+		bgm.onClick()
 	}
-}
-
-func (bgm *BGMIcon) OnClick() {
-	data.BGM.ToggleMute()
 }
 
 func (bgm *BGMIcon) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
@@ -111,18 +109,17 @@ func NewSFXIcon() *SFXIcon {
 	return &SFXIcon{
 		Clickable: Clickable{
 			image: image,
+			onClick: func() {
+				data.SFX.ToggleMute()
+			},
 		},
 	}
 }
 
 func (sfx *SFXIcon) Update() {
 	if sfx.IsClicked() {
-		sfx.OnClick()
+		sfx.onClick()
 	}
-}
-
-func (sfx *SFXIcon) OnClick() {
-	data.SFX.ToggleMute()
 }
 
 func (sfx *SFXIcon) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
@@ -130,4 +127,48 @@ func (sfx *SFXIcon) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions
 		screenOp.ColorM.Scale(1.0, 1.0, 1.0, 0.5)
 	}
 	sfx.Clickable.Draw(screen, screenOp)
+}
+
+const borderWidth = 5
+
+type Button struct {
+	Clickable
+	text       string
+	background *ebiten.Image
+}
+
+func NewButton(x, y float64, txt string, onClick func()) *Button {
+	bounds := text.BoundString(data.NormalFace, txt)
+	width := bounds.Dx() + borderWidth
+	height := bounds.Dy() + borderWidth
+	bgImage := ebiten.NewImage(width, height)
+	bgImage.Fill(color.White)
+
+	return &Button{
+		Clickable: Clickable{
+			x:       x,
+			y:       y,
+			image:   bgImage,
+			onClick: onClick,
+		},
+		text: txt,
+	}
+}
+
+func (b *Button) Update() {
+	if b.IsClicked() {
+		b.onClick()
+	}
+}
+
+func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
+	b.Clickable.Draw(screen, screenOp)
+	text.Draw(
+		screen,
+		b.text,
+		data.NormalFace,
+		int(b.x)-b.image.Bounds().Dx()/2,
+		int(b.y)-b.image.Bounds().Dy()/2,
+		color.White,
+	)
 }

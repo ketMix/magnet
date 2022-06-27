@@ -11,4 +11,5 @@ type Options struct {
 	Speed      float64 `short:"S" long:"speed" description:"Game speed multiplier" default:"1.0"`
 	NoMusic    bool    `long:"nomusic" description:"Disable in-game music"`
 	NoSound    bool    `long:"nosound" description:"Disable in-game sound"`
+	NoMenu     bool    `long:"nomenu" description:"Disable main menu and immediately start game"`
 }
