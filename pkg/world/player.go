@@ -94,6 +94,17 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 					Tool: ToolDestroy,
 				},
 			}
+		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && p.Toolbelt.activeItem.tool == ToolGun {
+			// Check if we can fire
+			cx, cy := w.GetCursorPosition()
+			if p.Entity.Turret().CanFire(w.Speed) {
+				action = &EntityActionShoot{
+					TargetX:  float64(cx),
+					TargetY:  float64(cy),
+					Polarity: p.Toolbelt.activeItem.polarity,
+				}
+			}
+
 		} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			// Send turret placement request at the cell closest to the mouse.
 			cx, cy := w.GetCursorPosition()
@@ -117,15 +128,6 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 						Tool:     p.Toolbelt.activeItem.tool,
 						Polarity: p.Toolbelt.activeItem.polarity,
 					},
-				}
-			case ToolGun:
-				// Check if we can fire
-				if p.Entity.Turret().CanFire(w.Speed) {
-					action = &EntityActionShoot{
-						TargetX:  float64(cx),
-						TargetY:  float64(cy),
-						Polarity: p.Toolbelt.activeItem.polarity,
-					}
 				}
 			}
 		} else if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyD) {
