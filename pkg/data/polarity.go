@@ -10,6 +10,14 @@ const (
 	PositivePolarity          = 1
 )
 
+func (p *Polarity) Reverse() {
+	if *p == NegativePolarity {
+		*p = PositivePolarity
+	} else if *p == PositivePolarity {
+		*p = NegativePolarity
+	}
+}
+
 // Returns raw RGB values for provided polarity
 func GetPolarityColor(p Polarity) color.RGBA {
 	switch p {

@@ -4,7 +4,7 @@ D 1
 R 0
 X 0.23076923076
 O 2
-N 5
+N 1
 S 1
 P positive
 M false

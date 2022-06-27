@@ -9,5 +9,5 @@ r 3
 P neutral
 M true
 Y 1
-Z 100
+Z 50
 I runner-

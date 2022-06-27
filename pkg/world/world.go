@@ -270,8 +270,8 @@ func (w *World) ProcessRequest(r Request) {
 			} else {
 				r.Owner = w.Game.Players()[1].Name
 			}
-			// Wall points? 5? :shrug:
-			wallCost := 5
+			// Wall points? 3? :shrug:
+			wallCost := 3
 			if w.Points >= wallCost {
 				c := w.GetCell(r.X, r.Y)
 				if c != nil {

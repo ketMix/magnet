@@ -158,7 +158,7 @@ func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
 				config := data.TurretConfigs[t.kind.Title]
 				cost = fmt.Sprintf("%dpts", config.Points)
 			} else if t.tool == ToolWall {
-				cost = "5pts"
+				cost = "3pts"
 			}
 
 			// Combine labels
