@@ -234,10 +234,12 @@ func (m *LossMode) Init(w *World) error {
 			e.heldWave = true
 		case *TurretEntity:
 			e.locked = true
+			e.target = nil
 			closestPlayer := ObjectsNearest(w.actors, e.physics.X, e.physics.Y)[0]
 			e.headAnimation.rotation = math.Atan2(e.physics.Y-closestPlayer.physics.Y, e.physics.X-closestPlayer.physics.X)
 		case *TurretBeamEntity:
 			e.locked = true
+			e.target = nil
 			closestPlayer := ObjectsNearest(w.actors, e.physics.X, e.physics.Y)[0]
 			e.headAnimation.rotation = math.Atan2(e.physics.Y-closestPlayer.physics.Y, e.physics.X-closestPlayer.physics.X)
 		}
