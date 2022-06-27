@@ -69,12 +69,12 @@ func (s *PlayState) Update() error {
 	switch s.world.Mode.(type) {
 	case *world.LossMode:
 		// TODO: Show hit "R" to restart or something. Also maybe stats.
-		if s.game.net.Hosting() || !s.game.net.Active() {
-			s.game.SetState(&TravelState{
-				game:        s.game,
-				targetLevel: s.levelDataName,
-			})
-		}
+		// if s.game.net.Hosting() || !s.game.net.Active() {
+		// 	s.game.SetState(&TravelState{
+		// 		game:        s.game,
+		// 		targetLevel: s.levelDataName,
+		// 	})
+		// }
 	case *world.VictoryMode:
 		// TODO: Show end game stats, if possible! Then some sort of "hit okay" to travel button/key.
 		if s.level.Next != "" {

@@ -64,6 +64,7 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 		})
 		return requests, nil
 	}
+
 	e.lifetime++
 	// Update animation.
 	e.animation.Update()
@@ -95,6 +96,11 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 
 		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
 	} else {
+		for _, core := range world.cores {
+			if e.IsCollided(core) {
+				core.health--
+			}
+		}
 		// No mo steppes
 		request = TrashEntityRequest{
 			NetID:  e.netID,

@@ -15,9 +15,11 @@ type CoreEntity struct {
 func NewCoreEntity(config data.EntityConfig) *CoreEntity {
 	return &CoreEntity{
 		BaseEntity: BaseEntity{
-			health:    50,
-			maxHealth: 50,
-			physics:   PhysicsObject{},
+			health:    1,
+			maxHealth: 1,
+			physics: PhysicsObject{
+				radius: 5,
+			},
 			animation: Animation{
 				images:    config.Images,
 				frameTime: 5,

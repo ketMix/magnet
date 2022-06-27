@@ -5,7 +5,7 @@ import (
 )
 
 var BGM MusicPlayer = MusicPlayer{
-	volume: 0.35,
+	volume: 0.50,
 }
 
 type MusicPlayer struct {

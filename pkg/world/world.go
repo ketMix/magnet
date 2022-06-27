@@ -701,6 +701,7 @@ func (w *World) Update() error {
 func (w *World) Draw(screen *ebiten.Image) {
 	// Get our camera position.
 	screenOp := &ebiten.DrawImageOptions{}
+
 	// FIXME: Base this on some sort of player lookup or a global self reference.
 	if w.Game.Players()[0].Entity != nil {
 		w.CameraX = -w.Game.Players()[0].Entity.Physics().X + float64(ScreenWidth)/2
@@ -710,6 +711,9 @@ func (w *World) Draw(screen *ebiten.Image) {
 		w.CameraX,
 		w.CameraY,
 	)
+
+	// Draw any mode overlays
+	w.Mode.Draw(w, screen)
 
 	// Draw da background.
 	if w.backgroundImage != nil {

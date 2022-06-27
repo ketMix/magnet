@@ -30,6 +30,7 @@ func (s *MenuState) Init() error {
 	} else {
 		panic(err)
 	}
+
 	// Set Main Menu Buttons
 	startGameButton := NewButton(
 		float64(world.ScreenWidth/2),
@@ -42,7 +43,7 @@ func (s *MenuState) Init() error {
 	s.buttons = []Button{*startGameButton}
 
 	// Start the tunes
-	data.BGM.Set("mainmenu.ogg")
+	data.BGM.Set("menu.ogg")
 	return nil
 }
 

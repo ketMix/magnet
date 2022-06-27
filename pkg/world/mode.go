@@ -64,7 +64,7 @@ func (m BuildMode) Type() net.TypedMessageType {
 }
 func (m *BuildMode) Init(w *World) error {
 	w.CurrentWave++
-	data.BGM.Set("build-phase.ogg")
+	data.BGM.Set("build.ogg")
 	return nil
 }
 func (m *BuildMode) Update(w *World) (next WorldMode, err error) {
@@ -176,7 +176,8 @@ func (m WaveMode) Type() net.TypedMessageType {
 }
 func (m *WaveMode) Init(w *World) error {
 	// Play that funky music.
-	data.BGM.Set("wave-phase.ogg")
+	data.BGM.Set("wave.ogg")
+
 	// Reset the player's ready state.
 	for _, pl := range w.Game.Players() {
 		pl.ReadyForWave = false
@@ -189,10 +190,10 @@ func (m *WaveMode) Init(w *World) error {
 	return nil
 }
 func (m *WaveMode) Update(w *World) (next WorldMode, err error) {
-	if w.AreSpawnersHolding() && w.AreEnemiesDead() {
-		next = &BuildMode{local: true}
-	} else if w.AreCoresDead() {
+	if w.AreCoresDead() {
 		next = &LossMode{local: true}
+	} else if w.AreSpawnersHolding() && w.AreEnemiesDead() {
+		next = &BuildMode{local: true}
 	} else if w.AreWavesComplete() {
 		next = &VictoryMode{local: true}
 		// Move onto build mode...?
@@ -217,12 +218,55 @@ func (m LossMode) Type() net.TypedMessageType {
 	return 503
 }
 func (m *LossMode) Init(w *World) error {
+	// cry tiem
+	data.BGM.Set("loss.ogg")
 	return nil
 }
 func (m *LossMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
 func (m *LossMode) Draw(w *World, screen *ebiten.Image) {
+	// Draw the game over messages
+	lossText := "DEFEAT"
+	flavorText := "Tch... we've lost the crystalized embryos meant to seed the human race... we're extinctie..."
+	restartText := "press R to restartie"
+
+	lossBounds := text.BoundString(data.BoldFace, lossText)
+	flavorBounds := text.BoundString(data.NormalFace, flavorText)
+	restartBounds := text.BoundString(data.NormalFace, restartText)
+
+	x := ScreenWidth / 2
+	y := int(float64(ScreenHeight) / 1.25)
+
+	// Might be nice to have a wrapper for constructing and drawing text objects
+	text.Draw(
+		screen,
+		lossText,
+		data.BoldFace,
+		x-lossBounds.Dx()/2,
+		y-lossBounds.Dy(),
+		color.White,
+	)
+	y += flavorBounds.Dy() * 2
+
+	text.Draw(
+		screen,
+		flavorText,
+		data.NormalFace,
+		x-flavorBounds.Dx()/2,
+		y-flavorBounds.Dy(),
+		color.White,
+	)
+	y += flavorBounds.Dy() * 2
+
+	text.Draw(
+		screen,
+		restartText,
+		data.NormalFace,
+		x-restartBounds.Dx()/2,
+		y-restartBounds.Dy(),
+		color.White,
+	)
 }
 func (m *LossMode) Local() bool {
 	return m.local
