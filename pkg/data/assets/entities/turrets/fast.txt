@@ -2,9 +2,9 @@ T FAST
 C 15
 H 1
 D 1
-R 25
+R 35
 N 1
-X 0.33
+X 0.3
 O 1
 S 1
 P neutral
@@ -12,4 +12,4 @@ M false
 Y 1
 Z 1
 I turret-basic
-i turret-head2
+i turret-fast

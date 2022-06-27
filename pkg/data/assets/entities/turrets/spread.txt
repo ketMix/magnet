@@ -4,7 +4,7 @@ H 1
 D 1
 R 30
 N 3
-X 1
+X 1.25
 O 1
 S 1
 P neutral
