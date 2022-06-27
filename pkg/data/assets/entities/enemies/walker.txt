@@ -10,4 +10,5 @@ P neutral
 M true
 Y 1
 Z 50
-I walker-fancy
+W walker-walk-
+V walker-victory-

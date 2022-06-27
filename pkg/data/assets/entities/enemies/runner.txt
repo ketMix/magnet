@@ -10,4 +10,5 @@ P neutral
 M true
 Y 1
 Z 50
-I runner-
+W runner-walk-
+V runner-victory-

@@ -18,14 +18,16 @@ type EnemyEntity struct {
 	// How many points are awarded upon defeat?
 	points int
 	//
-	lastSync int
+	lastSync         int
+	victoryAnimation Animation
+	locked           bool // locked is used to lock the enemy entity when the mode changes to a loss.
 }
 
 func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 	return &EnemyEntity{
 		BaseEntity: BaseEntity{
 			animation: Animation{
-				images:    config.Images,
+				images:    config.WalkImages,
 				frameTime: 30,
 				speed:     1 - config.Speed,
 			},
@@ -46,10 +48,20 @@ func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
 		),
 		speed:  config.Speed,
 		points: config.Points,
+		victoryAnimation: Animation{
+			images:    config.VictoryImages,
+			frameTime: 30,
+			speed:     1 - config.Speed,
+		},
 	}
 }
 
 func (e *EnemyEntity) Update(world *World) (request Request, err error) {
+	// Update animation.
+	e.animation.Update()
+	if e.locked {
+		return
+	}
 	if e.health <= 0 {
 		var requests MultiRequest
 		requests.Requests = append(requests.Requests, TrashEntityRequest{
@@ -66,8 +78,6 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 	}
 
 	e.lifetime++
-	// Update animation.
-	e.animation.Update()
 
 	// Update healthbar
 	e.healthBar.progress = float64(e.maxHealth) / float64(e.health)

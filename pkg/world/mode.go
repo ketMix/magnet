@@ -220,11 +220,17 @@ func (m LossMode) Type() net.TypedMessageType {
 func (m *LossMode) Init(w *World) error {
 	// cry tiem
 	data.BGM.Set("loss.ogg")
-	// Lock those lil actors an' make em weep
+	// Lock those lil actors an' make em weep. Or, if they're enemies, do a jig.
 	for _, e := range w.entities {
-		if e, ok := e.(*ActorEntity); ok {
+		switch e := e.(type) {
+		case *ActorEntity:
 			e.locked = true
 			e.animation = e.lossAnimation
+		case *EnemyEntity:
+			e.locked = true
+			e.animation = e.victoryAnimation
+		case *SpawnerEntity:
+			e.heldWave = true
 		}
 	}
 	return nil
