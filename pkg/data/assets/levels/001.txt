@@ -1,8 +1,8 @@
 T The Start
 S nature
 P 100
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
+W 10@30 scrapper;10@40 scrapper&scrapper;1@100 trundler;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
+W 10@30 scrapper;10@40 scrapper&scrapper;1@100 trundler;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
 N 002
 
 #####   #####
