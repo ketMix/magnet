@@ -81,6 +81,10 @@ type TrashEntityRequest struct {
 	local  bool   // Used to determine in the trash request is local.
 }
 
+type PlaySoundRequest struct {
+	Sound string `json:"s"`
+}
+
 // MultiRequest is a container for multiple requests.
 type MultiRequest struct {
 	Requests []Request `json:"r"`
@@ -142,6 +146,10 @@ func (r TrashEntityRequest) Type() net.TypedMessageType {
 	return 310
 }
 
+func (r PlaySoundRequest) Type() net.TypedMessageType {
+	return 320
+}
+
 func (r DummyRequest) Type() net.TypedMessageType {
 	return net.MissingMessageType
 }
@@ -189,6 +197,12 @@ func init() {
 	})
 	net.AddTypedMessage(311, func(data json.RawMessage) net.Message {
 		var m PointsSync
+		json.Unmarshal(data, &m)
+		return m
+	})
+
+	net.AddTypedMessage(320, func(data json.RawMessage) net.Message {
+		var m PlaySoundRequest
 		json.Unmarshal(data, &m)
 		return m
 	})

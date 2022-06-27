@@ -161,6 +161,8 @@ func (w *World) ProcessNetMessage(msg net.Message) error {
 		}
 	} else {
 		switch msg := msg.(type) {
+		case PlaySoundRequest:
+			data.SFX.Play(msg.Sound)
 		case PointsSync:
 			w.SyncPoints(msg)
 		case EntityPropertySync:
@@ -240,6 +242,14 @@ func (w *World) ProcessRequest(r Request) {
 							r.NetID = e.NetID()
 							w.Game.Net().SendReliable(r)
 						}
+					} else {
+						if !r.local {
+							w.Game.Net().SendReliable(PlaySoundRequest{
+								Sound: "denied.ogg",
+							})
+						} else {
+							data.SFX.Play("denied.ogg")
+						}
 					}
 				}
 			}
@@ -274,6 +284,14 @@ func (w *World) ProcessRequest(r Request) {
 						if w.Game.Net().Hosting() {
 							r.NetID = e.NetID()
 							w.Game.Net().SendReliable(r)
+						}
+					} else {
+						if !r.local {
+							w.Game.Net().SendReliable(PlaySoundRequest{
+								Sound: "denied.ogg",
+							})
+						} else {
+							data.SFX.Play("denied.ogg")
 						}
 					}
 				}
@@ -412,6 +430,7 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 					if r.Owner == w.Game.Players()[0].Name {
 						// TODO: Show some sort of "that isn't yours!" message on screen.
 						fmt.Printf("that is %s's, not yours!\n", ownerName)
+						data.SFX.Play("denied.ogg")
 					}
 				} else {
 					c.entity.Trash()
