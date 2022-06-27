@@ -2,6 +2,7 @@ package world
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/kettek/ebijam22/pkg/data"
 )
 
@@ -17,6 +18,9 @@ type Player struct {
 	ReadyForWave bool
 	// Name is acquired from the initial connection name.
 	Name string
+	//
+	HoveringPlacement bool
+	HoveringPlace     EntityActionPlace
 }
 
 func NewPlayer() *Player {
@@ -60,7 +64,22 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 	}
 	if p.Entity != nil {
 		var action EntityAction
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			cx, cy := w.GetCursorPosition()
+			tx, ty := w.GetClosestCellPosition(cx, cy)
+			// TODO: Show placement preview
+			p.HoveringPlacement = true
+			p.HoveringPlace = EntityActionPlace{
+				X:        tx,
+				Y:        ty,
+				Kind:     p.Toolbelt.activeItem.kind.Title,
+				Tool:     p.Toolbelt.activeItem.tool,
+				Polarity: p.Toolbelt.activeItem.polarity,
+			}
+		} else if p.HoveringPlacement {
+			p.HoveringPlacement = false
+		}
+		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonRight) {
 			// Right-click to delete.
 			cx, cy := w.GetCursorPosition()
 			tx, ty := w.GetClosestCellPosition(cx, cy)
@@ -75,7 +94,7 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 					Tool: ToolDestroy,
 				},
 			}
-		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			// Send turret placement request at the cell closest to the mouse.
 			cx, cy := w.GetCursorPosition()
 			tx, ty := w.GetClosestCellPosition(cx, cy)

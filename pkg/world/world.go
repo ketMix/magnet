@@ -718,6 +718,22 @@ func (w *World) Draw(screen *ebiten.Image) {
 	// Check for any special pending renders, such as move target or pending turret location.
 	for _, p := range w.Game.Players() {
 		if p.Entity != nil {
+			if p.HoveringPlacement {
+				if p.HoveringPlace.Tool == ToolTurret || p.HoveringPlace.Tool == ToolWall {
+					image := GetToolImage(p.HoveringPlace.Tool, p.HoveringPlace.Kind)
+					op := &ebiten.DrawImageOptions{}
+					op.ColorM.Scale(data.GetPolarityColorScale(p.HoveringPlace.Polarity))
+					op.ColorM.Scale(1, 1, 1, 0.5)
+					op.GeoM.Concat(screenOp.GeoM)
+					op.GeoM.Translate(float64(p.HoveringPlace.X*data.CellWidth)+float64(data.CellWidth/2), float64(p.HoveringPlace.Y*data.CellHeight)+float64(data.CellHeight/2))
+					// Draw from center.
+					op.GeoM.Translate(
+						-float64(image.Bounds().Dx())/2,
+						-float64(image.Bounds().Dy())/2,
+					)
+					screen.DrawImage(image, op)
+				}
+			}
 			if p.Entity.Action() != nil && p.Entity.Action().GetNext() != nil {
 				switch a := p.Entity.Action().GetNext().(type) {
 				case *EntityActionPlace:
