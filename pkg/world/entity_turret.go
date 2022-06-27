@@ -16,16 +16,26 @@ type TurretEntity struct {
 	headAnimation   Animation
 	cost            int
 	showRange       bool
+	polarizer       bool
 }
 
 func NewTurretEntity(config data.EntityConfig) *TurretEntity {
+	polarizer := false
+	if config.AttackType == "polarizer" {
+		polarizer = true
+	}
 	return &TurretEntity{
+		polarizer: polarizer,
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images: config.Images,
 			},
 			physics: PhysicsObject{
-				polarity: config.Polarity,
+				polarity:       config.Polarity,
+				magnetic:       config.Magnetic,
+				magnetStrength: config.MagnetStrength,
+				magnetRadius:   config.MagnetRadius,
+				radius:         config.Radius,
 			},
 			turret: Turret{
 				damage:         config.Damage,

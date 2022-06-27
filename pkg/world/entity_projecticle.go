@@ -9,9 +9,10 @@ import (
 
 type ProjecticleEntity struct {
 	BaseEntity
-	elapsed  int
-	lifetime int
-	damage   int
+	elapsed         int
+	lifetime        int
+	damage          int
+	touchedEntities []Entity
 }
 
 func NewProjecticleEntity() *ProjecticleEntity {
@@ -26,6 +27,16 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 	// For each collision
 	//  - get magnetic vector
 	//  - add to initial vector
+
+	hasTouched := func(entity Entity) bool {
+		for _, ent := range e.touchedEntities {
+			if ent == entity {
+				return true
+			}
+		}
+		return false
+	}
+
 	for _, entity := range world.entities {
 		switch entity := entity.(type) {
 		case *EnemyEntity:
@@ -33,6 +44,13 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 				entity.health -= e.damage
 				e.Trash()
 				break
+			}
+		case *TurretEntity:
+			if entity.polarizer && e.IsCollided(entity) {
+				if !hasTouched(entity) {
+					e.physics.polarity = entity.physics.polarity
+					e.touchedEntities = append(e.touchedEntities, entity)
+				}
 			}
 		}
 
