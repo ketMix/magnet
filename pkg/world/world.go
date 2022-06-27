@@ -24,6 +24,7 @@ type World struct {
 	cells            [][]LiveCell
 	entities         []Entity
 	netIDs           int
+	trashedIDs       []int // This is a slice of trashed IDs for the current wave. This is used to ensure entities are not created if they're marked as trashed. This can happen due to out of order arrival of packets.
 	spawners         []*SpawnerEntity
 	enemies          []*EnemyEntity
 	currentTileset   data.TileSet
@@ -340,6 +341,9 @@ func (w *World) ProcessRequest(r Request) {
 			}
 		} else if w.Game.Net().Active() {
 			if !r.local {
+				// Mark it as trashed.
+				w.trashedIDs = append(w.trashedIDs, r.NetID)
+				fmt.Println("trashing it", r.NetID)
 				for _, e := range w.entities {
 					if e.NetID() == r.NetID {
 						e.Trash()
@@ -366,7 +370,15 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 		if w.Game.Net().Hosting() {
 			e.netID = w.GetNextNetID()
 		} else {
-			e.netID = r.NetID
+			if r.NetID != 0 {
+				for _, trashedID := range w.trashedIDs {
+					if trashedID == r.NetID {
+						// Oh! we don't want to construct this, as it has already been trashed.
+						return nil
+					}
+				}
+				e.netID = r.NetID
+			}
 		}
 		e.physics.polarity = r.Polarity
 		w.PlaceEntityInCell(e, r.X, r.Y)
@@ -444,7 +456,15 @@ func (w *World) SpawnEnemyEntity(r SpawnEnemyRequest) *EnemyEntity {
 	if w.Game.Net().Hosting() {
 		e.netID = w.GetNextNetID()
 	} else {
-		e.netID = r.NetID
+		if r.NetID != 0 {
+			for _, trashedID := range w.trashedIDs {
+				if trashedID == r.NetID {
+					// Oh! we don't want to construct this, as it has already been trashed.
+					return nil
+				}
+			}
+			e.netID = r.NetID
+		}
 	}
 	e.physics.polarity = r.Polarity
 	w.enemies = append(w.enemies, e)
@@ -459,7 +479,15 @@ func (w *World) SpawnOrbEntity(r SpawnOrbRequest) *OrbEntity {
 	if w.Game.Net().Hosting() {
 		e.netID = w.GetNextNetID()
 	} else {
-		e.netID = r.NetID
+		if r.NetID != 0 {
+			for _, trashedID := range w.trashedIDs {
+				if trashedID == r.NetID {
+					// Oh! we don't want to construct this, as it has already been trashed.
+					return nil
+				}
+			}
+			e.netID = r.NetID
+		}
 	}
 	w.PlaceEntityAt(e, r.X, r.Y)
 
@@ -489,7 +517,15 @@ func (w *World) SpawnProjecticleEntity(r SpawnProjecticleRequest) *ProjecticleEn
 	if w.Game.Net().Hosting() {
 		e.netID = w.GetNextNetID()
 	} else {
-		e.netID = r.NetID
+		if r.NetID != 0 {
+			for _, trashedID := range w.trashedIDs {
+				if trashedID == r.NetID {
+					// Oh! we don't want to construct this, as it has already been trashed.
+					return nil
+				}
+			}
+			e.netID = r.NetID
+		}
 	}
 	e.physics.polarity = r.Polarity
 	e.damage = r.Damage
@@ -550,20 +586,11 @@ func (w *World) SetMode(m WorldMode) {
 	// Otherwise update the mode.
 	w.Mode = m
 
-	if _, ok := w.Mode.(*BuildMode); ok {
-		data.BGM.Set("build-phase.ogg")
-		w.CurrentWave++
-	}
+	m.Init(w)
+
 	if _, ok := w.Mode.(*WaveMode); ok {
-		data.BGM.Set("wave-phase.ogg")
-		// UGH
-		for _, pl := range w.Game.Players() {
-			pl.ReadyForWave = false
-		}
-		// Unleash the spawners.
-		for _, s := range w.spawners {
-			s.heldWave = false
-		}
+		// Clear out our trashed IDs history on wave start.
+		w.trashedIDs = make([]int, 0)
 	}
 
 	// Also send the network message if we're the host.

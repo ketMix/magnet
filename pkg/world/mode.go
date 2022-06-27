@@ -14,6 +14,7 @@ import (
 // WorldMode represents the type for representing the current game mode
 type WorldMode interface {
 	Type() net.TypedMessageType
+	Init(w *World) error
 	Update(w *World) (WorldMode, error)
 	Draw(screen *ebiten.Image)
 	String() string
@@ -30,6 +31,13 @@ func (m PreGameMode) String() string {
 }
 func (m PreGameMode) Type() net.TypedMessageType {
 	return 500
+}
+func (m *PreGameMode) Init(w *World) error {
+	for _, pl := range w.Game.Players() {
+		pl.ReadyForWave = false
+	}
+
+	return nil
 }
 func (m *PreGameMode) Update(w *World) (next WorldMode, err error) {
 	// Just immediately go to build mode.
@@ -52,6 +60,11 @@ func (m BuildMode) String() string {
 }
 func (m BuildMode) Type() net.TypedMessageType {
 	return 501
+}
+func (m *BuildMode) Init(w *World) error {
+	w.CurrentWave++
+	data.BGM.Set("build-phase.ogg")
+	return nil
 }
 func (m *BuildMode) Update(w *World) (next WorldMode, err error) {
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
@@ -103,6 +116,20 @@ func (m WaveMode) String() string {
 func (m WaveMode) Type() net.TypedMessageType {
 	return 502
 }
+func (m *WaveMode) Init(w *World) error {
+	// Play that funky music.
+	data.BGM.Set("wave-phase.ogg")
+	// Reset the player's ready state.
+	for _, pl := range w.Game.Players() {
+		pl.ReadyForWave = false
+	}
+	// Unleash the spawners.
+	for _, s := range w.spawners {
+		s.heldWave = false
+	}
+
+	return nil
+}
 func (m *WaveMode) Update(w *World) (next WorldMode, err error) {
 	if w.AreSpawnersHolding() && w.AreEnemiesDead() {
 		next = &BuildMode{local: true}
@@ -131,6 +158,9 @@ func (m LossMode) String() string {
 func (m LossMode) Type() net.TypedMessageType {
 	return 503
 }
+func (m *LossMode) Init(w *World) error {
+	return nil
+}
 func (m *LossMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
@@ -151,6 +181,9 @@ func (m VictoryMode) String() string {
 func (m VictoryMode) Type() net.TypedMessageType {
 	return 504
 }
+func (m *VictoryMode) Init(w *World) error {
+	return nil
+}
 func (m *VictoryMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
@@ -170,6 +203,9 @@ func (m PostGameMode) String() string {
 }
 func (m PostGameMode) Type() net.TypedMessageType {
 	return 505
+}
+func (m *PostGameMode) Init(w *World) error {
+	return nil
 }
 func (m *PostGameMode) Update(w *World) (next WorldMode, err error) {
 	return
