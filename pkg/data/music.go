@@ -58,5 +58,6 @@ func (mp *MusicPlayer) ToggleMute() {
 func (mp *MusicPlayer) Update() {
 	if mp.currentMusic != nil && !mp.currentMusic.IsPlaying() {
 		mp.currentMusic.Rewind()
+		mp.currentMusic.Play()
 	}
 }
