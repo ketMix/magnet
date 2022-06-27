@@ -1,10 +1,10 @@
 T WALKER
-C 2
+C 5
 H 10
 D 1
 R 1
 X 1
-S 0.25
+S 0.3
 r 3
 P neutral
 M true

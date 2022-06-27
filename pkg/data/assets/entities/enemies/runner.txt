@@ -1,6 +1,6 @@
 T RUNNER
-C 2
-H 4
+C 6
+H 5
 D 2
 R 1
 X 1
