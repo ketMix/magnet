@@ -2,22 +2,34 @@ package world
 
 import (
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/kettek/ebijam22/pkg/data"
 )
+
+type TouchContainer struct {
+	entity    Entity
+	count     int
+	touchTime time.Time
+}
 
 type ProjecticleEntity struct {
 	BaseEntity
 	elapsed         int
 	lifetime        int
 	damage          int
-	touchedEntities []Entity
+	touchedEntities []TouchContainer
 }
 
 func NewProjecticleEntity() *ProjecticleEntity {
 	return &ProjecticleEntity{
 		lifetime: 500, // Make the default lifetime 500 ticks. This should be set to a value that makes sense for the projectile's speed so it remains alive for however long it needs to.
+		BaseEntity: BaseEntity{
+			physics: PhysicsObject{
+				radius: 4,
+			},
+		},
 	}
 }
 
@@ -28,13 +40,13 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 	//  - get magnetic vector
 	//  - add to initial vector
 
-	hasTouched := func(entity Entity) bool {
-		for _, ent := range e.touchedEntities {
-			if ent == entity {
-				return true
+	getTouch := func(entity Entity) *TouchContainer {
+		for i, c := range e.touchedEntities {
+			if c.entity == entity {
+				return &e.touchedEntities[i]
 			}
 		}
-		return false
+		return nil
 	}
 
 	for _, entity := range world.entities {
@@ -47,9 +59,25 @@ func (e *ProjecticleEntity) Update(world *World) (request Request, err error) {
 			}
 		case *TurretEntity:
 			if entity.polarizer && e.IsCollided(entity) {
-				if !hasTouched(entity) {
+				t := getTouch(entity)
+				if t == nil {
 					e.physics.polarity = entity.physics.polarity
-					e.touchedEntities = append(e.touchedEntities, entity)
+					e.touchedEntities = append(e.touchedEntities, TouchContainer{entity, 1, time.Now()})
+				}
+			} else if entity.reflector && e.IsCollided(entity) {
+				t := getTouch(entity)
+				if t == nil || time.Now().Sub(t.touchTime) >= time.Duration(50)*time.Millisecond {
+					if math.Abs(e.physics.vX) > math.Abs(e.physics.vY) {
+						e.physics.vX = -e.physics.vX
+					} else {
+						e.physics.vY = -e.physics.vY
+					}
+					if t != nil {
+						t.count++
+						t.touchTime = time.Now()
+					} else {
+						e.touchedEntities = append(e.touchedEntities, TouchContainer{entity, 1, time.Now()})
+					}
 				}
 			}
 		}

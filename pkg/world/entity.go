@@ -86,8 +86,8 @@ func (e *BaseEntity) IsProjectile() bool {
 // Check whether or not the provided entity collides
 // Should probably use entity sprites or add hitboxes to physics object
 func (e *BaseEntity) IsCollided(t Entity) bool {
-	x, y := e.physics.X, e.physics.Y
-	tx, ty := t.Physics().X, t.Physics().Y
+	x, y := e.physics.X+e.physics.OffsetX, e.physics.Y+e.physics.OffsetY
+	tx, ty := t.Physics().X+t.Physics().OffsetX, t.Physics().Y+t.Physics().OffsetY
 	return IsWithinRadius(x, y, tx, ty, t.Physics().radius)
 }
 

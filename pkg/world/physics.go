@@ -10,6 +10,9 @@ type PhysicsObject struct {
 	// X and Y position in the world.
 	X, Y float64
 
+	// This is a bad, but I need collision offsets.
+	OffsetX, OffsetY float64
+
 	// Motion Vector
 	vX, vY float64
 

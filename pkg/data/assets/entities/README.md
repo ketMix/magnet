@@ -77,6 +77,7 @@ For turrets, this can be missing or any of the following:
   * normal
   * beam
   * polarizer
+  * reflector
 
 ## S (Speed) **float**
 

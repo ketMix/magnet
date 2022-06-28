@@ -1,0 +1,17 @@
+T REFLECTOR
+C 5
+H 1
+D 2
+R 5
+N 0
+X 1
+O 1
+S 1
+r 6
+A reflector
+P neutral
+M false
+Y 5
+Z 10
+I turret-basic
+i turret-reflector

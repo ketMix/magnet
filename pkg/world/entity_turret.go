@@ -3,6 +3,7 @@ package world
 import (
 	"math"
 	"sort"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/kettek/ebijam22/pkg/data"
@@ -17,17 +18,33 @@ type TurretEntity struct {
 	cost            int
 	showRange       bool
 	polarizer       bool
+	reflector       bool
 	locked          bool // locked is used to lock the entity when the mode changes to a loss.
 	lockedTicker    int
 }
 
 func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 	polarizer := false
+	reflector := false
 	if config.AttackType == "polarizer" {
 		polarizer = true
+	} else if config.AttackType == "reflector" {
+		reflector = true
+	} else {
+		// This is a sekret
+		parts := strings.Split(config.AttackType, "&")
+		for _, p := range parts {
+			switch p {
+			case "polarizer":
+				polarizer = true
+			case "reflector":
+				reflector = true
+			}
+		}
 	}
 	return &TurretEntity{
 		polarizer: polarizer,
+		reflector: reflector,
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images: config.Images,
@@ -38,6 +55,7 @@ func NewTurretEntity(config data.EntityConfig) *TurretEntity {
 				magnetStrength: config.MagnetStrength,
 				magnetRadius:   config.MagnetRadius,
 				radius:         config.Radius,
+				OffsetY:        -4,
 			},
 			turret: Turret{
 				damage:         config.Damage,
@@ -170,3 +188,9 @@ func DrawTurret(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions, bodyAni
 		headAnimation.Draw(screen, headOp)
 	}
 }
+
+/*func (e *TurretEntity) IsCollided(t Entity) bool {
+	x, y := e.physics.X, e.physics.Y-5
+	tx, ty := t.Physics().X, t.Physics().Y
+	return IsWithinRadius(x, y, tx, ty, t.Physics().radius)
+}*/
