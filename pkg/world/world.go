@@ -30,6 +30,7 @@ type World struct {
 	actors           []*ActorEntity
 	currentTileset   data.TileSet
 	CameraX, CameraY float64
+	cameraShakeTimer int
 	path             pathing.Path
 	// Our waves, acquired from BuildFromLevel.
 	waves       []*data.Wave
@@ -603,6 +604,7 @@ func (w *World) DamageCore(r DamageCoreRequest) {
 		if c.id == r.ID {
 			c.health -= r.Damage
 			data.SFX.Play("core-damage.ogg")
+			w.cameraShakeTimer = 30
 			if c.health <= 0 && !c.destroyed {
 				c.destroyed = true
 				data.SFX.Play("loss-hit.ogg")
@@ -708,6 +710,9 @@ func (w *World) SetMode(m WorldMode) {
 
 // Update updates the world.
 func (w *World) Update() error {
+	if w.cameraShakeTimer > 0 {
+		w.cameraShakeTimer--
+	}
 	// Silly background processing.
 	if len(w.currentTileset.BackgroundImages) > 0 {
 		w.backgroundTimer++
@@ -778,6 +783,13 @@ func (w *World) Draw(screen *ebiten.Image) {
 		w.CameraX = -w.Game.Players()[0].Entity.Physics().X + float64(ScreenWidth)/2
 		w.CameraY = -w.Game.Players()[0].Entity.Physics().Y + float64(ScreenHeight)/2
 	}
+
+	// Shake the camera if the timer is set.
+	if w.cameraShakeTimer > 0 {
+		w.CameraX += math.Sin(float64(w.cameraShakeTimer)*2) / 2
+		w.CameraY += math.Cos(float64(w.cameraShakeTimer)*2) / 2
+	}
+
 	screenOp.GeoM.Translate(
 		w.CameraX,
 		w.CameraY,
