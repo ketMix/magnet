@@ -78,12 +78,14 @@ func (s *PlayState) Update() error {
 	case *world.VictoryMode:
 		// TODO: Show end game stats, if possible! Then some sort of "hit okay" to travel button/key.
 		if s.level.Next != "" {
-			if s.game.net.Hosting() || !s.game.net.Active() {
-				fmt.Println("TRAVELING TO NEXT")
-				s.game.SetState(&TravelState{
-					game:        s.game,
-					targetLevel: s.level.Next,
-				})
+			if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+				if s.game.net.Hosting() || !s.game.net.Active() {
+					fmt.Println("TRAVELING TO NEXT")
+					s.game.SetState(&TravelState{
+						game:        s.game,
+						targetLevel: s.level.Next,
+					})
+				}
 			}
 		} else {
 			// We beat the video game.

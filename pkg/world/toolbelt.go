@@ -223,7 +223,7 @@ func GetToolImage(t ToolKind, k string) *ebiten.Image {
 	var image *ebiten.Image
 	switch t {
 	case ToolTurret:
-		image = data.TurretConfigs[k].Images[0]
+		image = data.TurretConfigs[k].HeadImages[0]
 	case ToolDestroy:
 		image, _ = data.GetImage("tool-destroy.png")
 	case ToolGun:
