@@ -22,7 +22,8 @@ type MusicMenuState struct {
 	tiledBackgroundIndex   int
 	backgroundImage        *ebiten.Image
 
-	buttons []*data.Button
+	buttons    []*data.Button
+	animations []*world.Animation
 }
 
 func (s *MusicMenuState) Init() error {
@@ -67,9 +68,10 @@ func (s *MusicMenuState) Init() error {
 	s.buttons = []*data.Button{
 		backButton,
 	}
+
 	// Create music buttons
 	offsetY := world.ScreenHeight / 2
-
+	offset := 20
 	tracks := data.BGM.GetAllTracks()
 	for i := range tracks {
 		trackName := tracks[i]
@@ -81,10 +83,21 @@ func (s *MusicMenuState) Init() error {
 				data.BGM.Set(trackName + ".ogg")
 			},
 		)
+		trackButton.Hover = true
 		s.buttons = append(s.buttons, trackButton)
-		offsetY += trackButton.Image().Bounds().Dy() * 3
+		offsetY += offset
 	}
 
+	// Create the entities
+	for i := range data.EnemyConfigs {
+		config := data.EnemyConfigs[i]
+		animation := world.NewAnimation(
+			config.VictoryImages,
+			30,
+			1-config.Speed,
+		)
+		s.animations = append(s.animations, animation)
+	}
 	return nil
 }
 
@@ -102,14 +115,21 @@ func (s *MusicMenuState) Update() error {
 			s.tiledBackgroundIndex = 0
 		}
 	}
+
 	// Spin at 4 degrees per update.
 	s.magnetSpin += math.Pi / 180 * 4
-
+	if s.magnetSpin >= 2*math.Pi {
+		s.magnetSpin = 0
+	}
 	// Update buttons
 	for _, button := range s.buttons {
 		button.Update()
 	}
 
+	// Update animations
+	for _, animation := range s.animations {
+		animation.Update()
+	}
 	return nil
 }
 
@@ -124,6 +144,7 @@ func (s *MusicMenuState) Draw(screen *ebiten.Image) {
 	screen.DrawImage(s.backgroundImage, screenOp)
 
 	centeredX := world.ScreenWidth / 2
+
 	// Draw our title
 	titleBounds := text.BoundString(data.BoldFace, s.title)
 	data.DrawStaticText(
@@ -138,6 +159,7 @@ func (s *MusicMenuState) Draw(screen *ebiten.Image) {
 
 	// Draw currently playing
 	currentlyPlaying := "Currently Playing"
+	currentTrack := data.FormatTrackName(data.BGM.GetCurrentTrack())
 	textBounds := text.BoundString(data.NormalFace, currentlyPlaying)
 	data.DrawStaticText(
 		currentlyPlaying,
@@ -149,7 +171,7 @@ func (s *MusicMenuState) Draw(screen *ebiten.Image) {
 		true,
 	)
 	data.DrawStaticText(
-		data.FormatTrackName(data.BGM.GetCurrentTrack()),
+		currentTrack,
 		data.BoldFace,
 		centeredX,
 		world.ScreenHeight/5+textBounds.Dy()*2,
@@ -180,8 +202,19 @@ func (s *MusicMenuState) Draw(screen *ebiten.Image) {
 
 	// Draw game buttons
 	for _, button := range s.buttons {
+		if button.Text() == currentTrack {
+			button.Underline = true
+		} else {
+			button.Underline = false
+		}
 		button.Draw(screen, &op)
 	}
-
-	op.GeoM.Translate(8, 80)
+	animationOp := ebiten.DrawImageOptions{}
+	animationOp.GeoM.Translate(float64(world.ScreenWidth)/2.5, float64(world.ScreenHeight)/2.5)
+	offsetX := float64(world.ScreenWidth / 15 * (len(s.animations) / 4))
+	// Draw animations
+	for i := range s.animations {
+		s.animations[i].Draw(screen, &animationOp)
+		animationOp.GeoM.Translate(offsetX, 0)
+	}
 }

@@ -71,3 +71,11 @@ func (a *Animation) Draw(screen *ebiten.Image, op *ebiten.DrawImageOptions) {
 	// Draw to screen.
 	screen.DrawImage(a.Image(), aop)
 }
+
+func NewAnimation(images []*ebiten.Image, frameTime, speed float64) *Animation {
+	return &Animation{
+		images:    images,
+		frameTime: frameTime,
+		speed:     speed,
+	}
+}
