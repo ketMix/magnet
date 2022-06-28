@@ -126,7 +126,7 @@ func (s *NetworkMenuState) Init() error {
 	findGameButton := data.NewButton(
 		remotePlayerX,
 		buttonY,
-		"Find Game",
+		"Find Player",
 		func() {
 			s.Find()
 		},
