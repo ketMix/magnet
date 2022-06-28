@@ -51,6 +51,7 @@ type TextInput struct {
 	borderWidth int
 	maxLength   int
 	innerImage  *ebiten.Image
+	OnChange    func(s string)
 }
 
 func NewTextInput(label, placeholder string, maxLength, x, y int) *TextInput {
@@ -100,12 +101,18 @@ func (ti *TextInput) Update() {
 		if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
 			if len(ti.data) > 0 {
 				ti.data = ti.data[0 : len(ti.data)-1]
+				if ti.OnChange != nil {
+					ti.OnChange(ti.data)
+				}
 			}
 		}
 		ti.counter++
 		ti.runes = ebiten.AppendInputChars(ti.runes[:0])
 		if len(ti.data) < ti.maxLength {
 			ti.data += string(ti.runes)
+			if len(ti.runes) > 0 && ti.OnChange != nil {
+				ti.OnChange(ti.data)
+			}
 		}
 	}
 }
