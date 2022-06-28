@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	enet "github.com/kettek/ebijam22/pkg/net"
 )
@@ -18,8 +19,9 @@ import (
 type AddressKey string
 
 type MessageBox struct {
-	name     string              // String for this messagebox
-	wavingAt map[string]struct{} // waving at other names
+	name           string              // String for this messagebox
+	wavingAt       map[string]struct{} // waving at other names
+	connectionTime time.Time
 }
 
 var clientsMap map[AddressKey]*MessageBox = make(map[AddressKey]*MessageBox)
@@ -51,6 +53,14 @@ func main() {
 
 	// Begin the Eternal Listen (tm)
 	for {
+		// This is super sloppy, but use network receives to remove any pending clients that have been here for over 30 seconds.
+		for k, v := range clientsMap {
+			if time.Now().Sub(v.connectionTime) > time.Duration(30)*time.Second {
+				delete(clientsMap, k)
+				fmt.Println("cleaned up", k)
+			}
+		}
+
 		buffer := make([]byte, 1024)
 		bytesRead, remoteAddr, err := localConn.ReadFromUDP(buffer)
 		if err != nil {
@@ -72,6 +82,7 @@ func main() {
 			delete(clientsMap, clientKey)
 			if _, ok := clientsMap[clientKey]; !ok {
 				clientsMap[clientKey] = new(MessageBox)
+				clientsMap[clientKey].connectionTime = time.Now()
 				clientsMap[clientKey].wavingAt = make(map[string]struct{})
 				log.Printf("Registered %s as %s\n", clientKey, parts[1])
 			}
