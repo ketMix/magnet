@@ -18,7 +18,7 @@ type PlayState struct {
 	level         data.Level
 	world         world.World
 	messages      []Message
-	clickables    []ClickableUI
+	clickables    []data.UIComponent
 }
 
 func (s *PlayState) Init() error {
@@ -42,9 +42,9 @@ func (s *PlayState) Init() error {
 	}
 
 	s.world.Mode = &world.PreGameMode{}
-	s.clickables = []ClickableUI{
-		NewBGMIcon(),
-		NewSFXIcon(),
+	s.clickables = []data.UIComponent{
+		data.NewBGMIcon(),
+		data.NewSFXIcon(),
 	}
 	return nil
 }
@@ -169,9 +169,15 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	s.world.Draw(screen)
 
 	// Draw level text centered at top of screen for now.
-	bounds := text.BoundString(data.BoldFace, s.level.Title)
-	centeredX := world.ScreenWidth/2 - bounds.Min.X - bounds.Dx()/2
-	text.Draw(screen, s.level.Title, data.BoldFace, centeredX, bounds.Dy()+1, color.White)
+	data.DrawStaticText(
+		s.level.Title,
+		data.BoldFace,
+		world.ScreenWidth/2,
+		5,
+		color.White,
+		screen,
+		true,
+	)
 
 	// Draw our messages from most recent to oldest, bottom to top.
 	mx := 8
@@ -204,26 +210,44 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 
 	// Draw the waves and current points.
 	mx = 8
-	my = 8
-	{
-		t := fmt.Sprintf("wave: %d/%d points: %d", s.world.CurrentWave, s.world.MaxWave, s.world.Points)
-		bounds := text.BoundString(data.NormalFace, t)
-		text.Draw(
-			screen,
-			t,
-			data.NormalFace,
-			mx,
-			my+bounds.Dy(),
-			color.White,
-		)
-		mx += bounds.Dx()
-	}
-
-	// Draw our clickables
+	my = 16
 	offset := 16
+	t := fmt.Sprintf("wave: %d/%d", s.world.CurrentWave, s.world.MaxWave)
+	bounds := text.BoundString(data.NormalFace, t)
+	data.DrawStaticText(
+		t,
+		data.NormalFace,
+		mx,
+		my,
+		color.White,
+		screen,
+		false,
+	)
+
+	mx = bounds.Dx() + offset
+	// Draw current points
+	t = fmt.Sprint(s.world.Points)
+	bounds = text.BoundString(data.NormalFace, t)
+	data.DrawStaticText(
+		fmt.Sprint(s.world.Points),
+		data.NormalFace,
+		mx,
+		my,
+		color.White,
+		screen,
+		false,
+	)
+	mx += bounds.Dx() + 5
+	orb, _ := data.GetImage("orb-large.png")
+	op := ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(mx), float64(my-orb.Bounds().Dy()))
+	screen.DrawImage(orb, &op)
+
+	mx += orb.Bounds().Dx() + offset
+	// Draw our clickables
 	if s.clickables != nil {
 		for i, c := range s.clickables {
-			c.SetPos(float64(mx+(i+1)*offset), float64(12))
+			c.SetPos(mx+(i+1)*offset, 12)
 			c.Draw(screen, &ebiten.DrawImageOptions{})
 		}
 	}

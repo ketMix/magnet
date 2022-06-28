@@ -139,25 +139,26 @@ func (m *BuildMode) Draw(w *World, screen *ebiten.Image) {
 		}
 	}
 
-	bounds := text.BoundString(data.NormalFace, "build mode")
-	text.Draw(
-		screen,
+	// hhmnh...
+	data.DrawStaticText(
 		"build mode",
 		data.NormalFace,
 		8,
-		bounds.Dy()+24,
+		30,
 		color.White,
-	)
-	// Hmm.
-	msg := "hit <spacebar> to start combat waves"
-	bounds = text.BoundString(data.NormalFace, msg)
-	text.Draw(
 		screen,
-		msg,
+		false,
+	)
+
+	// Hmm.
+	data.DrawStaticText(
+		"hit <spacebar> to start combat waves",
 		data.NormalFace,
-		ScreenWidth/2-bounds.Dx()/2,
-		ScreenHeight-50,
+		ScreenWidth/2,
+		ScreenHeight-60,
 		color.White,
+		screen,
+		true,
 	)
 }
 func (m *BuildMode) Local() bool {
@@ -255,41 +256,40 @@ func (m *LossMode) Draw(w *World, screen *ebiten.Image) {
 	flavorText := "Tch... we've lost the crystalized embryos meant to seed the human race... we're extinctie..."
 	restartText := "press R to restartie"
 
-	lossBounds := text.BoundString(data.BoldFace, lossText)
 	flavorBounds := text.BoundString(data.NormalFace, flavorText)
-	restartBounds := text.BoundString(data.NormalFace, restartText)
 
 	x := ScreenWidth / 2
-	y := int(float64(ScreenHeight) / 1.25)
-
+	y := int(float64(ScreenHeight) / 1.5)
+	offset := flavorBounds.Dy() * 2
 	// Might be nice to have a wrapper for constructing and drawing text objects
-	text.Draw(
-		screen,
+	data.DrawStaticText(
 		lossText,
 		data.BoldFace,
-		x-lossBounds.Dx()/2,
-		y-lossBounds.Dy(),
+		x,
+		y,
 		color.White,
-	)
-	y += flavorBounds.Dy() * 2
-
-	text.Draw(
 		screen,
+		true,
+	)
+	y += offset
+	data.DrawStaticText(
 		flavorText,
 		data.NormalFace,
-		x-flavorBounds.Dx()/2,
-		y-flavorBounds.Dy(),
+		x,
+		y,
 		color.White,
+		screen,
+		true,
 	)
 	y += flavorBounds.Dy() * 2
-
-	text.Draw(
-		screen,
+	data.DrawStaticText(
 		restartText,
 		data.NormalFace,
-		x-restartBounds.Dx()/2,
-		y-restartBounds.Dy(),
+		x,
+		y,
 		color.White,
+		screen,
+		true,
 	)
 }
 func (m *LossMode) Local() bool {

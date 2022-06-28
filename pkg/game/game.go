@@ -115,10 +115,11 @@ func (g *Game) Update() error {
 	// Call update on our BGM to ensure it's playing
 	data.BGM.Update()
 
-	if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
-		ebiten.SetFullscreen(!ebiten.IsFullscreen())
+	if !data.CurrentlyReceivingInput() {
+		if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
+			ebiten.SetFullscreen(!ebiten.IsFullscreen())
+		}
 	}
-
 	return g.state.Update()
 }
 

@@ -1,4 +1,4 @@
-package game
+package data
 
 import (
 	"image/color"
@@ -6,25 +6,16 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
-	"github.com/kettek/ebijam22/pkg/data"
 )
 
-type ClickableUI interface {
-	SetPos(x, y float64)
-	Image() *ebiten.Image
-	Update()
-	Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions)
-	IsClicked() bool
-}
-
+// Implements UIComponent interface
 type Clickable struct {
 	image   *ebiten.Image
-	x       float64
-	y       float64
+	x, y    int
 	onClick func()
 }
 
-func (c *Clickable) SetPos(x, y float64) {
+func (c *Clickable) SetPos(x, y int) {
 	c.x = x
 	c.y = y
 }
@@ -44,8 +35,8 @@ func (c *Clickable) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions
 		return
 	}
 	screenOp.GeoM.Translate(
-		c.x-float64(c.image.Bounds().Dx())/2,
-		c.y-float64(c.image.Bounds().Dy())/2,
+		float64(c.x-c.image.Bounds().Dx()/2),
+		float64(c.y-c.image.Bounds().Dy()/2),
 	)
 	screen.DrawImage(c.image, screenOp)
 }
@@ -53,8 +44,8 @@ func (c *Clickable) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions
 func (c *Clickable) IsClicked() bool {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		cursorX, cursorY := ebiten.CursorPosition()
-		minX, maxX := c.x-float64(c.image.Bounds().Dx())/2, c.x+float64(c.image.Bounds().Dx())/2
-		minY, maxY := c.y-float64(c.image.Bounds().Dx())/2, c.y+float64(c.image.Bounds().Dx())/2
+		minX, maxX := c.x-c.image.Bounds().Dx()/2, c.x+c.image.Bounds().Dx()/2
+		minY, maxY := c.y-c.image.Bounds().Dx()/2, c.y+c.image.Bounds().Dx()/2
 		if int(minX) < cursorX && cursorX < int(maxX) {
 			if int(minY) < cursorY && cursorY < int(maxY) {
 				return true
@@ -70,7 +61,7 @@ type BGMIcon struct {
 }
 
 func NewBGMIcon() *BGMIcon {
-	image, err := data.GetImage("ui/bgm.png")
+	image, err := GetImage("ui/bgm.png")
 	if err != nil {
 		return nil
 	}
@@ -78,7 +69,7 @@ func NewBGMIcon() *BGMIcon {
 		Clickable: Clickable{
 			image: image,
 			onClick: func() {
-				data.BGM.ToggleMute()
+				BGM.ToggleMute()
 			},
 		},
 	}
@@ -91,7 +82,7 @@ func (bgm *BGMIcon) Update() {
 }
 
 func (bgm *BGMIcon) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
-	if data.BGM.Muted {
+	if BGM.Muted {
 		screenOp.ColorM.Scale(1.0, 1.0, 1.0, 0.5)
 	}
 	bgm.Clickable.Draw(screen, screenOp)
@@ -102,7 +93,7 @@ type SFXIcon struct {
 }
 
 func NewSFXIcon() *SFXIcon {
-	image, err := data.GetImage("ui/sfx.png")
+	image, err := GetImage("ui/sfx.png")
 	if err != nil {
 		return nil
 	}
@@ -110,7 +101,7 @@ func NewSFXIcon() *SFXIcon {
 		Clickable: Clickable{
 			image: image,
 			onClick: func() {
-				data.SFX.ToggleMute()
+				SFX.ToggleMute()
 			},
 		},
 	}
@@ -123,7 +114,7 @@ func (sfx *SFXIcon) Update() {
 }
 
 func (sfx *SFXIcon) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
-	if data.SFX.Muted {
+	if SFX.Muted {
 		screenOp.ColorM.Scale(1.0, 1.0, 1.0, 0.5)
 	}
 	sfx.Clickable.Draw(screen, screenOp)
@@ -137,8 +128,8 @@ type Button struct {
 	background *ebiten.Image
 }
 
-func NewButton(x, y float64, txt string, onClick func()) *Button {
-	bounds := text.BoundString(data.NormalFace, txt)
+func NewButton(x, y int, txt string, onClick func()) *Button {
+	bounds := text.BoundString(NormalFace, txt)
 	width := bounds.Dx() + borderWidth
 	height := bounds.Dy() + borderWidth
 	bgImage := ebiten.NewImage(width, height)
@@ -166,7 +157,7 @@ func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 	text.Draw(
 		screen,
 		b.text,
-		data.NormalFace,
+		NormalFace,
 		int(b.x)-b.image.Bounds().Dx()/2,
 		int(b.y)-b.image.Bounds().Dy()/2,
 		color.White,

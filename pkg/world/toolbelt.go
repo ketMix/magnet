@@ -126,6 +126,7 @@ func (t *ToolbeltItem) Position(sx, sy *int) {
 }
 
 func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
+	orbImage, _ := data.GetImage("orb-large.png")
 	toolSlotImage, _ := data.GetImage("toolslot.png")
 	toolSlotActiveImage, _ := data.GetImage("toolslot-active.png")
 	op := ebiten.DrawImageOptions{}
@@ -144,11 +145,11 @@ func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
 			// Create polarity label
 			polarity := ""
 			if t.tool == ToolGun || t.tool == ToolTurret {
-				polarity = "(N)"
+				polarity = "(N) "
 				if t.polarity == data.NegativePolarity {
-					polarity = "(-)"
+					polarity = "(-) "
 				} else if t.polarity == data.PositivePolarity {
-					polarity = "(+)"
+					polarity = "(+) "
 				}
 			}
 
@@ -156,21 +157,30 @@ func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
 			cost := ""
 			if t.tool == ToolTurret {
 				config := data.TurretConfigs[t.kind.Title]
-				cost = fmt.Sprintf("%dpts", config.Points)
+				cost = fmt.Sprint(config.Points)
 			} else if t.tool == ToolWall {
-				cost = "3pts"
+				cost = "3"
 			}
 
 			// Combine labels
-			label = fmt.Sprintf("%s %s %s", label, polarity, cost)
-			text.Draw(
-				screen,
+			label = fmt.Sprintf("%s %s%s", label, polarity, cost)
+			textBounds := text.BoundString(data.NormalFace, label)
+			x := t.x - toolSlotActiveImage.Bounds().Dx()/2
+			y := t.y - toolSlotActiveImage.Bounds().Dy() + 5
+			data.DrawStaticText(
 				label,
 				data.NormalFace,
-				t.x-toolSlotActiveImage.Bounds().Dx()/2,
-				t.y-toolSlotActiveImage.Bounds().Dy(),
+				x,
+				y,
 				color.White,
+				screen,
+				false,
 			)
+			if cost != "" {
+				imageOp := ebiten.DrawImageOptions{}
+				imageOp.GeoM.Translate(float64(t.x+textBounds.Dx()-5), float64(y-orbImage.Bounds().Dy()))
+				screen.DrawImage(orbImage, &imageOp)
+			}
 		}
 	} else {
 		op.GeoM.Translate(float64(t.x-toolSlotImage.Bounds().Dx()/2), float64(t.y-toolSlotImage.Bounds().Dy()/2))

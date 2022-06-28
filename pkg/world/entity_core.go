@@ -1,6 +1,7 @@
 package world
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,7 +10,6 @@ import (
 
 type CoreEntity struct {
 	BaseEntity
-	healthBar *ProgressBar
 	id        int // Simplified core ID that can be shared between clients, as it is based on map construction.
 	destroyed bool
 }
@@ -28,18 +28,11 @@ func NewCoreEntity(config data.EntityConfig) *CoreEntity {
 				speed:     1,
 			},
 		},
-		healthBar: NewProgressBar(
-			10, 2, color.RGBA{32, 255, 32, 1},
-		),
 	}
 }
 
 func (e *CoreEntity) Update(world *World) (request Request, err error) {
 	e.animation.Update()
-
-	// Update healthbar
-	e.healthBar.progress = float64(e.maxHealth) / float64(e.health)
-
 	return request, nil
 }
 
@@ -49,6 +42,18 @@ func (e *CoreEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOption
 	op.GeoM.Translate(
 		e.physics.X,
 		e.physics.Y,
+	)
+
+	// Draw health as text
+	t := fmt.Sprintf("%d/%d", e.health, e.maxHealth)
+	data.DrawStaticText(
+		t,
+		data.NormalFace,
+		int(op.GeoM.Element(0, 2)),
+		int(op.GeoM.Element(1, 2))-e.animation.Image().Bounds().Dy(),
+		color.White,
+		screen,
+		true,
 	)
 
 	// Offset the obelisk/core.
@@ -61,7 +66,4 @@ func (e *CoreEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOption
 		-float64(e.animation.Image().Bounds().Dx())/2,
 		0,
 	)
-
-	// Draw healthbar
-	e.healthBar.Draw(screen, op)
 }

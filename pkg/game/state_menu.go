@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/world"
 )
@@ -16,7 +15,8 @@ type MenuState struct {
 	magnetImage *ebiten.Image
 	title       string
 	magnetSpin  float64
-	buttons     []Button
+	buttons     []data.Button
+	inputs      []data.TextInput
 }
 
 func (s *MenuState) Init() error {
@@ -32,15 +32,22 @@ func (s *MenuState) Init() error {
 	}
 
 	// Set Main Menu Buttons
-	startGameButton := NewButton(
-		float64(world.ScreenWidth/2),
-		float64(world.ScreenHeight)/1.25,
+	startGameButton := data.NewButton(
+		world.ScreenWidth/2,
+		int(float64(world.ScreenHeight)/1.25),
 		"Start Game",
 		func() {
 			s.StartGame()
 		},
 	)
-	s.buttons = []Button{*startGameButton}
+	s.buttons = []data.Button{*startGameButton}
+
+	playerNameInput := data.NewTextInput(
+		"Player Name",
+		int(float64(world.ScreenWidth)/1.25),
+		int(float64(world.ScreenHeight)/4),
+	)
+	s.inputs = []data.TextInput{*playerNameInput}
 
 	// Start the tunes
 	data.BGM.Set("menu.ogg")
@@ -63,6 +70,10 @@ func (s *MenuState) Update() error {
 	for _, button := range s.buttons {
 		button.Update()
 	}
+	// Update inputs
+	for _, input := range s.inputs {
+		input.Update()
+	}
 	return nil
 }
 
@@ -77,19 +88,23 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 	screen.DrawImage(s.magnetImage, &op)
 
 	// Draw our title
-	bounds := text.BoundString(data.NormalFace, s.title)
-	text.Draw(
-		screen,
+	data.DrawStaticText(
 		s.title,
-		data.NormalFace,
-		int(world.ScreenWidth/3)-bounds.Dx()/2,
-		int(world.ScreenHeight/2)+bounds.Dy()/2,
+		data.BoldFace,
+		world.ScreenWidth/3,
+		world.ScreenHeight/2,
 		color.White,
+		screen,
+		true,
 	)
 
 	// Draw game buttons
 	for _, button := range s.buttons {
 		button.Draw(screen, &op)
+	}
+	// Update inputs
+	for _, input := range s.inputs {
+		input.Draw(screen, &op)
 	}
 }
 
