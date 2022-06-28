@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"image/color"
 	"math"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -210,7 +211,8 @@ func (m *WaveMode) Local() bool {
 
 // LossMode represents when the core 'splodes. Leads to a restart of the current.
 type LossMode struct {
-	local bool
+	local      bool
+	flavorText string
 }
 
 func (m LossMode) String() string {
@@ -220,6 +222,16 @@ func (m LossMode) Type() net.TypedMessageType {
 	return 503
 }
 func (m *LossMode) Init(w *World) error {
+	// Grab flavor text from set
+	flavorTexts := []string{
+		"Tch... we've lost the crystallized embryos meant to seed the human race... we're extinctie...",
+		"Argh... they've overwhelmed us and taken our crystallized embryos... we have to retreatie...",
+		"Grr... we only have a few crystallized embyros left... make the next one countie...",
+	}
+	m.flavorText = flavorTexts[rand.Int()%len(flavorTexts)]
+
+	// Add darkened overlay to screen
+
 	// cry tiem
 	data.BGM.Set("loss.ogg")
 	// Lock those lil actors an' make em weep. Or, if they're enemies, do a jig. Also make turrets turn to player and shake their heads in disappointment.
@@ -253,15 +265,14 @@ func (m *LossMode) Update(w *World) (next WorldMode, err error) {
 func (m *LossMode) Draw(w *World, screen *ebiten.Image) {
 	// Draw the game over messages
 	lossText := "DEFEAT"
-	flavorText := "Tch... we've lost the crystalized embryos meant to seed the human race... we're extinctie..."
+
 	restartText := "press R to restartie"
 
-	flavorBounds := text.BoundString(data.NormalFace, flavorText)
+	flavorBounds := text.BoundString(data.NormalFace, m.flavorText)
 
 	x := ScreenWidth / 2
 	y := int(float64(ScreenHeight) / 1.5)
 	offset := flavorBounds.Dy() * 2
-	// Might be nice to have a wrapper for constructing and drawing text objects
 	data.DrawStaticText(
 		lossText,
 		data.BoldFace,
@@ -273,7 +284,7 @@ func (m *LossMode) Draw(w *World, screen *ebiten.Image) {
 	)
 	y += offset
 	data.DrawStaticText(
-		flavorText,
+		m.flavorText,
 		data.NormalFace,
 		x,
 		y,
@@ -298,7 +309,8 @@ func (m *LossMode) Local() bool {
 
 // VictoryMode represents when all waves are finished. Leads to Travel state.
 type VictoryMode struct {
-	local bool
+	local      bool
+	flavorText string
 }
 
 func (m VictoryMode) String() string {
@@ -308,13 +320,63 @@ func (m VictoryMode) Type() net.TypedMessageType {
 	return 504
 }
 func (m *VictoryMode) Init(w *World) error {
+	// Comgrantulations
+	data.BGM.Set("victory.ogg")
+
+	flavorTexts := []string{
+		"It's over... for now... We're not home yet though...",
+		"Good work commandies, that should put them back a few paces. However we still have a bit to go...",
+		"Hah! They'll think twice before comin' round these here parts again. Let's get to the next location...",
+	}
+	m.flavorText = flavorTexts[rand.Int()%len(flavorTexts)]
 	return nil
 }
 func (m *VictoryMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
 func (m *VictoryMode) Draw(w *World, screen *ebiten.Image) {
+	// Add darkened overlay to screen
+
+	// Draw the victory messages
+	lossText := "Victory"
+	nextText := "press <space bar> to continue to next level"
+
+	flavorBounds := text.BoundString(data.NormalFace, m.flavorText)
+
+	x := ScreenWidth / 2
+	y := int(float64(ScreenHeight) / 1.5)
+	offset := flavorBounds.Dy() * 2
+	data.DrawStaticText(
+		lossText,
+		data.BoldFace,
+		x,
+		y,
+		color.White,
+		screen,
+		true,
+	)
+	y += offset
+	data.DrawStaticText(
+		m.flavorText,
+		data.NormalFace,
+		x,
+		y,
+		color.White,
+		screen,
+		true,
+	)
+	y += flavorBounds.Dy() * 2
+	data.DrawStaticText(
+		nextText,
+		data.NormalFace,
+		x,
+		y,
+		color.White,
+		screen,
+		true,
+	)
 }
+
 func (m *VictoryMode) Local() bool {
 	return m.local
 }
