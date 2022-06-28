@@ -148,7 +148,7 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 			case ToolDestroy:
 				action = &EntityActionMove{
 					X:        float64(tx)*float64(data.CellWidth) + float64(data.CellWidth)/2,
-					Y:        float64(ty+1)*float64(data.CellHeight) + float64(data.CellHeight)/2,
+					Y:        float64(ty)*float64(data.CellHeight) + float64(data.CellHeight)/2,
 					Distance: 8,
 					// We wrap the place action as a move action's next step.
 					Next: &EntityActionPlace{
