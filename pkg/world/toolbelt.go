@@ -24,6 +24,15 @@ func (t *Toolbelt) Update() (request Request) {
 		t.activeItem.active = true
 	}
 
+	// Might as well allow mousewheel for the plebs.
+	wheelX, wheelY := ebiten.Wheel()
+	// TODO: I don't remember which way the mousewheel is supposed to scroll items since I don't use it much.
+	if wheelX < 0 || wheelY < 0 {
+		t.ScrollItem(1)
+	} else if wheelX > 0 || wheelY > 0 {
+		t.ScrollItem(-1)
+	}
+
 	// Update our individual slots.
 	for _, item := range t.items {
 		r := item.Update()
@@ -59,6 +68,29 @@ func (t *Toolbelt) Position() {
 
 	for _, ti := range t.items {
 		ti.Position(&x, &y)
+	}
+}
+
+func (t *Toolbelt) ActivateItem(item *ToolbeltItem) {
+	if t.activeItem != nil {
+		t.activeItem.active = false
+	}
+	t.activeItem = item
+	t.activeItem.active = true
+}
+
+func (t *Toolbelt) ScrollItem(dir int) {
+	for i, item := range t.items {
+		if item == t.activeItem {
+			i += dir
+			if i < 0 {
+				i = len(t.items) - 1
+			} else if i >= len(t.items) {
+				i = 0
+			}
+			t.ActivateItem(t.items[i])
+			break
+		}
 	}
 }
 
