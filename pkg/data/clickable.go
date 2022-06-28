@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
@@ -127,6 +128,10 @@ type Button struct {
 	text             string
 	OffsetX, OffsetY int // Forgive me.
 	Active           bool
+	Bold             bool
+	Underline        bool
+	Hover            bool
+	isHovered        bool
 }
 
 func NewButton(x, y int, txt string, onClick func()) *Button {
@@ -147,6 +152,22 @@ func NewButton(x, y int, txt string, onClick func()) *Button {
 func (b *Button) Update() {
 	if b.IsClicked() {
 		b.onClick()
+		// This isn't the right thing to do, but it's easier to always turn the cursor back on click. (this prevents the pointer cursor being set when a button causes a travel)
+		ebiten.SetCursorShape(ebiten.CursorShapeDefault)
+		return
+	}
+	if b.Hover {
+		if b.IsHit() {
+			if !b.isHovered {
+				b.isHovered = true
+				ebiten.SetCursorShape(ebiten.CursorShapePointer)
+			}
+		} else {
+			if b.isHovered {
+				b.isHovered = false
+				ebiten.SetCursorShape(ebiten.CursorShapeDefault)
+			}
+		}
 	}
 }
 func (b *Button) IsClicked() bool {
@@ -165,6 +186,19 @@ func (b *Button) IsClicked() bool {
 	return false
 }
 
+func (b *Button) IsHit() bool {
+	bounds := text.BoundString(NormalFace, b.text)
+	cursorX, cursorY := ebiten.CursorPosition()
+	minX, maxX := b.OffsetX+b.x-bounds.Dx()/2, b.OffsetX+b.x+bounds.Dx()/2
+	minY, maxY := b.OffsetY+b.y-bounds.Dy()/2, b.OffsetY+b.y+bounds.Dy()/2
+	if int(minX) < cursorX && cursorX < int(maxX) {
+		if int(minY) < cursorY && cursorY < int(maxY) {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 	b.OffsetX = int(screenOp.GeoM.Element(0, 2))
 	b.OffsetY = int(screenOp.GeoM.Element(1, 2))
@@ -173,14 +207,30 @@ func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 		c = color.RGBA{255, 255, 0, 255}
 	}
 
+	face := NormalFace
+	if b.Bold {
+		face = BoldFace
+	}
+
 	text.Draw(
 		screen,
 		b.text,
-		NormalFace,
+		face,
 		b.OffsetX+(b.x)-b.image.Bounds().Dx()/2,
 		b.OffsetY+(b.y)+b.image.Bounds().Dy()/2,
 		c,
 	)
+
+	if b.Underline {
+		ebitenutil.DrawLine(
+			screen, // Wanna see a magic (number) trick?
+			float64(b.OffsetX+(b.x)-b.image.Bounds().Dx()/2)+4,
+			float64(b.OffsetY+(b.y)+b.image.Bounds().Dy())-3,
+			float64(b.OffsetX+(b.x)+b.image.Bounds().Dx()/2)+4,
+			float64(b.OffsetY+(b.y)+b.image.Bounds().Dy())-3,
+			c,
+		)
+	}
 }
 
 func (b *Button) Text() string {
