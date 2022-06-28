@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/ui"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/goro/pathing"
 )
@@ -799,18 +800,11 @@ func (w *World) Draw(screen *ebiten.Image) {
 
 	// Draw da background.
 	if w.backgroundImage != nil {
-		width := w.backgroundImage.Bounds().Dx()
-		height := w.backgroundImage.Bounds().Dy()
-		rows := math.Ceil(float64(ScreenHeight)/float64(height)) + 1
-		cols := math.Ceil(float64(ScreenWidth)/float64(width)) + 1
-		for y := 0.0; y < rows; y++ {
-			for x := 0.0; x < cols; x++ {
-				bgOp := &ebiten.DrawImageOptions{}
-				bgOp.GeoM.Translate(-w.CameraX/float64(width/16), -w.CameraY/float64(height/16))
-				bgOp.GeoM.Translate(x*float64(width), y*float64(height))
-				screen.DrawImage(w.backgroundImage, bgOp)
-			}
-		}
+		bgOp := &ebiten.DrawImageOptions{}
+		width := ScreenWidth * 2
+		height := ScreenHeight * 2
+		bgOp.GeoM.Translate(-w.CameraX/float64(width/32), -w.CameraY/float64(height/32))
+		ui.DrawTiled(screen, w.backgroundImage, bgOp, width, height)
 	}
 
 	// Draw the map.
