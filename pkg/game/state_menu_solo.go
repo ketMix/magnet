@@ -17,10 +17,19 @@ type SoloMenuState struct {
 	magnetSpin  float64
 	mapList     MapList
 
+	backgroundImage *ebiten.Image
+
 	buttons []data.Button
 }
 
 func (s *SoloMenuState) Init() error {
+	// Load our background image.
+	if img, err := data.ReadImage("/ui/singleplayer.png"); err == nil {
+		s.backgroundImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
 	if err := s.mapList.Init(); err != nil {
 		return err
 	}
@@ -89,6 +98,11 @@ func (s *SoloMenuState) Update() error {
 }
 
 func (s *SoloMenuState) Draw(screen *ebiten.Image) {
+	// Draw our background.
+	screenOp := &ebiten.DrawImageOptions{}
+	screenOp.ColorM.Scale(0.5, 0.5, 0.5, 1)
+	screen.DrawImage(s.backgroundImage, screenOp)
+
 	// Draw our title
 	titleBounds := text.BoundString(data.BoldFace, s.title)
 	data.DrawStaticText(
