@@ -590,12 +590,14 @@ func (w *World) CollectOrb(r CollectOrbRequest) {
 	}
 	if r.Collector == w.Game.Players()[0].Name {
 		s := data.SFX.Play("pop.ogg")
-		if r.Worth <= 10 {
-			s.SetVolume(0.5)
-		} else if r.Worth <= 15 {
-			s.SetVolume(1)
-		} else {
-			s.SetVolume(1.5)
+		if !data.SFX.Muted {
+			if r.Worth <= 10 {
+				s.SetVolume(0.5)
+			} else if r.Worth <= 15 {
+				s.SetVolume(1)
+			} else {
+				s.SetVolume(1.5)
+			}
 		}
 	}
 }
