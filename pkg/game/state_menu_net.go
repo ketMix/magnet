@@ -27,7 +27,7 @@ type NetworkMenuState struct {
 	tiledBackgroundIndex   int
 	backgroundImage        *ebiten.Image
 
-	buttons               []data.Button
+	buttons               []*data.Button
 	cancelButton          data.Button
 	playerNameInput       *data.TextInput
 	remotePlayerNameInput *data.TextInput
@@ -92,6 +92,7 @@ func (s *NetworkMenuState) Init() error {
 			})
 		},
 	)
+	backButton.Hover = true
 	hostGameButton := data.NewButton(
 		centeredX,
 		buttonY,
@@ -100,6 +101,7 @@ func (s *NetworkMenuState) Init() error {
 			s.Host()
 		},
 	)
+	hostGameButton.Hover = true
 
 	joinGameButton := data.NewButton(
 		centeredX,
@@ -109,6 +111,7 @@ func (s *NetworkMenuState) Init() error {
 			s.JoinByIP()
 		},
 	)
+	joinGameButton.Hover = true
 	waitGameButton := data.NewButton(
 		localPlayerX,
 		buttonY,
@@ -117,6 +120,7 @@ func (s *NetworkMenuState) Init() error {
 			s.Await()
 		},
 	)
+	waitGameButton.Hover = true
 	findGameButton := data.NewButton(
 		remotePlayerX,
 		buttonY,
@@ -125,13 +129,14 @@ func (s *NetworkMenuState) Init() error {
 			s.Find()
 		},
 	)
+	findGameButton.Hover = true
 
-	s.buttons = []data.Button{
-		*backButton,
-		*hostGameButton,
-		*joinGameButton,
-		*findGameButton,
-		*waitGameButton,
+	s.buttons = []*data.Button{
+		backButton,
+		hostGameButton,
+		joinGameButton,
+		findGameButton,
+		waitGameButton,
 	}
 
 	// Standalone cancel button, since it is conditional.

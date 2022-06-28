@@ -23,7 +23,7 @@ type SoloMenuState struct {
 	tiledBackgroundIndex   int
 	backgroundImage        *ebiten.Image
 
-	buttons []data.Button
+	buttons []*data.Button
 }
 
 func (s *SoloMenuState) Init() error {
@@ -72,6 +72,7 @@ func (s *SoloMenuState) Init() error {
 			})
 		},
 	)
+	backButton.Hover = true
 
 	startGameButton := data.NewButton(
 		centeredX,
@@ -81,10 +82,11 @@ func (s *SoloMenuState) Init() error {
 			s.StartGame()
 		},
 	)
+	startGameButton.Hover = true
 
-	s.buttons = []data.Button{
-		*backButton,
-		*startGameButton,
+	s.buttons = []*data.Button{
+		backButton,
+		startGameButton,
 	}
 
 	return nil

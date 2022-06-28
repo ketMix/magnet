@@ -12,17 +12,19 @@ import (
 
 type MenuState struct {
 	game        *Game
+	ebitenImage *ebiten.Image
 	magnetImage *ebiten.Image
 	titleImage  *ebiten.Image
 	title       string
 	magnetSpin  float64
-	buttons     []data.Button
+	buttons     []*data.Button
 	titleFadeIn int
+	shouldQuit  bool
 }
 
 func (s *MenuState) Init() error {
 	// Title Text
-	s.title = "ebijam 2022"
+	s.title = "" // forever hidden
 
 	// Load some assets. This will be abstracted elsewhere.
 	if img, err := data.ReadImage("/ui/magnet.png"); err == nil {
@@ -39,9 +41,16 @@ func (s *MenuState) Init() error {
 		panic(err)
 	}
 
+	// Load our ebiten image.
+	if img, err := data.ReadImage("/ui/ebitengine-gamejam.png"); err == nil {
+		s.ebitenImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
 	// Set Main Menu Buttons
 	x := world.ScreenWidth / 2
-	y := int(float64(world.ScreenHeight) / 1.25)
+	y := int(float64(world.ScreenHeight) / 2)
 	startGameButton := data.NewButton(
 		x,
 		y,
@@ -52,7 +61,8 @@ func (s *MenuState) Init() error {
 			})
 		},
 	)
-	y += startGameButton.Image().Bounds().Dy() * 2
+	startGameButton.Hover = true
+	y += startGameButton.Image().Bounds().Dy() * 3
 	networkButton := data.NewButton(
 		x,
 		y,
@@ -63,9 +73,94 @@ func (s *MenuState) Init() error {
 			})
 		},
 	)
-	s.buttons = []data.Button{
-		*startGameButton,
-		*networkButton,
+	networkButton.Hover = true
+	y += networkButton.Image().Bounds().Dy() * 3
+	exitButton := data.NewButton(
+		x,
+		y,
+		"Exit",
+		func() {
+			s.shouldQuit = true
+		},
+	)
+	exitButton.Hover = true
+
+	// Use buttons for credits.
+	x = world.ScreenWidth - world.ScreenWidth/5
+	y = world.ScreenHeight / 8
+	credits1aButton := data.NewButton(
+		x,
+		y,
+		"Programming, Art, Sounds, Maps",
+		func() {
+			// open github/website
+		},
+	)
+	y += int(float64(credits1aButton.Image().Bounds().Dy()) * 1.5)
+	credits1bButton := data.NewButton(
+		x,
+		y,
+		"kettek",
+		func() {
+			OpenFile("https://kettek.net")
+		},
+	)
+	credits1bButton.Bold = true
+	credits1bButton.Underline = true
+	credits1bButton.Hover = true
+
+	y += credits1bButton.Image().Bounds().Dy() * 3
+	credits2aButton := data.NewButton(
+		x,
+		y,
+		"Programming, Music, Maps",
+		func() {
+		},
+	)
+	y += int(float64(credits2aButton.Image().Bounds().Dy()) * 1.5)
+	credits2bButton := data.NewButton(
+		x,
+		y,
+		"liqmix",
+		func() {
+			OpenFile("https://liq.mx")
+		},
+	)
+	credits2bButton.Bold = true
+	credits2bButton.Underline = true
+	credits2bButton.Hover = true
+
+	y += credits2bButton.Image().Bounds().Dy() * 3
+	credits3aButton := data.NewButton(
+		x,
+		y,
+		"Menu Art",
+		func() {
+		},
+	)
+	y += int(float64(credits3aButton.Image().Bounds().Dy()) * 1.5)
+	credits3bButton := data.NewButton(
+		x,
+		y,
+		"Amaruuk",
+		func() {
+			OpenFile("https://birdtooth.studio")
+		},
+	)
+	credits3bButton.Bold = true
+	credits3bButton.Underline = true
+	credits3bButton.Hover = true
+
+	s.buttons = []*data.Button{
+		startGameButton,
+		networkButton,
+		exitButton,
+		credits1aButton,
+		credits1bButton,
+		credits2aButton,
+		credits2bButton,
+		credits3aButton,
+		credits3bButton,
 	}
 	// Start the tunes
 	data.BGM.Set("menu.ogg")
@@ -77,6 +172,10 @@ func (s *MenuState) Dispose() error {
 }
 
 func (s *MenuState) Update() error {
+	// It seems the idiomatic way to quit an ebiten program is to return an error...?
+	if s.shouldQuit {
+		return NoError{}
+	}
 	// Are we skippin menu
 	if s.game.Options.NoMenu {
 		s.StartGame()
@@ -105,12 +204,12 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 
 	// Rotate our magnet about its center.
 	op := ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(s.magnetImage.Bounds().Dx())/2, -float64(s.magnetImage.Bounds().Dy())/2)
+	/*op.GeoM.Translate(-float64(s.magnetImage.Bounds().Dx())/2, -float64(s.magnetImage.Bounds().Dy())/2)
 	op.GeoM.Rotate(s.magnetSpin)
 
 	// Render it at the center of the screen.
 	op.GeoM.Translate(float64(world.ScreenWidth)/2, float64(world.ScreenHeight/2))
-	screen.DrawImage(s.magnetImage, &op)
+	screen.DrawImage(s.magnetImage, &op)*/
 
 	// Draw our title
 	data.DrawStaticText(
@@ -122,6 +221,12 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 		screen,
 		true,
 	)
+
+	// Draw left-hand ebiten
+	op = ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(world.ScreenWidth)/5, float64(world.ScreenHeight)/5)
+	op.GeoM.Translate(-float64(s.ebitenImage.Bounds().Dx())/2, -float64(s.ebitenImage.Bounds().Dy())/2)
+	screen.DrawImage(s.ebitenImage, &op)
 
 	// Draw game buttons
 	for _, button := range s.buttons {
