@@ -40,8 +40,6 @@ type World struct {
 	coreX, coreY int
 	// Overall game speed
 	Speed float64
-	// Current points (sync across players? or each player has their own points)
-	Points int
 	//
 	backgroundTimer int
 	backgroundImage *ebiten.Image
@@ -59,7 +57,6 @@ func (w *World) BuildFromLevel(level data.Level) error {
 		return err
 	}
 	w.currentTileset = ts
-	w.Points = level.Points
 	w.width = 0
 	w.height = 0
 	w.cells = make([][]LiveCell, 0)
@@ -145,6 +142,15 @@ func (w *World) BuildFromLevel(level data.Level) error {
 	}
 
 	w.SetWaves()
+
+	// Set our player points/orbs.
+	for _, pl := range w.Game.Players() {
+		pl.Points = 0
+	}
+	w.SplitPoints(level.Points)
+	if w.Game.Net().Hosting() {
+		w.SendPlayerPoints()
+	}
 
 	w.UpdatePathing()
 	return nil
@@ -232,26 +238,26 @@ func (w *World) ProcessRequest(r Request) {
 			return
 		}
 		if r.Tool == ToolTurret {
-			config := data.TurretConfigs[r.Kind]
-			// If we have enough points to place the turret
-			if w.Points >= config.Points {
-				if c := w.GetCell(r.X, r.Y); c != nil {
-					if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
-						if r.local {
-							r.Owner = w.Game.Players()[0].Name
-						} else {
-							r.Owner = w.Game.Players()[1].Name
-						}
+			if c := w.GetCell(r.X, r.Y); c != nil {
+				if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
+					if r.local {
+						r.Owner = w.Game.Players()[0].Name
+					} else {
+						r.Owner = w.Game.Players()[1].Name
+					}
 
+					pl := w.Game.GetPlayerByName(r.Owner)
+					config := data.TurretConfigs[r.Kind]
+					if pl.Points >= config.Points {
 						e := w.HandleToolRequest(r)
-
-						// Also adjust our points.
-						w.AdjustPoints(-config.Points)
-
-						// Let the client know to make our turret.
-						if w.Game.Net().Hosting() {
-							r.NetID = e.NetID()
-							w.Game.Net().SendReliable(r)
+						if e != nil {
+							pl.Points -= config.Points
+							w.SendPlayerPoints()
+							// Let the client know to make our turret.
+							if w.Game.Net().Hosting() {
+								r.NetID = e.NetID()
+								w.Game.Net().SendReliable(r)
+							}
 						}
 					} else {
 						if !r.local {
@@ -262,6 +268,14 @@ func (w *World) ProcessRequest(r Request) {
 							data.SFX.Play("denied.ogg")
 						}
 					}
+				} else {
+					if !r.local {
+						w.Game.Net().SendReliable(PlaySoundRequest{
+							Sound: "denied.ogg",
+						})
+					} else {
+						data.SFX.Play("denied.ogg")
+					}
 				}
 			}
 		} else if r.Tool == ToolDestroy {
@@ -271,7 +285,6 @@ func (w *World) ProcessRequest(r Request) {
 				r.Owner = w.Game.Players()[1].Name
 			}
 			w.HandleToolRequest(r)
-			// TODO: Refund points.
 			if w.Game.Net().Hosting() {
 				w.Game.Net().SendReliable(r)
 			}
@@ -281,20 +294,21 @@ func (w *World) ProcessRequest(r Request) {
 			} else {
 				r.Owner = w.Game.Players()[1].Name
 			}
-			// Wall points? 3? :shrug:
-			wallCost := 3
-			if w.Points >= wallCost {
-				c := w.GetCell(r.X, r.Y)
-				if c != nil {
-					if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
+			c := w.GetCell(r.X, r.Y)
+			if c != nil {
+				if w.IsPlacementValid(r.X, r.Y) && c.IsOpen() {
+					pl := w.Game.GetPlayerByName(r.Owner)
+					if pl.Points >= 3 {
 						e := w.HandleToolRequest(r)
+						if e != nil {
 
-						// these cost money you know!
-						w.AdjustPoints(-wallCost)
+							pl.Points -= 3
+							w.SendPlayerPoints()
 
-						if w.Game.Net().Hosting() {
-							r.NetID = e.NetID()
-							w.Game.Net().SendReliable(r)
+							if w.Game.Net().Hosting() {
+								r.NetID = e.NetID()
+								w.Game.Net().SendReliable(r)
+							}
 						}
 					} else {
 						if !r.local {
@@ -304,6 +318,14 @@ func (w *World) ProcessRequest(r Request) {
 						} else {
 							data.SFX.Play("denied.ogg")
 						}
+					}
+				} else {
+					if !r.local {
+						w.Game.Net().SendReliable(PlaySoundRequest{
+							Sound: "denied.ogg",
+						})
+					} else {
+						data.SFX.Play("denied.ogg")
 					}
 				}
 			}
@@ -391,6 +413,11 @@ func (w *World) ProcessRequest(r Request) {
 
 // ???
 func (w *World) HandleToolRequest(r UseToolRequest) Entity {
+	pl := w.Game.GetPlayerByName(r.Owner)
+	if pl == nil {
+		panic("PLAYER NIL")
+	}
+
 	if r.Tool == ToolTurret {
 		config := data.TurretConfigs[r.Kind]
 		// This is kind of stupid.
@@ -420,6 +447,7 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 
 			e = te
 		}
+
 		if w.Game.Net().Hosting() {
 			e.SetNetID(w.GetNextNetID())
 		} else {
@@ -447,12 +475,18 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 		c := w.GetCell(r.X, r.Y)
 		if c != nil {
 			if c.entity != nil {
+				var points int
 				ownerName := r.Owner
 				switch e := c.entity.(type) {
 				case *TurretEntity:
 					ownerName = e.owner
+					points = e.cost
+				case *TurretBeamEntity:
+					ownerName = e.owner
+					points = e.cost
 				case *WallEntity:
 					ownerName = e.owner
+					points = 3
 				}
 				if ownerName != r.Owner {
 					if r.Owner == w.Game.Players()[0].Name {
@@ -461,6 +495,12 @@ func (w *World) HandleToolRequest(r UseToolRequest) Entity {
 						data.SFX.Play("denied.ogg")
 					}
 				} else {
+
+					if !w.Game.Net().Active() || w.Game.Net().Hosting() {
+						pl.Points += points
+					}
+					w.SendPlayerPoints()
+
 					c.entity.Trash()
 					c.entity = nil
 					w.UpdatePathing()
@@ -543,7 +583,8 @@ func (w *World) SpawnOrbEntity(r SpawnOrbRequest) *OrbEntity {
 
 func (w *World) CollectOrb(r CollectOrbRequest) {
 	if !w.Game.Net().Active() || w.Game.Net().Hosting() {
-		w.AdjustPoints(r.Worth)
+		w.SplitPoints(r.Worth)
+		w.SendPlayerPoints()
 	}
 	if r.Collector == w.Game.Players()[0].Name {
 		s := data.SFX.Play("pop.ogg")
@@ -613,19 +654,24 @@ func (w *World) SyncEntity(r EntityPropertySync) {
 	}
 }
 
-// AdjustPoints adjusts the points total and sends the points to connected players.
-func (w *World) AdjustPoints(p int) {
-	w.Points += p
+func (w *World) SplitPoints(value int) {
+	// Get it's split value.
+	worth := math.Max(1, math.Floor(float64(value)/float64(len(w.Game.Players()))))
+	for _, pl := range w.Game.Players() {
+		pl.Points += int(worth)
+	}
+}
+
+func (w *World) SendPlayerPoints() {
 	if w.Game.Net().Hosting() {
 		m := PointsSync{
 			Points: make(map[string]int),
 		}
 		// Generate a points sync message.
 		for _, pl := range w.Game.Players() {
-			// TODO: Use players for points!
-			m.Points[pl.Name] = w.Points
+			m.Points[pl.Name] = pl.Points
 		}
-		w.Game.Net().Send(m)
+		w.Game.Net().SendReliable(m)
 	}
 }
 
@@ -633,9 +679,8 @@ func (w *World) AdjustPoints(p int) {
 func (w *World) SyncPoints(r PointsSync) {
 	for name, value := range r.Points {
 		if pl := w.Game.GetPlayerByName(name); pl != nil {
-			// TODO
+			pl.Points = value
 		}
-		w.Points = value
 	}
 }
 

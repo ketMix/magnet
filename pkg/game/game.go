@@ -1,12 +1,9 @@
 package game
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
@@ -142,34 +139,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				float64(world.ScreenHeight-img.Bounds().Dy()-8),
 			)
 			screen.DrawImage(img, op)
-		}
-		// This is _bad_
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(
-			float64(world.ScreenWidth)-float64(img.Bounds().Dx())-8,
-			float64(img.Bounds().Dy()-8),
-		)
-		for i := range g.players {
-			name := g.net.Name
-			if i == 1 {
-				name = g.net.OtherName
-			}
-			imgs := data.Player2Init.Images
-			if g.net.Hosting() {
-				if i == 0 {
-					imgs = data.PlayerInit.Images
-				}
-			} else {
-				if i == 1 {
-					imgs = data.PlayerInit.Images
-				}
-			}
-			screen.DrawImage(imgs[0], op)
-
-			bounds := text.BoundString(data.NormalFace, name)
-			text.Draw(screen, name, data.NormalFace, int(op.GeoM.Element(0, 2))-bounds.Dx()-4, int(op.GeoM.Element(1, 2))+8, color.White)
-
-			op.GeoM.Translate(0, float64(imgs[0].Bounds().Dy())+8)
 		}
 	} else {
 	}

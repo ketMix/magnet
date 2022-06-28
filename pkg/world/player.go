@@ -22,6 +22,8 @@ type Player struct {
 	HoveringPlacement     bool
 	HoveringPlace         EntityActionPlace
 	HoverColumn, HoverRow int // X and Y hover coordinate in terms of columns/rows
+	// Current points the player has.
+	Points int
 }
 
 func NewPlayer() *Player {

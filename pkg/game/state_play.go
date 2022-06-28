@@ -225,8 +225,44 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	)
 
 	mx = bounds.Dx() + offset
+
+	// Draw players and points. (don't judge me)
+	for i, pl := range s.game.players {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(world.ScreenWidth)-12, float64(i)*32)
+
+		// Draw our player image and name from right to left.
+		imgs := data.Player2Init.Images
+		if !s.game.net.Active() || s.game.net.Hosting() {
+			if i == 0 {
+				imgs = data.PlayerInit.Images
+			}
+		} else {
+			if i == 1 {
+				imgs = data.PlayerInit.Images
+			}
+		}
+		op.GeoM.Translate(-float64(imgs[0].Bounds().Dx()/2), float64(imgs[0].Bounds().Dy()))
+		screen.DrawImage(imgs[0], op)
+
+		bounds := text.BoundString(data.BoldFace, pl.Name)
+		text.Draw(screen, pl.Name, data.BoldFace, int(op.GeoM.Element(0, 2))-bounds.Dx()-4, int(op.GeoM.Element(1, 2))+8, color.White)
+
+		// Move down and draw our points.
+		orb, _ := data.GetImage("orb-large.png")
+		op.GeoM.Translate(1, 16)
+
+		screen.DrawImage(orb, op)
+
+		op.GeoM.Translate(-float64(orb.Bounds().Dx()), 0)
+
+		t := fmt.Sprint(pl.Points)
+		bounds = text.BoundString(data.NormalFace, t)
+		op.GeoM.Translate(-float64(bounds.Dx()), 0)
+		text.Draw(screen, t, data.NormalFace, int(op.GeoM.Element(0, 2)), int(op.GeoM.Element(1, 2))+8, color.White)
+	}
 	// Draw current points
-	t = fmt.Sprint(s.world.Points)
+	/*t = fmt.Sprint(s.world.Points)
 	bounds = text.BoundString(data.NormalFace, t)
 	data.DrawStaticText(
 		fmt.Sprint(s.world.Points),
@@ -243,7 +279,8 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(float64(mx), float64(my-orb.Bounds().Dy()))
 	screen.DrawImage(orb, &op)
 
-	mx += orb.Bounds().Dx() + offset
+	mx += orb.Bounds().Dx() + offset*/
+
 	// Draw our clickables
 	if s.clickables != nil {
 		for i, c := range s.clickables {
