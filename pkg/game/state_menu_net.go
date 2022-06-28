@@ -21,6 +21,8 @@ type NetworkMenuState struct {
 	magnetSpin  float64
 	mapList     MapList
 
+	backgroundImage *ebiten.Image
+
 	buttons               []data.Button
 	cancelButton          data.Button
 	playerNameInput       *data.TextInput
@@ -33,6 +35,14 @@ type NetworkMenuState struct {
 }
 
 func (s *NetworkMenuState) Init() error {
+	// Load our background image.
+	if img, err := data.ReadImage("/ui/multiplayer.png"); err == nil {
+		s.backgroundImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	// Generate our maps list.
 	if err := s.mapList.Init(); err != nil {
 		return err
 	}
@@ -54,11 +64,11 @@ func (s *NetworkMenuState) Init() error {
 
 	centeredX := world.ScreenWidth / 2
 
-	addressX := int(float64(world.ScreenWidth) * 0.15)
+	localPlayerX := int(float64(world.ScreenWidth) * 0.15)
 	remotePlayerX := int(float64(world.ScreenWidth) * 0.8)
 
-	inputY := int(float64(world.ScreenHeight) * 0.75)
-	buttonY := int(float64(world.ScreenHeight) * 0.85)
+	inputY := int(float64(world.ScreenHeight) * 0.8)
+	buttonY := int(float64(world.ScreenHeight) * 0.9)
 
 	// Create Buttons
 	backButton := data.NewButton(
@@ -72,7 +82,7 @@ func (s *NetworkMenuState) Init() error {
 		},
 	)
 	hostGameButton := data.NewButton(
-		addressX,
+		centeredX,
 		buttonY,
 		"Host Game",
 		func() {
@@ -81,7 +91,7 @@ func (s *NetworkMenuState) Init() error {
 	)
 
 	joinGameButton := data.NewButton(
-		addressX,
+		centeredX,
 		buttonY+hostGameButton.Image().Bounds().Dy()*2,
 		"Join Game",
 		func() {
@@ -89,7 +99,7 @@ func (s *NetworkMenuState) Init() error {
 		},
 	)
 	waitGameButton := data.NewButton(
-		centeredX,
+		localPlayerX,
 		buttonY,
 		"Wait for Player",
 		func() {
@@ -143,7 +153,7 @@ func (s *NetworkMenuState) Init() error {
 		"Local Player Name",
 		playerName,
 		15,
-		centeredX,
+		localPlayerX,
 		inputY,
 	)
 
@@ -161,7 +171,7 @@ func (s *NetworkMenuState) Init() error {
 		"IP Address/Host",
 		"",
 		15,
-		addressX,
+		centeredX-30, // oops
 		inputY,
 	)
 
@@ -170,7 +180,7 @@ func (s *NetworkMenuState) Init() error {
 		"Port",
 		"20220",
 		6,
-		addressX+int(float64(s.addressInput.Image().Bounds().Dx())*0.75),
+		centeredX-30+int(float64(s.addressInput.Image().Bounds().Dx())*0.75),
 		inputY,
 	)
 
@@ -229,6 +239,11 @@ func (s *NetworkMenuState) Update() error {
 }
 
 func (s *NetworkMenuState) Draw(screen *ebiten.Image) {
+	// Draw our background.
+	screenOp := &ebiten.DrawImageOptions{}
+	screenOp.ColorM.Scale(0.5, 0.5, 0.5, 1)
+	screen.DrawImage(s.backgroundImage, screenOp)
+
 	// Draw our title
 	titleBounds := text.BoundString(data.BoldFace, s.title)
 	data.DrawStaticText(

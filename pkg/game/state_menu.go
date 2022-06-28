@@ -13,9 +13,11 @@ import (
 type MenuState struct {
 	game        *Game
 	magnetImage *ebiten.Image
+	titleImage  *ebiten.Image
 	title       string
 	magnetSpin  float64
 	buttons     []data.Button
+	titleFadeIn int
 }
 
 func (s *MenuState) Init() error {
@@ -26,6 +28,13 @@ func (s *MenuState) Init() error {
 	if img, err := data.ReadImage("/ui/magnet.png"); err == nil {
 		ebiten.SetWindowIcon([]image.Image{img})
 		s.magnetImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	// Load our title image.
+	if img, err := data.ReadImage("/ui/title.png"); err == nil {
+		s.titleImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
@@ -81,10 +90,19 @@ func (s *MenuState) Update() error {
 		button.Update()
 	}
 
+	s.titleFadeIn++
+
 	return nil
 }
 
 func (s *MenuState) Draw(screen *ebiten.Image) {
+	// Let's first draw that background.
+	titleOp := &ebiten.DrawImageOptions{}
+	// Darken it a lil.
+	d := math.Max(0.5, 1.0-float64(s.titleFadeIn)/120.0)
+	titleOp.ColorM.Scale(d, d, d, 1.0)
+	screen.DrawImage(s.titleImage, titleOp)
+
 	// Rotate our magnet about its center.
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-float64(s.magnetImage.Bounds().Dx())/2, -float64(s.magnetImage.Bounds().Dy())/2)
