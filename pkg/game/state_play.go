@@ -13,18 +13,42 @@ import (
 )
 
 type PlayState struct {
-	game          *Game
-	levelDataName string
-	level         data.Level
-	world         world.World
-	messages      []Message
-	clickables    []data.UIComponent
-	framebuffer   *ebiten.Image
+	game              *Game
+	levelDataName     string
+	level             data.Level
+	world             world.World
+	messages          []Message
+	clickables        []data.UIComponent
+	worldbuffer       *ebiten.Image
+	viewbuffer        *ebiten.Image
+	showEscapeMenu    bool
+	escapeMenuButtons []data.Button
 }
 
 func (s *PlayState) Init() error {
-	// Create our framebuffer so we can do some nicer fx.
-	s.framebuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
+	// Create our framebuffers so we can do some nicer fx.
+	s.worldbuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
+	s.viewbuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
+
+	// Set up escape menu buttons.
+	x := world.ScreenWidth / 2
+	y := world.ScreenHeight / 2
+	leaveGameButton := data.NewButton(
+		x,
+		y,
+		"Leave Game",
+		func() {
+			// Let's be sure to close the network if we actually have it running.
+			if s.game.net.Active() {
+				s.game.net.Close()
+			}
+
+			s.game.SetState(&MenuState{
+				game: s.game,
+			})
+		},
+	)
+	s.escapeMenuButtons = append(s.escapeMenuButtons, *leaveGameButton)
 
 	s.world.Game = s.game // Eww
 	s.world.Speed = s.game.Options.Speed
@@ -61,18 +85,27 @@ func (s *PlayState) Dispose() error {
 	// Remove players. Should this be moved to a preplay state? Something between menu and travel for setting up players.
 	s.game.players = make([]*world.Player, 0)
 
-	// Dispose framebuffer. This is unnecessary afaik.
-	if s.framebuffer != nil {
-		s.framebuffer.Dispose()
+	// Dispose buffers. This is unnecessary afaik.
+	if s.worldbuffer != nil {
+		s.worldbuffer.Dispose()
 	}
+	if s.viewbuffer != nil {
+		s.viewbuffer.Dispose()
+	}
+
+	// Special consideration for if menu skip was chosen on start...
+	s.game.Options.NoMenu = false
 	return nil
 }
 
 func (s *PlayState) Update() error {
 	// You may judge me for this, but I leave myself in the arms of the Gopher.
-	if s.framebuffer.Bounds().Dx() != world.ScreenWidth || s.framebuffer.Bounds().Dy() != world.ScreenHeight {
-		s.framebuffer.Dispose()
-		s.framebuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
+	if s.worldbuffer.Bounds().Dx() != world.ScreenWidth || s.worldbuffer.Bounds().Dy() != world.ScreenHeight {
+		s.worldbuffer.Dispose()
+		s.worldbuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
+
+		s.viewbuffer.Dispose()
+		s.viewbuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
 	}
 
 	// Update the clickables
@@ -178,24 +211,28 @@ func (s *PlayState) Update() error {
 		return err
 	}
 
+	// Check if the player hit 'escape', toggle escape menu.
+	if inpututil.IsKeyJustReleased(ebiten.KeyEscape) {
+		s.showEscapeMenu = !s.showEscapeMenu
+
+	}
+	if s.showEscapeMenu {
+		// Update buttons
+		for _, button := range s.escapeMenuButtons {
+			button.Update()
+		}
+	}
+
 	return nil
 }
 
 func (s *PlayState) Draw(screen *ebiten.Image) {
+	// Clear old buffer data.
+	s.viewbuffer.Clear()
+	s.worldbuffer.Clear()
+
 	// Draw our world.
-	s.world.Draw(s.framebuffer)
-
-	// Draw the framebuffer.
-	framebufferOp := ebiten.DrawImageOptions{}
-	// Let's first darken the render if we're in loss/victory.
-	switch s.world.Mode.(type) {
-	case *world.LossMode:
-		framebufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
-	case *world.VictoryMode:
-		framebufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
-	}
-
-	screen.DrawImage(s.framebuffer, &framebufferOp)
+	s.world.Draw(s.worldbuffer)
 
 	// Draw level text centered at top of screen for now.
 	data.DrawStaticText(
@@ -204,7 +241,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		world.ScreenWidth/2,
 		5,
 		color.White,
-		screen,
+		s.viewbuffer,
 		true,
 	)
 
@@ -224,7 +261,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		}
 
 		text.Draw(
-			screen,
+			s.viewbuffer,
 			m.content,
 			data.NormalFace,
 			mx,
@@ -235,7 +272,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	}
 
 	// Draw mode.
-	s.world.Mode.Draw(&s.world, screen)
+	s.world.Mode.Draw(&s.world, s.viewbuffer)
 
 	// Draw the waves and current points.
 	mx = 8
@@ -249,7 +286,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		mx,
 		my,
 		color.White,
-		screen,
+		s.viewbuffer,
 		false,
 	)
 
@@ -272,54 +309,64 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 			}
 		}
 		op.GeoM.Translate(-float64(imgs[0].Bounds().Dx()/2), float64(imgs[0].Bounds().Dy()))
-		screen.DrawImage(imgs[0], op)
+		s.viewbuffer.DrawImage(imgs[0], op)
 
 		bounds := text.BoundString(data.BoldFace, pl.Name)
-		text.Draw(screen, pl.Name, data.BoldFace, int(op.GeoM.Element(0, 2))-bounds.Dx()-4, int(op.GeoM.Element(1, 2))+8, color.White)
+		text.Draw(s.viewbuffer, pl.Name, data.BoldFace, int(op.GeoM.Element(0, 2))-bounds.Dx()-4, int(op.GeoM.Element(1, 2))+8, color.White)
 
 		// Move down and draw our points.
 		orb, _ := data.GetImage("orb-large.png")
 		op.GeoM.Translate(1, 16)
 
-		screen.DrawImage(orb, op)
+		s.viewbuffer.DrawImage(orb, op)
 
 		op.GeoM.Translate(-float64(orb.Bounds().Dx()), 0)
 
 		t := fmt.Sprint(pl.Points)
 		bounds = text.BoundString(data.NormalFace, t)
 		op.GeoM.Translate(-float64(bounds.Dx()), 0)
-		text.Draw(screen, t, data.NormalFace, int(op.GeoM.Element(0, 2)), int(op.GeoM.Element(1, 2))+8, color.White)
+		text.Draw(s.viewbuffer, t, data.NormalFace, int(op.GeoM.Element(0, 2)), int(op.GeoM.Element(1, 2))+8, color.White)
 	}
-	// Draw current points
-	/*t = fmt.Sprint(s.world.Points)
-	bounds = text.BoundString(data.NormalFace, t)
-	data.DrawStaticText(
-		fmt.Sprint(s.world.Points),
-		data.NormalFace,
-		mx,
-		my,
-		color.White,
-		screen,
-		false,
-	)
-	mx += bounds.Dx() + 5
-	orb, _ := data.GetImage("orb-large.png")
-	op := ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(mx), float64(my-orb.Bounds().Dy()))
-	screen.DrawImage(orb, &op)
-
-	mx += orb.Bounds().Dx() + offset*/
 
 	// Draw our clickables
 	if s.clickables != nil {
 		for i, c := range s.clickables {
 			c.SetPos(mx+(i+1)*offset, 12)
-			c.Draw(screen, &ebiten.DrawImageOptions{})
+			c.Draw(s.viewbuffer, &ebiten.DrawImageOptions{})
 		}
 	}
 
 	// Draw our player's belt!
-	s.game.players[0].Toolbelt.Draw(screen)
+	s.game.players[0].Toolbelt.Draw(s.viewbuffer)
+
+	// Actually draw our buffers to the screen!
+
+	// Draw the worldbuffer first.
+	worldbufferOp := ebiten.DrawImageOptions{}
+	viewbufferOp := ebiten.DrawImageOptions{}
+
+	// Let's first darken the render if we're in loss/victory.
+	switch s.world.Mode.(type) {
+	case *world.LossMode:
+		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
+	case *world.VictoryMode:
+		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
+	}
+	// Also darken if we're in the escape menu.
+	if s.showEscapeMenu {
+		worldbufferOp.ColorM.Scale(0.5, 0.5, 0.5, 1)
+		viewbufferOp.ColorM.Scale(0.5, 0.5, 0.5, 1)
+	}
+
+	screen.DrawImage(s.worldbuffer, &worldbufferOp)
+	screen.DrawImage(s.viewbuffer, &viewbufferOp)
+
+	// Draw our escape menu over top all.
+	if s.showEscapeMenu {
+		for _, button := range s.escapeMenuButtons {
+			button.Draw(screen, &ebiten.DrawImageOptions{})
+		}
+	}
 }
 
 func (s *PlayState) AddMessage(m Message) {
