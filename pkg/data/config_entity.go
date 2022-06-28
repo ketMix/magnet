@@ -33,6 +33,7 @@ type EntityConfig struct {
 	WalkImages       []*ebiten.Image
 	HeadImages       []*ebiten.Image
 	ColorMultiplier  [3]float64
+	ToolbeltOrder    int
 }
 
 func (e *EntityConfig) LoadFromFile(p string) error {
@@ -150,6 +151,8 @@ func (e *EntityConfig) LoadFromFile(p string) error {
 					e.ColorMultiplier[2] = v
 				}
 			}
+		case 'o':
+			e.ToolbeltOrder, err = strconv.Atoi(value)
 		}
 		if err != nil {
 			return err

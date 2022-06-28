@@ -14,3 +14,4 @@ Y 1
 Z 1
 I turret-basic
 i turret-beam
+o 5

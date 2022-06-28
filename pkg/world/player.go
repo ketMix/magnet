@@ -1,6 +1,8 @@
 package world
 
 import (
+	"sort"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/kettek/ebijam22/pkg/data"
@@ -32,13 +34,25 @@ func NewPlayer() *Player {
 		{tool: ToolGun, key: ebiten.Key1},
 	}
 
-	i := 2
+	// Collect our toolbelt items.
+	var toolbeltItems []data.EntityConfig
 	for _, v := range data.TurretConfigs {
+		toolbeltItems = append(toolbeltItems, v)
+	}
+
+	// Sort them.
+	sort.SliceStable(toolbeltItems, func(i, j int) bool {
+		return toolbeltItems[i].ToolbeltOrder < toolbeltItems[j].ToolbeltOrder
+	})
+
+	i := 2
+	for _, v := range toolbeltItems {
 		items = append(items, &ToolbeltItem{
 			tool: ToolTurret, key: ebiten.Key0 + ebiten.Key(i), polarity: data.NegativePolarity, kind: v,
 		})
 		i++
 	}
+
 	items = append(items, &ToolbeltItem{tool: ToolWall, key: ebiten.Key0 + ebiten.Key(i)})
 	i++
 	items = append(items, &ToolbeltItem{tool: ToolDestroy, key: ebiten.Key0 + ebiten.Key(i)})
