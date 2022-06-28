@@ -115,13 +115,16 @@ func (s *MenuState) Init() error {
 		y,
 		"Programming, Music, Maps",
 		func() {
+			s.game.SetState(&MusicMenuState{
+				game: s.game,
+			})
 		},
 	)
 	y += int(float64(credits2aButton.Image().Bounds().Dy()) * 1.5)
 	credits2bButton := data.NewButton(
 		x,
 		y,
-		"liqmix",
+		"liqMix",
 		func() {
 			OpenFile("https://liq.mx")
 		},

@@ -1,6 +1,8 @@
 package data
 
 import (
+	"strings"
+
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
@@ -65,4 +67,18 @@ func (mp *MusicPlayer) Update() {
 		mp.currentMusic.Rewind()
 		mp.currentMusic.Play()
 	}
+}
+
+func (mp *MusicPlayer) GetCurrentTrack() string {
+	return mp.currentTrack
+}
+
+func (mp *MusicPlayer) GetAllTracks() []string {
+	tracks, _ := GetPathFiles("music")
+	return tracks
+}
+func FormatTrackName(p string) string {
+	trackName := strings.Split(p, ".")[0]
+	trackName = strings.ToUpper(string(trackName[0])) + trackName[1:]
+	return trackName
 }
