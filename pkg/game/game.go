@@ -1,6 +1,8 @@
 package game
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -22,7 +24,8 @@ type Game struct {
 	//
 	net net.Connection
 	//
-	players []*world.Player
+	players             []*world.Player
+	lostConnectionTimer int
 }
 
 // Init is used to set up all initial game structures.
@@ -112,6 +115,20 @@ func (g *Game) Update() error {
 	// Call update on our BGM to ensure it's playing
 	data.BGM.Update()
 
+	if g.net.Active() {
+		if g.net.Disconnected() {
+			g.lostConnectionTimer++
+		}
+		if g.lostConnectionTimer >= 300 {
+			g.lostConnectionTimer = 0
+			g.net.Close()
+			g.SetState(&MenuState{
+				game: g,
+			})
+			return nil
+		}
+	}
+
 	if !data.CurrentlyReceivingInput() {
 		if inpututil.IsKeyJustReleased(ebiten.KeyF) || inpututil.IsKeyJustReleased(ebiten.KeyF11) || (inpututil.IsKeyJustReleased(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
 			ebiten.SetFullscreen(!ebiten.IsFullscreen())
@@ -139,6 +156,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				float64(world.ScreenHeight-img.Bounds().Dy()-8),
 			)
 			screen.DrawImage(img, op)
+		}
+		if g.net.Disconnected() {
+			data.DrawStaticText("connection lost, returning to menu...", data.BoldFace, world.ScreenWidth/2, world.ScreenHeight/2, color.White, screen, true)
 		}
 	} else {
 	}
