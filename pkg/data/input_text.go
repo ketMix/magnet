@@ -50,13 +50,13 @@ type TextInput struct {
 	counter     int
 	borderWidth int
 	maxLength   int
+	innerImage  *ebiten.Image
 }
 
-func NewTextInput(label string, x, y int) *TextInput {
-	maxLength := 22
+func NewTextInput(label, placeholder string, maxLength, x, y int) *TextInput {
 	borderWidth := 2
-	textSize := text.BoundString(NormalFace, "t")
-	outerImage := ebiten.NewImage((textSize.Dx()*maxLength)+borderWidth*7, textSize.Dy()+borderWidth*7)
+	textSize := text.BoundString(NormalFace, "m")
+	outerImage := ebiten.NewImage((textSize.Dx()*(maxLength))+borderWidth*7, textSize.Dy()+borderWidth*7)
 	outerBounds := outerImage.Bounds()
 	innerRectangle := image.Rectangle{
 		image.Point{
@@ -74,9 +74,11 @@ func NewTextInput(label string, x, y int) *TextInput {
 		label:       label,
 		borderWidth: borderWidth,
 		maxLength:   maxLength,
+		data:        placeholder,
+		innerImage:  innerImage,
 		Clickable: Clickable{
-			x:     x,
-			y:     y,
+			x:     x - outerBounds.Dx()/2,
+			y:     y - outerBounds.Dy()/2,
 			image: outerImage,
 		},
 	}
@@ -84,35 +86,39 @@ func NewTextInput(label string, x, y int) *TextInput {
 
 func (ti *TextInput) Update() {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		println("true")
 		if ti.IsClicked() {
-			println("activating")
+			println("Clicked ", ti.label)
 			ti.isActive = true
 			receivingKeyboardInput[ti.label] = true
 		} else {
-			println("deactivating")
 			ti.isActive = false
 			receivingKeyboardInput[ti.label] = false
 			ti.counter = 0
 		}
 	}
 	if ti.isActive {
+		if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
+			if len(ti.data) > 0 {
+				ti.data = ti.data[0 : len(ti.data)-1]
+			}
+		}
 		ti.counter++
 		ti.runes = ebiten.AppendInputChars(ti.runes[:0])
 		if len(ti.data) < ti.maxLength {
 			ti.data += string(ti.runes)
 		}
-		println(ti.data)
 	}
 }
 
 func (ti *TextInput) IsClicked() bool {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		labelBounds := text.BoundString(NormalFace, ti.label)
+		// labelBounds := text.BoundString(NormalFace, ti.label)
 		cursorX, cursorY := ebiten.CursorPosition()
-		// Puike
-		minX, maxX := ti.x-ti.image.Bounds().Dx()/3, float64(ti.x)+float64(ti.image.Bounds().Dx())/1.5
-		minY, maxY := ti.y+labelBounds.Dy(), float64(ti.y)+float64(ti.image.Bounds().Dy())*1.5
+		width := ti.innerImage.Bounds().Dx()
+		height := ti.innerImage.Bounds().Dy() / 2
+		labelBounds := text.BoundString(NormalFace, ti.label)
+		minX, maxX := ti.x, ti.x+width
+		minY, maxY := ti.y+labelBounds.Dy()-height, ti.y+labelBounds.Dy()+height
 		if int(minX) < cursorX && cursorX < int(maxX) {
 			if int(minY) < cursorY && cursorY < int(maxY) {
 				return true
@@ -124,30 +130,34 @@ func (ti *TextInput) IsClicked() bool {
 }
 
 func (ti *TextInput) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
-	labelBounds := text.BoundString(NormalFace, ti.label)
 	op := ebiten.DrawImageOptions{}
-	// barf
-	op.GeoM.Translate(float64(ti.x-ti.image.Bounds().Dx()/3), float64(ti.y+labelBounds.Dy()))
+
+	op.GeoM.Translate(float64(ti.x), float64(ti.y))
+
+	// Draw the input box
 	screen.DrawImage(ti.image, &op)
 	DrawStaticText(
 		ti.label,
 		NormalFace,
 		ti.x,
-		ti.y,
+		ti.y-ti.borderWidth,
 		color.White,
 		screen,
-		true,
+		false,
 	)
+
+	// Add a lil _ if we can type
 	t := ti.data
 	if ti.counter%60 > 30 {
-		t += "|"
+		t += "_"
 	}
-	// Need to position this
+
+	// Draw the input
 	DrawStaticText(
-		ti.data,
+		t,
 		NormalFace,
-		ti.x-ti.image.Bounds().Dx()/3+ti.borderWidth*2,
-		ti.y+labelBounds.Dy()+ti.borderWidth,
+		ti.x+ti.borderWidth*2,
+		ti.y+ti.borderWidth*7,
 		color.White,
 		screen,
 		false,

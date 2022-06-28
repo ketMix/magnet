@@ -45,7 +45,7 @@ func (c *Clickable) IsClicked() bool {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		cursorX, cursorY := ebiten.CursorPosition()
 		minX, maxX := c.x-c.image.Bounds().Dx()/2, c.x+c.image.Bounds().Dx()/2
-		minY, maxY := c.y-c.image.Bounds().Dx()/2, c.y+c.image.Bounds().Dx()/2
+		minY, maxY := c.y-c.image.Bounds().Dy()/2, c.y+c.image.Bounds().Dy()/2
 		if int(minX) < cursorX && cursorX < int(maxX) {
 			if int(minY) < cursorY && cursorY < int(maxY) {
 				return true
@@ -124,16 +124,12 @@ const borderWidth = 5
 
 type Button struct {
 	Clickable
-	text       string
-	background *ebiten.Image
+	text string
 }
 
 func NewButton(x, y int, txt string, onClick func()) *Button {
 	bounds := text.BoundString(NormalFace, txt)
-	width := bounds.Dx() + borderWidth
-	height := bounds.Dy() + borderWidth
-	bgImage := ebiten.NewImage(width, height)
-	bgImage.Fill(color.White)
+	bgImage := ebiten.NewImage(bounds.Dx(), bounds.Dy())
 
 	return &Button{
 		Clickable: Clickable{
@@ -151,15 +147,29 @@ func (b *Button) Update() {
 		b.onClick()
 	}
 }
+func (b *Button) IsClicked() bool {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		bounds := text.BoundString(NormalFace, b.text)
+		cursorX, cursorY := ebiten.CursorPosition()
+		minX, maxX := b.x-bounds.Dx()/2, b.x+bounds.Dx()/2
+		minY, maxY := b.y-bounds.Dy()/2, b.y+bounds.Dy()/2
+		if int(minX) < cursorX && cursorX < int(maxX) {
+			if int(minY) < cursorY && cursorY < int(maxY) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
 
 func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
-	b.Clickable.Draw(screen, screenOp)
 	text.Draw(
 		screen,
 		b.text,
 		NormalFace,
 		int(b.x)-b.image.Bounds().Dx()/2,
-		int(b.y)-b.image.Bounds().Dy()/2,
+		int(b.y)+b.image.Bounds().Dy()/2,
 		color.White,
 	)
 }

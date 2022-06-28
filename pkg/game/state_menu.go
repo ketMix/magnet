@@ -16,7 +16,6 @@ type MenuState struct {
 	title       string
 	magnetSpin  float64
 	buttons     []data.Button
-	inputs      []data.TextInput
 }
 
 func (s *MenuState) Init() error {
@@ -32,23 +31,31 @@ func (s *MenuState) Init() error {
 	}
 
 	// Set Main Menu Buttons
+	x := world.ScreenWidth / 2
+	y := int(float64(world.ScreenHeight) / 1.25)
 	startGameButton := data.NewButton(
-		world.ScreenWidth/2,
-		int(float64(world.ScreenHeight)/1.25),
+		x,
+		y,
 		"Start Game",
 		func() {
 			s.StartGame()
 		},
 	)
-	s.buttons = []data.Button{*startGameButton}
-
-	playerNameInput := data.NewTextInput(
-		"Player Name",
-		int(float64(world.ScreenWidth)/1.25),
-		int(float64(world.ScreenHeight)/4),
+	y += startGameButton.Image().Bounds().Dy() * 2
+	networkButton := data.NewButton(
+		x,
+		y,
+		"Network Game",
+		func() {
+			s.game.SetState(&NetworkMenuState{
+				game: s.game,
+			})
+		},
 	)
-	s.inputs = []data.TextInput{*playerNameInput}
-
+	s.buttons = []data.Button{
+		*startGameButton,
+		*networkButton,
+	}
 	// Start the tunes
 	data.BGM.Set("menu.ogg")
 	return nil
@@ -63,6 +70,7 @@ func (s *MenuState) Update() error {
 	if s.game.Options.NoMenu {
 		s.StartGame()
 	}
+
 	// Spin at 4 degrees per update.
 	s.magnetSpin += math.Pi / 180 * 4
 
@@ -70,10 +78,7 @@ func (s *MenuState) Update() error {
 	for _, button := range s.buttons {
 		button.Update()
 	}
-	// Update inputs
-	for _, input := range s.inputs {
-		input.Update()
-	}
+
 	return nil
 }
 
@@ -101,10 +106,6 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 	// Draw game buttons
 	for _, button := range s.buttons {
 		button.Draw(screen, &op)
-	}
-	// Update inputs
-	for _, input := range s.inputs {
-		input.Draw(screen, &op)
 	}
 }
 
