@@ -13,16 +13,17 @@ import (
 )
 
 type PlayState struct {
-	game              *Game
-	levelDataName     string
-	level             data.Level
-	world             world.World
-	messages          []Message
-	clickables        []data.UIComponent
-	worldbuffer       *ebiten.Image
-	viewbuffer        *ebiten.Image
-	showEscapeMenu    bool
-	escapeMenuButtons []data.Button
+	game                     *Game
+	levelDataName            string
+	level                    data.Level
+	world                    world.World
+	messages                 []Message
+	clickables               []data.UIComponent
+	worldbuffer              *ebiten.Image
+	viewbuffer               *ebiten.Image
+	showEscapeMenu           bool
+	escapeMenuButtons        []data.Button
+	readyImage, unreadyImage *ebiten.Image
 }
 
 func (s *PlayState) Init() error {
@@ -49,6 +50,18 @@ func (s *PlayState) Init() error {
 		},
 	)
 	s.escapeMenuButtons = append(s.escapeMenuButtons, *leaveGameButton)
+
+	// Ready button images.
+	if img, err := data.ReadImage("/ui/ready.png"); err == nil {
+		s.readyImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+	if img, err := data.ReadImage("/ui/not-ready.png"); err == nil {
+		s.unreadyImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
 
 	s.world.Game = s.game // Eww
 	s.world.Speed = s.game.Options.Speed
@@ -310,6 +323,17 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		}
 		op.GeoM.Translate(-float64(imgs[0].Bounds().Dx()/2), float64(imgs[0].Bounds().Dy()))
 		s.viewbuffer.DrawImage(imgs[0], op)
+		op.GeoM.Translate(-float64(imgs[0].Bounds().Dx()), 0)
+		// Also draw ready state if multiplayer
+		if _, ok := s.world.Mode.(*world.BuildMode); ok && s.game.net.Active() {
+			var img *ebiten.Image
+			if pl.ReadyForWave {
+				img = s.readyImage
+			} else {
+				img = s.unreadyImage
+			}
+			s.viewbuffer.DrawImage(img, op)
+		}
 
 		bounds := text.BoundString(data.BoldFace, pl.Name)
 		text.Draw(s.viewbuffer, pl.Name, data.BoldFace, int(op.GeoM.Element(0, 2))-bounds.Dx()-4, int(op.GeoM.Element(1, 2))+8, color.White)
