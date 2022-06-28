@@ -138,8 +138,14 @@ For players, this is to used to identify the images for the walk animation
 
 For players, this is to used to identify the images for when the player loses.
 
-### o (Toolbelt Order Prefix) **int**
+## o (Toolbelt Order Prefix) **int**
 
 ### *The prefix used to give order priority in the toolbelt*
 
 This is used to sort the toolbelt from lowest to highest, left to right.
+
+## d (Entity Information) **string**
+
+### *The prefix used to define entity information*
+
+This is used to provide additional information to the player about turrets and enemies.
