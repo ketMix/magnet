@@ -57,7 +57,7 @@ func main() {
 		for k, v := range clientsMap {
 			if time.Now().Sub(v.connectionTime) > time.Duration(30)*time.Second {
 				delete(clientsMap, k)
-				fmt.Println("cleaned up", k)
+				fmt.Println("cleaned up", k, v.name)
 			}
 		}
 
