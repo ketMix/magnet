@@ -2,7 +2,6 @@ package game
 
 import (
 	"os/exec"
-	"path/filepath"
 )
 
 func OpenFile(path string) error {
