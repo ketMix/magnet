@@ -187,6 +187,14 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 
 	// Draw the framebuffer.
 	framebufferOp := ebiten.DrawImageOptions{}
+	// Let's first darken the render if we're in loss/victory.
+	switch s.world.Mode.(type) {
+	case *world.LossMode:
+		framebufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
+	case *world.VictoryMode:
+		framebufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
+	}
+
 	screen.DrawImage(s.framebuffer, &framebufferOp)
 
 	// Draw level text centered at top of screen for now.
