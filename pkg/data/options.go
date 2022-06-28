@@ -12,4 +12,5 @@ type Options struct {
 	NoMusic    bool    `long:"nomusic" description:"Disable in-game music"`
 	NoSound    bool    `long:"nosound" description:"Disable in-game sound"`
 	NoMenu     bool    `long:"nomenu" description:"Disable main menu and immediately start game"`
+	SyncRate   int     `long:"syncrate" description:"How frequently in ticks network information should be synchronized" default:"100"`
 }

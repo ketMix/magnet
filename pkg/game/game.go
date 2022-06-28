@@ -182,6 +182,10 @@ func (g *Game) SetState(s State) error {
 	return nil
 }
 
+func (g *Game) GetOptions() *data.Options {
+	return &g.Options
+}
+
 // Hidden sekrets.
 type NoError struct {
 }

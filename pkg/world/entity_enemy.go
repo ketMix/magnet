@@ -128,7 +128,7 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 
 	// Send periodic sync every 100 ticks. This is ignored during processing if the host is not set.
 	e.lastSync++
-	if e.lastSync > 100 {
+	if e.lastSync > world.Game.GetOptions().SyncRate {
 		e.lastSync = 0
 		var r MultiRequest
 		r.Requests = append(r.Requests, EntityPropertySync{
