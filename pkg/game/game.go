@@ -181,3 +181,11 @@ func (g *Game) SetState(s State) error {
 	g.state = s
 	return nil
 }
+
+// Hidden sekrets.
+type NoError struct {
+}
+
+func (e NoError) Error() string {
+	return "no error here captain"
+}
