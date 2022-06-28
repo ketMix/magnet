@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 
 	"os/user"
 
@@ -33,6 +34,7 @@ type NetworkMenuState struct {
 	remotePlayerNameInput *data.TextInput
 	addressInput          *data.TextInput
 	portInput             *data.TextInput
+	syncRateInput         *data.TextInput
 	inputs                []*data.TextInput
 	netResult             chan error
 	networking            bool
@@ -182,6 +184,25 @@ func (s *NetworkMenuState) Init() error {
 		inputY,
 	)
 
+	// Sync RateInput
+	s.syncRateInput = data.NewTextInput(
+		"Host Sync Rate",
+		fmt.Sprintf("%d", s.game.Options.SyncRate),
+		15,
+		centeredX,
+		inputY-40,
+	)
+	s.syncRateInput.OnChange = func(text string) {
+		if rate, err := strconv.Atoi(text); err == nil {
+			if rate < 5 {
+				rate = 5
+			} else if rate >= 5000 {
+				rate = 5000
+			}
+			s.game.Options.SyncRate = rate
+		}
+	}
+
 	// Address Input
 	s.addressInput = data.NewTextInput(
 		"IP Address/Host",
@@ -203,6 +224,7 @@ func (s *NetworkMenuState) Init() error {
 	s.inputs = []*data.TextInput{
 		s.playerNameInput,
 		s.remotePlayerNameInput,
+		s.syncRateInput,
 		s.addressInput,
 		s.portInput,
 	}
