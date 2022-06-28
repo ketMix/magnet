@@ -609,7 +609,6 @@ func (w *World) DamageCore(r DamageCoreRequest) {
 				c.destroyed = true
 				data.SFX.Play("loss-hit.ogg")
 			}
-			// Screen shake?
 			return
 		}
 	}
