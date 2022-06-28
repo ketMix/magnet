@@ -5,9 +5,12 @@ import (
 	"image/color"
 	"math"
 
+	"os/user"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
 )
 
@@ -18,16 +21,22 @@ type NetworkMenuState struct {
 	magnetSpin  float64
 
 	buttons               []data.Button
+	cancelButton          data.Button
 	playerNameInput       *data.TextInput
 	remotePlayerNameInput *data.TextInput
 	addressInput          *data.TextInput
 	portInput             *data.TextInput
 	inputs                []*data.TextInput
+	netResult             chan error
+	networking            bool
 }
 
 func (s *NetworkMenuState) Init() error {
 	// Title Text
 	s.title = "Network Game"
+
+	// Set up our network response channel.
+	s.netResult = make(chan error)
 
 	// Magnet Image
 	if img, err := data.ReadImage("/ui/magnet.png"); err == nil {
@@ -60,9 +69,7 @@ func (s *NetworkMenuState) Init() error {
 		buttonY,
 		"Host Game",
 		func() {
-			// Host
-			t := fmt.Sprintf("hosting game on address: %s:%s", s.addressInput.GetInput(), s.portInput.GetInput())
-			println(t)
+			s.Host()
 		},
 	)
 
@@ -71,9 +78,7 @@ func (s *NetworkMenuState) Init() error {
 		buttonY+hostGameButton.Image().Bounds().Dy()*2,
 		"Join Game",
 		func() {
-			// Join
-			t := fmt.Sprintf("joining game for address: %s:%s", s.addressInput.GetInput(), s.portInput.GetInput())
-			println(t)
+			s.JoinByIP()
 		},
 	)
 	waitGameButton := data.NewButton(
@@ -81,11 +86,7 @@ func (s *NetworkMenuState) Init() error {
 		buttonY,
 		"Wait for Player",
 		func() {
-			// Wait
-			remotePlayerName := s.remotePlayerNameInput.GetInput()
-			if len(remotePlayerName) > 0 {
-				println("waiting for game for player name: ", s.playerNameInput.GetInput())
-			}
+			s.Await()
 		},
 	)
 	findGameButton := data.NewButton(
@@ -93,11 +94,7 @@ func (s *NetworkMenuState) Init() error {
 		buttonY,
 		"Find Game",
 		func() {
-			// Find
-			remotePlayerName := s.remotePlayerNameInput.GetInput()
-			if len(remotePlayerName) > 0 {
-				println("finding game for player name: ", s.remotePlayerNameInput.GetInput())
-			}
+			s.Find()
 		},
 	)
 
@@ -109,11 +106,35 @@ func (s *NetworkMenuState) Init() error {
 		*waitGameButton,
 	}
 
+	// Standalone cancel button, since it is conditional.
+	s.cancelButton = *data.NewButton(
+		world.ScreenWidth/2,
+		world.ScreenHeight/2,
+		"Cancel",
+		func() {
+			s.Cancel()
+		},
+	)
+
+	playerName := "player"
+	if s.game.Options.Name != "" {
+		playerName = s.game.Options.Name
+	} else {
+		user, err := user.Current()
+		if err == nil {
+			playerName = user.Username
+		}
+	}
+	remoteName := "friendo"
+	if s.game.Options.Search != "" {
+		remoteName = s.game.Options.Search
+	}
+
 	// Create the inputs
 	// Player Name Input
 	s.playerNameInput = data.NewTextInput(
 		"Local Player Name",
-		"player",
+		playerName,
 		15,
 		centeredX,
 		inputY,
@@ -122,7 +143,7 @@ func (s *NetworkMenuState) Init() error {
 	// Other player name input
 	s.remotePlayerNameInput = data.NewTextInput(
 		"Remote Player Name",
-		"friendo",
+		remoteName,
 		15,
 		remotePlayerX,
 		inputY,
@@ -166,6 +187,27 @@ func (s *NetworkMenuState) Dispose() error {
 func (s *NetworkMenuState) Update() error {
 	// Spin at 4 degrees per update.
 	s.magnetSpin += math.Pi / 180 * 4
+
+	if s.networking {
+		s.cancelButton.Update()
+		// Get that network message if needed.
+		select {
+		case v := <-s.netResult:
+			if v == nil {
+				// success!
+				s.game.SetState(&TravelState{
+					game:        s.game,
+					targetLevel: s.game.Options.Map,
+				})
+				go s.game.net.Loop()
+				return nil
+			} else {
+				s.networking = false
+				fmt.Println("net error", v)
+			}
+		default:
+		}
+	}
 
 	// Update buttons
 	for _, button := range s.buttons {
@@ -215,6 +257,9 @@ func (s *NetworkMenuState) Draw(screen *ebiten.Image) {
 	for _, button := range s.buttons {
 		button.Draw(screen, &op)
 	}
+	if s.networking {
+		s.cancelButton.Draw(screen, &op)
+	}
 	// Draw inputs
 	for i := range s.inputs {
 		s.inputs[i].Draw(screen, &op)
@@ -226,4 +271,60 @@ func (s *NetworkMenuState) StartGame() {
 		game:        s.game,
 		targetLevel: s.game.Options.Map,
 	})
+}
+
+func (s *NetworkMenuState) CreateNet() {
+	s.game.net = net.NewConnection(s.playerNameInput.GetInput())
+}
+
+func (s *NetworkMenuState) Host() {
+	if s.networking {
+		return
+	}
+	s.networking = true
+	s.CreateNet()
+	go func() {
+		err := s.game.net.AwaitDirect(s.addressInput.GetInput()+":"+s.portInput.GetInput(), "")
+		s.netResult <- err
+	}()
+}
+
+func (s *NetworkMenuState) JoinByIP() {
+	if s.networking {
+		return
+	}
+	s.networking = true
+	s.CreateNet()
+	go func() {
+		err := s.game.net.AwaitDirect("", s.addressInput.GetInput()+":"+s.portInput.GetInput())
+		s.netResult <- err
+	}()
+}
+
+func (s *NetworkMenuState) Await() {
+	if s.networking {
+		return
+	}
+	s.networking = true
+	s.CreateNet()
+	go func() {
+		err := s.game.net.AwaitHandshake(s.game.Options.Handshaker, "", "")
+		s.netResult <- err
+	}()
+}
+
+func (s *NetworkMenuState) Find() {
+	if s.networking {
+		return
+	}
+	s.networking = true
+	s.CreateNet()
+	go func() {
+		err := s.game.net.AwaitHandshake(s.game.Options.Handshaker, "", s.remotePlayerNameInput.GetInput())
+		s.netResult <- err
+	}()
+}
+
+func (s *NetworkMenuState) Cancel() {
+	s.game.net.Close()
 }
