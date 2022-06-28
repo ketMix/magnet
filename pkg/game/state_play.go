@@ -19,9 +19,13 @@ type PlayState struct {
 	world         world.World
 	messages      []Message
 	clickables    []data.UIComponent
+	framebuffer   *ebiten.Image
 }
 
 func (s *PlayState) Init() error {
+	// Create our framebuffer so we can do some nicer fx.
+	s.framebuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
+
 	s.world.Game = s.game // Eww
 	s.world.Speed = s.game.Options.Speed
 
@@ -56,10 +60,21 @@ func (s *PlayState) Dispose() error {
 	}
 	// Remove players. Should this be moved to a preplay state? Something between menu and travel for setting up players.
 	s.game.players = make([]*world.Player, 0)
+
+	// Dispose framebuffer. This is unnecessary afaik.
+	if s.framebuffer != nil {
+		s.framebuffer.Dispose()
+	}
 	return nil
 }
 
 func (s *PlayState) Update() error {
+	// You may judge me for this, but I leave myself in the arms of the Gopher.
+	if s.framebuffer.Bounds().Dx() != world.ScreenWidth || s.framebuffer.Bounds().Dy() != world.ScreenHeight {
+		s.framebuffer.Dispose()
+		s.framebuffer = ebiten.NewImage(world.ScreenWidth, world.ScreenHeight)
+	}
+
 	// Update the clickables
 	for _, c := range s.clickables {
 		c.Update()
@@ -168,7 +183,11 @@ func (s *PlayState) Update() error {
 
 func (s *PlayState) Draw(screen *ebiten.Image) {
 	// Draw our world.
-	s.world.Draw(screen)
+	s.world.Draw(s.framebuffer)
+
+	// Draw the framebuffer.
+	framebufferOp := ebiten.DrawImageOptions{}
+	screen.DrawImage(s.framebuffer, &framebufferOp)
 
 	// Draw level text centered at top of screen for now.
 	data.DrawStaticText(
