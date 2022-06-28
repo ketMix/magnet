@@ -58,7 +58,7 @@ func ReadImagesByPrefix(prefix string) ([]image.Image, error) {
 	return images, err
 }
 
-func getPathFiles(p string) ([]string, error) {
+func GetPathFiles(p string) ([]string, error) {
 	var files []string
 	fileList, err := assets.ReadDir(path.Join("assets", p))
 	for _, file := range fileList {
