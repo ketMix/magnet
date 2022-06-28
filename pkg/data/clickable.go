@@ -124,7 +124,9 @@ const borderWidth = 5
 
 type Button struct {
 	Clickable
-	text string
+	text             string
+	OffsetX, OffsetY int // Forgive me.
+	Active           bool
 }
 
 func NewButton(x, y int, txt string, onClick func()) *Button {
@@ -151,8 +153,8 @@ func (b *Button) IsClicked() bool {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		bounds := text.BoundString(NormalFace, b.text)
 		cursorX, cursorY := ebiten.CursorPosition()
-		minX, maxX := b.x-bounds.Dx()/2, b.x+bounds.Dx()/2
-		minY, maxY := b.y-bounds.Dy()/2, b.y+bounds.Dy()/2
+		minX, maxX := b.OffsetX+b.x-bounds.Dx()/2, b.OffsetX+b.x+bounds.Dx()/2
+		minY, maxY := b.OffsetY+b.y-bounds.Dy()/2, b.OffsetY+b.y+bounds.Dy()/2
 		if int(minX) < cursorX && cursorX < int(maxX) {
 			if int(minY) < cursorY && cursorY < int(maxY) {
 				return true
@@ -164,12 +166,23 @@ func (b *Button) IsClicked() bool {
 }
 
 func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
+	b.OffsetX = int(screenOp.GeoM.Element(0, 2))
+	b.OffsetY = int(screenOp.GeoM.Element(1, 2))
+	c := color.RGBA{255, 255, 255, 255}
+	if b.Active {
+		c = color.RGBA{255, 255, 0, 255}
+	}
+
 	text.Draw(
 		screen,
 		b.text,
 		NormalFace,
-		int(b.x)-b.image.Bounds().Dx()/2,
-		int(b.y)+b.image.Bounds().Dy()/2,
-		color.White,
+		b.OffsetX+(b.x)-b.image.Bounds().Dx()/2,
+		b.OffsetY+(b.y)+b.image.Bounds().Dy()/2,
+		c,
 	)
+}
+
+func (b *Button) Text() string {
+	return b.text
 }
