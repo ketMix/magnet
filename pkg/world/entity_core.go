@@ -45,7 +45,12 @@ func (e *CoreEntity) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOption
 	)
 
 	// Draw health as text
-	t := fmt.Sprintf("%d/%d", e.health, e.maxHealth)
+	// Let's not render negative health
+	currentHealth := e.health
+	if currentHealth < 0 {
+		currentHealth = 0
+	}
+	t := fmt.Sprintf("%d/%d", currentHealth, e.maxHealth)
 	data.DrawStaticText(
 		t,
 		data.NormalFace,
