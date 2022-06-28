@@ -9,6 +9,7 @@ var BGM MusicPlayer = MusicPlayer{
 }
 
 type MusicPlayer struct {
+	currentTrack string
 	currentMusic *audio.Player
 	Muted        bool
 	volume       float64
@@ -35,9 +36,13 @@ func (mp *MusicPlayer) Stop() {
 }
 
 func (mp *MusicPlayer) Set(p string) {
+	if mp.currentTrack == p {
+		return
+	}
 	bgm, err := GetMusic(p)
 	if err != nil {
 	}
+	mp.currentTrack = p
 	mp.Play(bgm)
 }
 
