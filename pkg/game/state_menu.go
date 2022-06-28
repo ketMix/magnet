@@ -105,7 +105,7 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 
 	// Draw game buttons
 	for _, button := range s.buttons {
-		button.Draw(screen, &op)
+		button.Draw(screen, &ebiten.DrawImageOptions{})
 	}
 }
 

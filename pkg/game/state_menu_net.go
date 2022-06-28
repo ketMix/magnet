@@ -19,6 +19,7 @@ type NetworkMenuState struct {
 	title       string
 	magnetImage *ebiten.Image
 	magnetSpin  float64
+	mapList     MapList
 
 	buttons               []data.Button
 	cancelButton          data.Button
@@ -32,6 +33,12 @@ type NetworkMenuState struct {
 }
 
 func (s *NetworkMenuState) Init() error {
+	if err := s.mapList.Init(); err != nil {
+		return err
+	}
+	if s.game.Options.Map != "" {
+		s.mapList.selectedMap = s.game.Options.Map
+	}
 	// Title Text
 	s.title = "Network Game"
 
@@ -195,10 +202,7 @@ func (s *NetworkMenuState) Update() error {
 		case v := <-s.netResult:
 			if v == nil {
 				// success!
-				s.game.SetState(&TravelState{
-					game:        s.game,
-					targetLevel: s.game.Options.Map,
-				})
+				s.StartGame()
 				go s.game.net.Loop()
 				return nil
 			} else {
@@ -218,6 +222,9 @@ func (s *NetworkMenuState) Update() error {
 	for i := range s.inputs {
 		s.inputs[i].Update()
 	}
+
+	s.mapList.Update()
+
 	return nil
 }
 
@@ -264,12 +271,15 @@ func (s *NetworkMenuState) Draw(screen *ebiten.Image) {
 	for i := range s.inputs {
 		s.inputs[i].Draw(screen, &op)
 	}
+
+	op.GeoM.Translate(8, 80)
+	s.mapList.Draw(screen, &op)
 }
 
 func (s *NetworkMenuState) StartGame() {
 	s.game.SetState(&TravelState{
 		game:        s.game,
-		targetLevel: s.game.Options.Map,
+		targetLevel: s.mapList.selectedMap,
 	})
 }
 
