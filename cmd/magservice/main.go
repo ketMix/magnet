@@ -53,18 +53,19 @@ func main() {
 
 	// Begin the Eternal Listen (tm)
 	for {
+
+		buffer := make([]byte, 1024)
+		bytesRead, remoteAddr, err := localConn.ReadFromUDP(buffer)
+		if err != nil {
+			panic(err)
+		}
+
 		// This is super sloppy, but use network receives to remove any pending clients that have been here for over 30 seconds.
 		for k, v := range clientsMap {
 			if time.Now().Sub(v.connectionTime) > time.Duration(30)*time.Second {
 				delete(clientsMap, k)
 				fmt.Println("cleaned up", k, v.name)
 			}
-		}
-
-		buffer := make([]byte, 1024)
-		bytesRead, remoteAddr, err := localConn.ReadFromUDP(buffer)
-		if err != nil {
-			panic(err)
 		}
 
 		clientKey := IPToAddressKey(remoteAddr)
