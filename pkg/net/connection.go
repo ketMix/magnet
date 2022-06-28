@@ -28,9 +28,10 @@ type Connection struct {
 	OtherName    string
 
 	//
-	connected bool
-	active    bool
-	hosting   bool
+	connected    bool
+	disconnected bool
+	active       bool
+	hosting      bool
 
 	//
 	lastReceived time.Time
@@ -58,6 +59,11 @@ func (c *Connection) Connected() bool {
 	return c.connected
 }
 
+// Connected returns if the connection was disconnected.
+func (c *Connection) Disconnected() bool {
+	return c.disconnected
+}
+
 // Active returns if the connection should be connected.
 func (c *Connection) Active() bool {
 	return c.active
@@ -66,6 +72,19 @@ func (c *Connection) Active() bool {
 // Hosting returns if the connection is acting as a host.
 func (c *Connection) Hosting() bool {
 	return c.hosting
+}
+
+func (c *Connection) Close() {
+	if c.conn != nil {
+		c.conn.Close()
+	}
+	if c.otherConn != nil {
+		c.otherConn.Close()
+	}
+	c.active = false
+	c.hosting = false
+	c.connected = false
+	c.disconnected = false
 }
 
 func (c *Connection) AwaitHandshake(handshaker string, local string, target string) error {
@@ -90,6 +109,8 @@ func (c *Connection) AwaitHandshake(handshaker string, local string, target stri
 	c.handshakerAddr = handshakerAddr
 	c.conn = localConn
 	fmt.Println("listening on", localConn.LocalAddr().String())
+
+	localConn.SetDeadline(time.Now().Add(time.Duration(10) * time.Second))
 
 	log.Println("Sending register message to handshaker service")
 	_, err = localConn.WriteTo([]byte(fmt.Sprintf("%d %s", RegisterMessage, c.Name)), c.handshakerAddr)
@@ -248,6 +269,7 @@ func (c *Connection) Loop() {
 		if t.Sub(c.lastReceived) > 5*time.Second {
 			fmt.Println("lost connection")
 			c.connected = false
+			c.disconnected = true
 			return
 		}
 		// Send a ping every 3 seconds.
