@@ -151,6 +151,11 @@ func (m *BuildMode) Draw(w *World, screen *ebiten.Image) {
 		false,
 	)
 
+	// Draw da waves previewums.
+	spawnerOp := ebiten.DrawImageOptions{}
+	spawnerOp.GeoM.Translate(16, 40)
+	DrawWaves(w, screen, &spawnerOp)
+
 	// Hmm.
 	data.DrawStaticText(
 		"hit <spacebar> to start combat waves",
@@ -204,6 +209,12 @@ func (m *WaveMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
 func (m *WaveMode) Draw(w *World, screen *ebiten.Image) {
+	// Draw da waves previewums.
+	if !w.AreSpawnersHolding() {
+		spawnerOp := ebiten.DrawImageOptions{}
+		spawnerOp.GeoM.Translate(16, 40)
+		DrawWaves(w, screen, &spawnerOp)
+	}
 }
 func (m *WaveMode) Local() bool {
 	return m.local

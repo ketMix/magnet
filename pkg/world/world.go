@@ -2,11 +2,14 @@ package world
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/data/ui"
 	"github.com/kettek/ebijam22/pkg/net"
@@ -1131,4 +1134,42 @@ type LiveCell struct {
 // IsOpen does what you think it does.
 func (c *LiveCell) IsOpen() bool {
 	return c.kind == data.NorthSpawnCell || c.kind == data.SouthSpawnCell || (c.entity == nil && c.blocked == false)
+}
+
+// This is _not_ the place for this.
+func DrawWaves(w *World, screen *ebiten.Image, spawnerOp *ebiten.DrawImageOptions) {
+	for _, spawner := range w.spawners {
+		yAdjust := 0
+		if spawner.wave != nil {
+			x := 0
+			for spawnList := spawner.wave.Spawns; spawnList != nil; spawnList = spawnList.Next {
+				t := fmt.Sprintf("%d", spawnList.Count)
+				bounds := text.BoundString(data.NormalFace, t)
+				text.Draw(screen, t, data.NormalFace, x+int(spawnerOp.GeoM.Element(0, 2)), int(spawnerOp.GeoM.Element(1, 2))+bounds.Dy(), color.White)
+				x += bounds.Dx() + 3
+				// Draw th' dude(s).
+				eop := ebiten.DrawImageOptions{}
+				eop.ColorM.Scale(data.GetPolarityColorScale(spawner.physics.polarity))
+				eop.GeoM.Concat(spawnerOp.GeoM)
+				eop.GeoM.Translate(float64(x), 0)
+				for _, kind := range spawnList.Kinds {
+					if enemy, ok := data.EnemyConfigs[kind]; ok {
+						ebitenutil.DrawRect(screen, eop.GeoM.Element(0, 2)-1, eop.GeoM.Element(1, 2)-1, float64(enemy.WalkImages[0].Bounds().Dx())+1, float64(enemy.WalkImages[0].Bounds().Dy())+1, color.RGBA{128, 128, 128, 64})
+
+						if enemy.WalkImages[0].Bounds().Dy() >= yAdjust {
+							yAdjust = enemy.WalkImages[0].Bounds().Dy()
+						}
+
+						// Actually draw the non-shameful image.
+						screen.DrawImage(enemy.WalkImages[0], &eop)
+
+						x += enemy.WalkImages[0].Bounds().Dx() + 2
+						eop.GeoM.Translate(float64(enemy.WalkImages[0].Bounds().Dx())+2, 0)
+					}
+				}
+			}
+		}
+		spawnerOp.GeoM.Translate(0, float64(yAdjust)+2)
+	}
+
 }
