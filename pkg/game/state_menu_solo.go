@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/ui"
 	"github.com/kettek/ebijam22/pkg/world"
 )
 
@@ -17,13 +18,23 @@ type SoloMenuState struct {
 	magnetSpin  float64
 	mapList     MapList
 
-	backgroundImage *ebiten.Image
+	tiledBackgroundImages  []*ebiten.Image
+	tiledBackgroundElapsed int
+	tiledBackgroundIndex   int
+	backgroundImage        *ebiten.Image
 
 	buttons []data.Button
 }
 
 func (s *SoloMenuState) Init() error {
-	// Load our background image.
+	// Oh boy.
+	t, err := data.LoadTileSet("nature")
+	if err != nil {
+		return err
+	}
+	s.tiledBackgroundImages = t.BackgroundImages
+
+	// Load our background images.
 	if img, err := data.ReadImage("/ui/singleplayer.png"); err == nil {
 		s.backgroundImage = ebiten.NewImageFromImage(img)
 	} else {
@@ -84,8 +95,17 @@ func (s *SoloMenuState) Dispose() error {
 }
 
 func (s *SoloMenuState) Update() error {
+	// Animate the background.
+	s.tiledBackgroundElapsed++
+	if s.tiledBackgroundElapsed >= 30 {
+		s.tiledBackgroundElapsed = 0
+		s.tiledBackgroundIndex++
+		if s.tiledBackgroundIndex >= len(s.tiledBackgroundImages) {
+			s.tiledBackgroundIndex = 0
+		}
+	}
 	// Spin at 4 degrees per update.
-	s.magnetSpin += math.Pi / 180 * 4
+	s.magnetSpin -= math.Pi / 180 * 4
 
 	// Update buttons
 	for _, button := range s.buttons {
@@ -98,6 +118,10 @@ func (s *SoloMenuState) Update() error {
 }
 
 func (s *SoloMenuState) Draw(screen *ebiten.Image) {
+	// Draw our tiled background.
+	bgOp := ebiten.DrawImageOptions{}
+	ui.DrawTiled(screen, s.tiledBackgroundImages[s.tiledBackgroundIndex], &bgOp, world.ScreenWidth, world.ScreenHeight)
+
 	// Draw our background.
 	screenOp := &ebiten.DrawImageOptions{}
 	screenOp.ColorM.Scale(0.5, 0.5, 0.5, 1)
