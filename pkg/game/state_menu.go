@@ -36,9 +36,11 @@ func (s *MenuState) Init() error {
 	startGameButton := data.NewButton(
 		x,
 		y,
-		"Start Game",
+		"Solo Game",
 		func() {
-			s.StartGame()
+			s.game.SetState(&SoloMenuState{
+				game: s.game,
+			})
 		},
 	)
 	y += startGameButton.Image().Bounds().Dy() * 2
