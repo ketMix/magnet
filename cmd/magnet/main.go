@@ -19,6 +19,8 @@ func main() {
 	}
 
 	if err := ebiten.RunGame(g); err != nil {
-		panic(err)
+		if _, ok := err.(game.NoError); !ok {
+			panic(err)
+		}
 	}
 }
