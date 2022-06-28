@@ -14,3 +14,4 @@ Z 1
 I turret-basic
 i turret-head2
 o 2
+d It shoots.

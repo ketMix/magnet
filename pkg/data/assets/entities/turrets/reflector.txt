@@ -16,3 +16,4 @@ Z 10
 I turret-base3
 i turret-reflector
 o 7
+d Reflects projectiles.

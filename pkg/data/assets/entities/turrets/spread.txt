@@ -14,3 +14,4 @@ Z 1
 I turret-basic
 i turret-spread
 o 4
+d High damage. Slow fire rate.

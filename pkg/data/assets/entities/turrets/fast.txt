@@ -14,3 +14,4 @@ Z 1
 I turret-basic
 i turret-fast
 o 3
+d It shoots fastly.

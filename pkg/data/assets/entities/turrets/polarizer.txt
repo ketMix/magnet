@@ -16,3 +16,4 @@ Z 10
 I turret-base3
 i turret-polarizer
 o 6
+d Inverts projectile polarity.
