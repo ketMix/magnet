@@ -1,6 +1,6 @@
 T Ze Bochs
 S magnet
-P 100
+P 200
 W 5@100 runner,5@100 runner&walker;15@50 walker
 W 5@100 runner,5@100 runner&walker;15@50 walker
 W 5@100 runner,5@100 runner&walker;15@50 walker
