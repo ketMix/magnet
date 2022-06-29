@@ -22,6 +22,8 @@ type PlayState struct {
 	worldbuffer              *ebiten.Image
 	viewbuffer               *ebiten.Image
 	showEscapeMenu           bool
+	showHelpOverlay          bool
+	helpOverlay              HelpOverlay
 	escapeMenuButtons        []data.Button
 	readyImage, unreadyImage *ebiten.Image
 }
@@ -224,10 +226,16 @@ func (s *PlayState) Update() error {
 		return err
 	}
 
+	// Check if the player is holder our help buttons.
+	if ebiten.IsKeyPressed(ebiten.KeyF1) || ebiten.IsKeyPressed(ebiten.KeyH) {
+		s.showHelpOverlay = true
+	} else {
+		s.showHelpOverlay = false
+	}
+
 	// Check if the player hit 'escape', toggle escape menu.
 	if inpututil.IsKeyJustReleased(ebiten.KeyEscape) {
 		s.showEscapeMenu = !s.showEscapeMenu
-
 	}
 	if s.showEscapeMenu {
 		// Update buttons
@@ -376,14 +384,25 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	case *world.VictoryMode:
 		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
 	}
+
 	// Also darken if we're in the escape menu.
 	if s.showEscapeMenu {
 		worldbufferOp.ColorM.Scale(0.5, 0.5, 0.5, 1)
 		viewbufferOp.ColorM.Scale(0.5, 0.5, 0.5, 1)
 	}
+	// Bonus darkness.
+	if s.showHelpOverlay {
+		worldbufferOp.ColorM.Scale(0.05, 0.05, 0.05, 1)
+		viewbufferOp.ColorM.Scale(0.25, 0.25, 0.25, 1)
+	}
 
 	screen.DrawImage(s.worldbuffer, &worldbufferOp)
 	screen.DrawImage(s.viewbuffer, &viewbufferOp)
+
+	// Draw help overlay if active
+	if s.showHelpOverlay {
+		s.helpOverlay.Draw(screen)
+	}
 
 	// Draw our escape menu over top all.
 	if s.showEscapeMenu {

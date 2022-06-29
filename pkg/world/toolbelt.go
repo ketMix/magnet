@@ -127,7 +127,9 @@ type ToolbeltItem struct {
 func (t *ToolbeltItem) Update() (request Request) {
 	toolSlotImage, _ := data.GetImage("toolslot.png")
 	// Does the cursor intersect us?
-	if inpututil.IsKeyJustPressed(t.key) {
+	if t.active && inpututil.IsKeyJustPressed(ebiten.KeyTab) {
+		return SelectToolbeltItemRequest{t.tool}
+	} else if inpututil.IsKeyJustPressed(t.key) {
 		return SelectToolbeltItemRequest{t.tool}
 	} else {
 		x, y := ebiten.CursorPosition()
