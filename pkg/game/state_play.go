@@ -151,11 +151,12 @@ func (s *PlayState) Update() error {
 		}
 	case *world.PostGameMode:
 		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			if s.game.net.Hosting() || !s.game.net.Active() {
-				s.game.SetState(&MenuState{
-					game: s.game,
-				})
+			if s.game.net.Active() {
+				s.game.net.Close()
 			}
+			s.game.SetState(&MenuState{
+				game: s.game,
+			})
 		}
 	}
 
