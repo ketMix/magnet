@@ -1,7 +1,6 @@
 package world
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -22,7 +21,6 @@ type ActorEntity struct {
 }
 
 func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
-	fmt.Println(len(config.WalkImages))
 	return &ActorEntity{
 		speed: config.Speed,
 		walkAnimation: Animation{
@@ -52,6 +50,7 @@ func NewActorEntity(player *Player, config data.EntityConfig) *ActorEntity {
 				speed:          config.ProjecticleSpeed,
 				rate:           config.AttackRate,
 				projecticleNum: config.ProjecticleNum,
+				defaultRate:    config.AttackRate,
 			},
 		},
 		player: player,
