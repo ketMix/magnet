@@ -11,15 +11,16 @@ import (
 )
 
 type MenuState struct {
-	game        *Game
-	ebitenImage *ebiten.Image
-	magnetImage *ebiten.Image
-	titleImage  *ebiten.Image
-	title       string
-	magnetSpin  float64
-	buttons     []*data.Button
-	titleFadeIn int
-	shouldQuit  bool
+	game             *Game
+	ebitenImage      *ebiten.Image
+	magnetImage      *ebiten.Image
+	backgroundImage  *ebiten.Image
+	title            string
+	titleImage       *ebiten.Image
+	magnetSpin       float64
+	buttons          []*data.Button
+	backgroundFadeIn int
+	shouldQuit       bool
 }
 
 func (s *MenuState) Init() error {
@@ -35,8 +36,15 @@ func (s *MenuState) Init() error {
 	}
 
 	// Load our title image.
-	if img, err := data.ReadImage("/ui/title.png"); err == nil {
+	if img, err := data.ReadImage("/ui/logo.png"); err == nil {
 		s.titleImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
+	// Load our background image.
+	if img, err := data.ReadImage("/ui/title.png"); err == nil {
+		s.backgroundImage = ebiten.NewImageFromImage(img)
 	} else {
 		panic(err)
 	}
@@ -86,7 +94,7 @@ func (s *MenuState) Init() error {
 	exitButton.Hover = true
 
 	// Use buttons for credits.
-	x = world.ScreenWidth - world.ScreenWidth/5
+	x = world.ScreenWidth - world.ScreenWidth/6
 	y = world.ScreenHeight / 8
 	credits1aButton := data.NewButton(
 		x,
@@ -192,7 +200,7 @@ func (s *MenuState) Update() error {
 		button.Update()
 	}
 
-	s.titleFadeIn++
+	s.backgroundFadeIn++
 
 	return nil
 }
@@ -201,9 +209,9 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 	// Let's first draw that background.
 	titleOp := &ebiten.DrawImageOptions{}
 	// Darken it a lil.
-	d := math.Max(0.5, 1.0-float64(s.titleFadeIn)/120.0)
+	d := math.Max(0.5, 1.0-float64(s.backgroundFadeIn)/120.0)
 	titleOp.ColorM.Scale(d, d, d, 1.0)
-	screen.DrawImage(s.titleImage, titleOp)
+	screen.DrawImage(s.backgroundImage, titleOp)
 
 	// Rotate our magnet about its center.
 	op := ebiten.DrawImageOptions{}
@@ -225,9 +233,14 @@ func (s *MenuState) Draw(screen *ebiten.Image) {
 		true,
 	)
 
+	// Draw our real title.
+	top := &ebiten.DrawImageOptions{}
+	top.GeoM.Translate(float64(world.ScreenWidth)/2-float64(s.titleImage.Bounds().Dx())/2, 16)
+	screen.DrawImage(s.titleImage, top)
+
 	// Draw left-hand ebiten
 	op = ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(world.ScreenWidth)/5, float64(world.ScreenHeight)/5)
+	op.GeoM.Translate(float64(world.ScreenWidth)/7, float64(world.ScreenHeight)/4)
 	op.GeoM.Translate(-float64(s.ebitenImage.Bounds().Dx())/2, -float64(s.ebitenImage.Bounds().Dy())/2)
 	screen.DrawImage(s.ebitenImage, &op)
 
