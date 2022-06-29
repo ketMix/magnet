@@ -45,7 +45,7 @@ func (o *HelpOverlay) Draw(screen *ebiten.Image) {
 	y += 16
 	data.DrawStaticText("WASD : Move", data.NormalFace, x, y, color.White, screen, true)
 	y += 16
-	data.DrawStaticText("Shift: Sprint", data.NormalFace, x, y, color.White, screen, true)
+	data.DrawStaticText("Shift : Sprint", data.NormalFace, x, y, color.White, screen, true)
 	y += 16
 	data.DrawStaticText("Left Mouse : Shoot/Construct", data.NormalFace, x, y, color.White, screen, true)
 	y += 16
