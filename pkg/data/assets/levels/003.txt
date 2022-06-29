@@ -1,37 +1,13 @@
-T Bunker
+T The Bar
 S magnet
-P 250
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
-W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner
+P 50
+W 10@100 walker;10@150 walker&runner;15@100 walker&runner&scrapper;2@5 trundler,25@75 walker&runner&scrapper
+W 10@100 walker;10@150 walker&runner;15@100 walker&runner&scrapper;2@5 trundler,25@75 walker&runner&scrapper
 
-#####################
-#N.................N#
-#...................#
-#N.................N#
-#####...####...######
-#...................#
-#...................#
-#...................#
-#...#############...#
-#...#           #...#
-#...#           #...#
-#........___........#
-#....#..._C_,,,#,,,,#
-#,,,,,,,,_@_,,,,,,,,#
-#,,,#           #,,,#
-#,,,#           #,,,#
-#,,,#############,,,#
-#,,,,,,,,,,,,,,,,,,,#
-#,,,,,,,,,,,,,,,,,,,#
-#,,,,,,,,,,,,,,,,,,,#
-#####,,,####,,,######
-#S,,,,,,,,,,,,,,,,,S#
-#,,,,,,,,,,,,,,,,,,,#
-#S,,,,,,,,,,,,,,,,,S#
-#####################
+#################################################
+#,,,,,,,,,,,,,,,,,,,,,###.......................#
+#S,,,,,,,,,,,,,,,,,,,,,,.......................N#
+#,,,,,,,,,,,,,,,,,,,,,,,........................#
+#                    ,,@..                      #
+#                     ,C.                       #
+#################################################
