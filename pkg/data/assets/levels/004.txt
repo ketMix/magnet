@@ -1,10 +1,11 @@
 T The Spot
 S magnet
-P 100
-W 3@50 walker;1@20 trundler,2@50 runner;15@20 flier
-W 3@50 walker;1@20 trundler,2@50 runner;15@20 flier
-W 3@50 walker;1@20 trundler,2@50 runner;15@20 flier
-W 3@50 walker;1@20 trundler,2@50 runner;15@20 flier
+P 60
+W 20@30 scrapper;3@50 walker,1@50 runner;4@80 trundler,2@50 runner;10@60 scrapper,15@50 flier
+W 20@30 scrapper;3@50 walker,1@50 runner;4@80 trundler,2@50 runner;10@60 scrapper,15@50 flier
+W 20@30 scrapper;3@50 walker,1@50 runner;4@80 trundler,2@50 runner;10@60 scrapper,15@50 flier
+W 20@30 scrapper;3@50 walker,1@50 runner;4@80 trundler,2@50 runner;10@60 scrapper,15@50 flier
+N 005
 
                                
  ##########         ########## 
