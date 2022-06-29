@@ -1,0 +1,37 @@
+T Bunker
+S nature
+P 250
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+W 5@200 walker;3@200 walker,2@200 runner;3@150 walker&runner,3@100 walker&runner;3@100 walker&scrapper,3@100 runner&flier,1@100 bigtrundler
+
+#####################
+#N.................N#
+#...................#
+#N.................N#
+#####...####...######
+#...................#
+#...................#
+#...................#
+#...#############...#
+#...#           #...#
+#...#           #...#
+#........___........#
+#....#..._C_,,,#,,,,#
+#,,,,,,,,_@_,,,,,,,,#
+#,,,#           #,,,#
+#,,,#           #,,,#
+#,,,#############,,,#
+#,,,,,,,,,,,,,,,,,,,#
+#,,,,,,,,,,,,,,,,,,,#
+#,,,,,,,,,,,,,,,,,,,#
+#####,,,####,,,######
+#S,,,,,,,,,,,,,,,,,S#
+#,,,,,,,,,,,,,,,,,,,#
+#S,,,,,,,,,,,,,,,,,S#
+#####################
