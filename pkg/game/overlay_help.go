@@ -55,8 +55,6 @@ func (o *HelpOverlay) Draw(screen *ebiten.Image) {
 	y += 16
 	data.DrawStaticText("Mousewheel / 1-9: Select Tool/Turret", data.NormalFace, x, y, color.White, screen, true)
 	y += 16
-	data.DrawStaticText("Shift : Sprint", data.NormalFace, x, y, color.White, screen, true)
-	y += 16
 	data.DrawStaticText("Alt : Show Turret Range", data.NormalFace, x, y, color.White, screen, true)
 	y += 16
 	data.DrawStaticText("R : Restart", data.NormalFace, x, y, color.White, screen, true)
