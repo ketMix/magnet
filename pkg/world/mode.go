@@ -203,8 +203,11 @@ func (m *WaveMode) Update(w *World) (next WorldMode, err error) {
 	} else if w.AreSpawnersHolding() && w.AreEnemiesDead() {
 		next = &BuildMode{local: true}
 	} else if w.AreWavesComplete() {
-		next = &VictoryMode{local: true}
-		// Move onto build mode...?
+		if w.hasNextLevel {
+			next = &VictoryMode{local: true}
+		} else {
+			next = &PostGameMode{local: true}
+		}
 	}
 	return
 }
@@ -276,9 +279,7 @@ func (m *LossMode) Update(w *World) (next WorldMode, err error) {
 func (m *LossMode) Draw(w *World, screen *ebiten.Image) {
 	// Draw the game over messages
 	lossText := "DEFEAT"
-
 	restartText := "press R to restartie"
-
 	flavorBounds := text.BoundString(data.NormalFace, m.flavorText)
 
 	x := ScreenWidth / 2
@@ -346,19 +347,16 @@ func (m *VictoryMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
 func (m *VictoryMode) Draw(w *World, screen *ebiten.Image) {
-	// Add darkened overlay to screen
-
 	// Draw the victory messages
-	lossText := "Victory"
+	victoryText := "Victory"
 	nextText := "press <space bar> to continue to next level"
-
 	flavorBounds := text.BoundString(data.NormalFace, m.flavorText)
 
 	x := ScreenWidth / 2
 	y := int(float64(ScreenHeight) / 1.5)
 	offset := flavorBounds.Dy() * 2
 	data.DrawStaticText(
-		lossText,
+		victoryText,
 		data.BoldFace,
 		x,
 		y,
@@ -394,7 +392,8 @@ func (m *VictoryMode) Local() bool {
 
 // PostGameMode is... the final victory...?
 type PostGameMode struct {
-	local bool
+	local      bool
+	flavorText string
 }
 
 func (m PostGameMode) String() string {
@@ -404,12 +403,57 @@ func (m PostGameMode) Type() net.TypedMessageType {
 	return 505
 }
 func (m *PostGameMode) Init(w *World) error {
+	// Comgrantulations
+	data.BGM.Set("victory.ogg")
+
+	flavorTexts := []string{
+		"Shazam!",
+	}
+	m.flavorText = flavorTexts[rand.Int()%len(flavorTexts)]
 	return nil
 }
 func (m *PostGameMode) Update(w *World) (next WorldMode, err error) {
 	return
 }
 func (m *PostGameMode) Draw(w *World, screen *ebiten.Image) {
+	// Draw the victory messages
+	victoryText := "Total Victory"
+	nextText := "press <space bar> to return to main menu"
+
+	flavorBounds := text.BoundString(data.NormalFace, m.flavorText)
+
+	x := ScreenWidth / 2
+	y := int(float64(ScreenHeight) / 1.5)
+	offset := flavorBounds.Dy() * 2
+	data.DrawStaticText(
+		victoryText,
+		data.BoldFace,
+		x,
+		y,
+		color.White,
+		screen,
+		true,
+	)
+	y += offset
+	data.DrawStaticText(
+		m.flavorText,
+		data.NormalFace,
+		x,
+		y,
+		color.White,
+		screen,
+		true,
+	)
+	y += flavorBounds.Dy() * 2
+	data.DrawStaticText(
+		nextText,
+		data.NormalFace,
+		x,
+		y,
+		color.White,
+		screen,
+		true,
+	)
 }
 func (m *PostGameMode) Local() bool {
 	return m.local

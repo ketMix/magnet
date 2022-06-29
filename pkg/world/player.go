@@ -125,6 +125,11 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 				},
 			}
 		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && p.Toolbelt.activeItem.tool == ToolGun {
+			if p.Toolbelt.activeItem.polarity == data.NeutralPolarity {
+				p.Entity.Turret().rate = p.Entity.Turret().defaultRate * 2
+			} else {
+				p.Entity.Turret().rate = p.Entity.Turret().defaultRate
+			}
 			// Check if we can fire
 			cx, cy := w.GetCursorPosition()
 			if p.Entity.Turret().CanFire(w.Speed) {

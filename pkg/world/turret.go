@@ -7,6 +7,7 @@ type Turret struct {
 	rate           float64 // projecticles per second
 	tick           float64 // counter for fire rate
 	attackRange    float64 // the range of the turret
+	defaultRate    float64 // the default fire rate
 }
 
 // Keep track of ticks for fire rate

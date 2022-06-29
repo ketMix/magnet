@@ -32,6 +32,12 @@ func (t *Toolbelt) Update() (request Request) {
 		t.ScrollItem(1)
 	}
 
+	// Allow cycling item with BUTTON
+	cycleKey := ebiten.KeyShift
+	if inpututil.IsKeyJustPressed(cycleKey) {
+		t.activeItem.Cycle()
+	}
+
 	// Update our individual slots.
 	for _, item := range t.items {
 		r := item.Update()

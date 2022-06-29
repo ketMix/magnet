@@ -49,10 +49,12 @@ type World struct {
 	backgroundTimer int
 	backgroundImage *ebiten.Image
 	backgroundIndex int
+	hasNextLevel bool
 }
 
 // BuildFromLevel builds the world's cells and entities from a given base level.
 func (w *World) BuildFromLevel(level data.Level) error {
+	w.hasNextLevel = level.Next != ""
 	tileset := level.Tileset
 	if tileset == "" {
 		tileset = "nature"
