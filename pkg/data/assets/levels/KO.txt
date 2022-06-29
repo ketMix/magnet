@@ -1,7 +1,7 @@
 T Futility
 S magnet
 P 0
-W 20@50 Runner
+W 20@50 runner
 
 ####
 #CS#
