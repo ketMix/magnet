@@ -21,10 +21,16 @@ type EnemyEntity struct {
 	lastSync         int
 	victoryAnimation Animation
 	locked           bool // locked is used to lock the enemy entity when the mode changes to a loss.
+	flies            bool
 }
 
 func NewEnemyEntity(config data.EntityConfig) *EnemyEntity {
+	flies := false
+	if config.Title == "flier" {
+		flies = true
+	}
 	return &EnemyEntity{
+		flies: flies,
 		BaseEntity: BaseEntity{
 			animation: Animation{
 				images:    config.WalkImages,
@@ -83,13 +89,12 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 	e.healthBar.progress = float64(e.maxHealth) / float64(e.health)
 
 	// Attempt to move along path to player's core
-	if len(e.steps) != 0 {
-		tx := float64(e.steps[0].X()*data.CellWidth + data.CellWidth/2)
-		ty := float64(e.steps[0].Y()*data.CellHeight + data.CellHeight/2)
-		if math.Abs(e.physics.X-float64(e.steps[0].X()*data.CellWidth+data.CellWidth/2)) < 1 && math.Abs(e.physics.Y-float64(e.steps[0].Y()*data.CellHeight+data.CellHeight/2)) < 1 {
-			//
-			e.steps = e.steps[1:]
-		} else {
+	if e.flies {
+		// We receive steps, so let's just go to the last step (the core)
+		if len(e.steps) != 0 {
+			step := e.steps[len(e.steps)-1]
+			tx := float64(step.X()*data.CellWidth + data.CellWidth/2)
+			ty := float64(step.Y()*data.CellHeight + data.CellHeight/2)
 			r := math.Atan2(e.physics.Y-ty, e.physics.X-tx)
 			x := math.Cos(r) * e.speed * world.Speed
 			y := math.Sin(r) * e.speed * world.Speed
@@ -102,28 +107,67 @@ func (e *EnemyEntity) Update(world *World) (request Request, err error) {
 			} else {
 				e.animation.mirror = true
 			}
-		}
-
-		// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
-	} else {
-		var requests MultiRequest
-		for _, core := range world.cores {
-			if e.IsCollided(core) {
-				requests.Requests = append(requests.Requests, DamageCoreRequest{
-					ID:     core.id,
-					Damage: 1, // Should this be based upon some enemy damage value?
+			var requests MultiRequest
+			for _, core := range world.cores {
+				if e.IsCollided(core) {
+					requests.Requests = append(requests.Requests, DamageCoreRequest{
+						ID:     core.id,
+						Damage: 1, // Should this be based upon some enemy damage value?
+					})
+				}
+			}
+			if len(requests.Requests) > 0 {
+				requests.Requests = append(requests.Requests, TrashEntityRequest{
+					NetID:  e.netID,
+					entity: e,
+					local:  true,
 				})
+				request = requests
 			}
 		}
-		// No mo steppes
-		requests.Requests = append(requests.Requests, TrashEntityRequest{
-			NetID:  e.netID,
-			entity: e,
-			local:  true,
-		})
-		request = requests
-		// We have reached a core, we should decrease the health on that core
-		// Gotta figure out what core it reached...
+	} else {
+		if len(e.steps) != 0 {
+			tx := float64(e.steps[0].X()*data.CellWidth + data.CellWidth/2)
+			ty := float64(e.steps[0].Y()*data.CellHeight + data.CellHeight/2)
+			if math.Abs(e.physics.X-float64(e.steps[0].X()*data.CellWidth+data.CellWidth/2)) < 1 && math.Abs(e.physics.Y-float64(e.steps[0].Y()*data.CellHeight+data.CellHeight/2)) < 1 {
+				//
+				e.steps = e.steps[1:]
+			} else {
+				r := math.Atan2(e.physics.Y-ty, e.physics.X-tx)
+				x := math.Cos(r) * e.speed * world.Speed
+				y := math.Sin(r) * e.speed * world.Speed
+
+				e.physics.X -= x
+				e.physics.Y -= y
+
+				if x > 0 {
+					e.animation.mirror = false
+				} else {
+					e.animation.mirror = true
+				}
+			}
+
+			// TODO: move towards step[0], then remove it when near its center. If the last one is to be removed, then we have reached the core.
+		} else {
+			var requests MultiRequest
+			for _, core := range world.cores {
+				if e.IsCollided(core) {
+					requests.Requests = append(requests.Requests, DamageCoreRequest{
+						ID:     core.id,
+						Damage: 1, // Should this be based upon some enemy damage value?
+					})
+				}
+			}
+			// No mo steppes
+			requests.Requests = append(requests.Requests, TrashEntityRequest{
+				NetID:  e.netID,
+				entity: e,
+				local:  true,
+			})
+			request = requests
+			// We have reached a core, we should decrease the health on that core
+			// Gotta figure out what core it reached...
+		}
 	}
 
 	// Send periodic sync every 100 ticks. This is ignored during processing if the host is not set.
