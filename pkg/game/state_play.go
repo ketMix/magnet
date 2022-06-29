@@ -138,18 +138,22 @@ func (s *PlayState) Update() error {
 		// }
 	case *world.VictoryMode:
 		// TODO: Show end game stats, if possible! Then some sort of "hit okay" to travel button/key.
-		if s.level.Next != "" {
-			if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-				if s.game.net.Hosting() || !s.game.net.Active() {
-					fmt.Println("TRAVELING TO NEXT")
-					s.game.SetState(&TravelState{
-						game:        s.game,
-						targetLevel: s.level.Next,
-					})
-				}
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			if s.game.net.Hosting() || !s.game.net.Active() {
+				fmt.Println("TRAVELING TO NEXT")
+				s.game.SetState(&TravelState{
+					game:        s.game,
+					targetLevel: s.level.Next,
+				})
 			}
-		} else {
-			// We beat the video game.
+		}
+	case *world.PostGameMode:
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			if s.game.net.Hosting() || !s.game.net.Active() {
+				s.game.SetState(&MenuState{
+					game: s.game,
+				})
+			}
 		}
 	}
 
@@ -374,6 +378,8 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	case *world.LossMode:
 		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
 	case *world.VictoryMode:
+		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
+	case *world.PostGameMode:
 		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
 	}
 	// Also darken if we're in the escape menu.
