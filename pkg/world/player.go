@@ -48,7 +48,7 @@ func NewPlayer() *Player {
 	i := 2
 	for _, v := range toolbeltItems {
 		items = append(items, &ToolbeltItem{
-			tool: ToolTurret, key: ebiten.Key0 + ebiten.Key(i), polarity: data.NegativePolarity, kind: v,
+			tool: ToolTurret, key: ebiten.Key0 + ebiten.Key(i), polarity: data.NegativePolarity, kind: v, description: v.Description,
 		})
 		i++
 	}

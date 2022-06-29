@@ -116,12 +116,13 @@ const (
 
 // ToolbeltItem is a toolbelt entry.
 type ToolbeltItem struct {
-	tool     ToolKind
-	kind     data.EntityConfig
-	polarity data.Polarity
-	x, y     int
-	key      ebiten.Key // Key to check against for activation.
-	active   bool
+	tool        ToolKind
+	kind        data.EntityConfig
+	polarity    data.Polarity
+	x, y        int
+	key         ebiten.Key // Key to check against for activation.
+	active      bool
+	description string
 }
 
 func (t *ToolbeltItem) Update() (request Request) {
@@ -209,11 +210,14 @@ func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
 				screen,
 				false,
 			)
+			x += textBounds.Dx() + 12
 			if cost != "" {
 				imageOp := ebiten.DrawImageOptions{}
 				imageOp.GeoM.Translate(float64(t.x+textBounds.Dx()-5), float64(y-orbImage.Bounds().Dy()))
 				screen.DrawImage(orbImage, &imageOp)
+				x += orbImage.Bounds().Dx()
 			}
+			data.DrawStaticText(t.description, data.NormalFace, x, y, color.RGBA{255, 255, 255, 128}, screen, false)
 		}
 	} else {
 		op.GeoM.Translate(float64(t.x-toolSlotImage.Bounds().Dx()/2), float64(t.y-toolSlotImage.Bounds().Dy()/2))
