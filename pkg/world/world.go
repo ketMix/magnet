@@ -49,7 +49,7 @@ type World struct {
 	backgroundTimer int
 	backgroundImage *ebiten.Image
 	backgroundIndex int
-	hasNextLevel bool
+	hasNextLevel    bool
 }
 
 // BuildFromLevel builds the world's cells and entities from a given base level.
@@ -630,12 +630,13 @@ func (w *World) SpawnProjecticleEntity(r SpawnProjecticleRequest) *ProjecticleEn
 		e.netID = w.GetNextNetID()
 	} else {
 		if r.NetID != 0 {
-			for _, trashedID := range w.trashedIDs {
+			// Commented out as this is suspected to lag out clients -- projectiles are generally so short-lived/fast that it doesn't matter if they spawn when they're supposed to be destroyed.
+			/*for _, trashedID := range w.trashedIDs {
 				if trashedID == r.NetID {
 					// Oh! we don't want to construct this, as it has already been trashed.
 					return nil
 				}
-			}
+			}*/
 			e.netID = r.NetID
 		}
 	}
