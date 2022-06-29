@@ -1,0 +1,14 @@
+T BIGTRUNDLER
+C 50
+H 200
+D 1
+R 2
+X 1
+S 0.25
+r 10
+P neutral
+M true
+Y 3
+Z 100
+W big-trundler-walk-
+V big-trundler-victory-
