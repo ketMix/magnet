@@ -1,5 +1,5 @@
 T RUNNER
-C 6
+C 3
 H 5
 D 2
 R 1

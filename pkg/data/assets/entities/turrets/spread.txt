@@ -1,5 +1,5 @@
 T SPREAD
-C 15
+C 20
 H 1
 D 1
 R 30

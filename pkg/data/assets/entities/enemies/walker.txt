@@ -1,5 +1,5 @@
 T WALKER
-C 5
+C 3
 H 10
 D 1
 R 1

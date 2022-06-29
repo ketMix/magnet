@@ -1,5 +1,5 @@
 T FAST
-C 15
+C 25
 H 1
 D 1
 R 35

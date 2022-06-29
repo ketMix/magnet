@@ -1,5 +1,5 @@
 T FLIER
-C 8
+C 4
 H 6
 D 1
 R 1

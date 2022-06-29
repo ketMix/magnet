@@ -1,5 +1,5 @@
 T BIGTRUNDLER
-C 50
+C 25
 H 200
 D 1
 R 2

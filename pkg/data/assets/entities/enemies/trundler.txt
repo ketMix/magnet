@@ -1,5 +1,5 @@
 T TRUNDLER
-C 15
+C 10
 H 30
 D 1
 R 2
