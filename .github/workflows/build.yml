@@ -16,7 +16,7 @@ jobs:
       run: sudo apt-get -y install libgl1-mesa-dev xorg-dev libasound2-dev
     - name: Run tests
       shell: bash
-      run: xvfb-run go test -v ./...
+      run: xvfb-run go test -v ./pkg/...
 
   build-win:
     name: Build Windows binary
