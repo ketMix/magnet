@@ -23,9 +23,10 @@ type Connection struct {
 	conn *net.UDPConn
 
 	// otherConn is the peer we wish to play with.
-	otherConn    *net.UDPConn
-	otherAddress *net.UDPAddr
-	OtherName    string
+	otherConn     *net.UDPConn
+	otherAddress  *net.UDPAddr
+	OtherName     string
+	multicastConn *net.UDPConn
 
 	//
 	connected    bool
@@ -80,6 +81,9 @@ func (c *Connection) Close() {
 	}
 	if c.otherConn != nil {
 		c.otherConn.Close()
+	}
+	if c.multicastConn != nil {
+		c.multicastConn.Close()
 	}
 	c.active = false
 	c.hosting = false
@@ -247,6 +251,112 @@ func (c *Connection) AwaitDirect(local string, target string) error {
 			break
 		} else {
 			// BOGUS
+		}
+	}
+	return nil
+}
+
+func (c *Connection) AwaitLAN(joiner bool) error {
+	localAddr, err := net.ResolveUDPAddr("udp4", "")
+	if err != nil {
+		return err
+	}
+
+	// Start listening!
+	localConn, err := net.ListenUDP("udp4", localAddr)
+	if err != nil {
+		return err
+	}
+
+	c.conn = localConn
+	fmt.Println("listening on", localConn.LocalAddr().String())
+
+	multiAddr, err := net.ResolveUDPAddr("udp4", "239.0.0.0:20221")
+	if err != nil {
+		return err
+	}
+	if !joiner {
+		c.multicastConn, err = net.DialUDP("udp4", nil, multiAddr)
+		if err != nil {
+			return err
+		}
+		fmt.Println("broadcasting on", c.multicastConn.LocalAddr().String())
+		c.hosting = true
+	} else {
+		c.multicastConn, err = net.ListenMulticastUDP("udp4", nil, multiAddr)
+		if err != nil {
+			return err
+		}
+		fmt.Println("listening for broadcast on", c.multicastConn.LocalAddr().String())
+	}
+
+	// Start the listen loop.
+	for {
+		if !joiner {
+			buffer := make([]byte, 1024)
+			c.conn.SetReadDeadline(time.Now().Add(1 * time.Second))
+			bytesRead, fromAddr, err := c.conn.ReadFromUDP(buffer)
+			if err != nil && !os.IsTimeout(err) {
+				return err
+			}
+			if os.IsTimeout(err) {
+				c.multicastConn.Write([]byte(fmt.Sprintf("%d %s", BroadcastMessage, c.conn.LocalAddr())))
+			} else {
+				msg := string(buffer[0:bytesRead])
+				parts := strings.Split(msg, " ")
+				a, err := strconv.Atoi(parts[0])
+				if err != nil {
+					return err
+				}
+				if a == int(HelloMessage) {
+					c.otherAddress = fromAddr
+					c.multicastConn.Close()
+					c.multicastConn = nil
+					break
+				}
+			}
+			// 1. Await localConn for msg
+			// 2. If nothing, send broadcast of localConn
+			// 3. Otherwise, send hello on localConn back to sender.
+		} else {
+			// 1. Await multicastConn for msg
+			// 2.
+			buffer := make([]byte, 1024)
+			c.conn.SetReadDeadline(time.Now().Add(1 * time.Second))
+			bytesRead, fromAddr, err := c.multicastConn.ReadFromUDP(buffer)
+			if err != nil && !os.IsTimeout(err) {
+				return err
+			}
+			if os.IsTimeout(err) {
+				//
+			} else {
+				msg := string(buffer[0:bytesRead])
+
+				parts := strings.Split(msg, " ")
+				a, err := strconv.Atoi(parts[0])
+				if err != nil {
+					return err
+				}
+				if a == int(BroadcastMessage) {
+					targetAddr, err := net.ResolveUDPAddr("udp", parts[1])
+					if err != nil {
+						continue
+					}
+					// Let's construct a correct address by joining the multicast ip to the target port.
+					targetAddr.IP = fromAddr.IP
+
+					_, err = c.conn.WriteTo([]byte(fmt.Sprintf("%d %s", HelloMessage, c.Name)), targetAddr)
+					if err != nil {
+						return err
+					}
+					c.otherAddress = targetAddr
+
+					c.multicastConn.Close()
+					c.multicastConn = nil
+
+					break
+				}
+			}
 		}
 	}
 	return nil

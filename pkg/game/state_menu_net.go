@@ -123,6 +123,16 @@ func (s *NetworkMenuState) Init() error {
 		},
 	)
 	waitGameButton.Hover = true
+	waitLanGameButton := data.NewButton(
+		localPlayerX,
+		buttonY+waitGameButton.Image().Bounds().Dy()*2,
+		"Broadcast Game (LAN)",
+		func() {
+			s.AwaitLan(false)
+		},
+	)
+	waitLanGameButton.Hover = true
+
 	findGameButton := data.NewButton(
 		remotePlayerX,
 		buttonY,
@@ -132,13 +142,24 @@ func (s *NetworkMenuState) Init() error {
 		},
 	)
 	findGameButton.Hover = true
+	findLanGameButton := data.NewButton(
+		remotePlayerX,
+		buttonY+findGameButton.Image().Bounds().Dy()*2,
+		"Find Broadcast (LAN)",
+		func() {
+			s.AwaitLan(true)
+		},
+	)
+	findLanGameButton.Hover = true
 
 	s.buttons = []*data.Button{
 		backButton,
 		hostGameButton,
 		joinGameButton,
 		findGameButton,
+		findLanGameButton,
 		waitGameButton,
+		waitLanGameButton,
 	}
 
 	// Standalone cancel button, since it is conditional.
@@ -385,6 +406,18 @@ func (s *NetworkMenuState) Await() {
 	s.CreateNet()
 	go func() {
 		err := s.game.net.AwaitHandshake(s.game.Options.Handshaker, "", "")
+		s.netResult <- err
+	}()
+}
+
+func (s *NetworkMenuState) AwaitLan(joiner bool) {
+	if s.networking {
+		return
+	}
+	s.networking = true
+	s.CreateNet()
+	go func() {
+		err := s.game.net.AwaitLAN(joiner)
 		s.netResult <- err
 	}()
 }

@@ -15,6 +15,7 @@ const (
 	ArrivedMessage
 	HelloMessage
 	HandshakerMessage
+	BroadcastMessage
 )
 
 // TypedMessageType represents the contained type within a TypedMessage.
