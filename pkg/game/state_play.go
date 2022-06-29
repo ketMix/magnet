@@ -388,6 +388,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 
 	// Let's first darken the render if we're in loss/victory.
 	// Disable world rendering if post game mode
+	renderWorld := true
 	switch s.world.Mode.(type) {
 	case *world.LossMode:
 		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
@@ -401,8 +402,14 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		} else {
 			victoryImage, _ = data.GetImage("ui/solo-win.png")
 		}
-		s.viewbuffer.DrawImage(victoryImage, &ebiten.DrawImageOptions{})
-		// s.world.Mode.Draw(&s.world, s.viewbuffer)
+		// Awful laziness. Let's just clear the viewbuffer.
+		s.viewbuffer.Clear()
+		vop := ebiten.DrawImageOptions{}
+		vop.ColorM.Scale(0.5, 0.5, 0.5, 1)
+		s.viewbuffer.DrawImage(victoryImage, &vop)
+		// Gross.
+		s.world.Mode.Draw(&s.world, s.viewbuffer)
+		renderWorld = false
 	}
 
 	// Also darken if we're in the escape menu.
@@ -416,7 +423,9 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 		viewbufferOp.ColorM.Scale(0.25, 0.25, 0.25, 1)
 	}
 
-	screen.DrawImage(s.worldbuffer, &worldbufferOp)
+	if renderWorld {
+		screen.DrawImage(s.worldbuffer, &worldbufferOp)
+	}
 	screen.DrawImage(s.viewbuffer, &viewbufferOp)
 
 	// Draw help overlay if active

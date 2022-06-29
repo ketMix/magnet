@@ -408,6 +408,8 @@ func (m *PostGameMode) Init(w *World) error {
 
 	flavorTexts := []string{
 		"Shazam!",
+		"Humanity has been saved, all thanks to you!",
+		"The magnetic robot uprising has been vanquished! You may now rest easy!",
 	}
 	m.flavorText = flavorTexts[rand.Int()%len(flavorTexts)]
 	return nil
@@ -423,7 +425,7 @@ func (m *PostGameMode) Draw(w *World, screen *ebiten.Image) {
 	flavorBounds := text.BoundString(data.NormalFace, m.flavorText)
 
 	x := ScreenWidth / 2
-	y := int(float64(ScreenHeight) / 1.5)
+	y := int(float64(ScreenHeight) / 6)
 	offset := flavorBounds.Dy() * 2
 	data.DrawStaticText(
 		victoryText,
