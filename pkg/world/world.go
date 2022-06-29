@@ -574,12 +574,13 @@ func (w *World) SpawnOrbEntity(r SpawnOrbRequest) *OrbEntity {
 		e.netID = w.GetNextNetID()
 	} else {
 		if r.NetID != 0 {
-			for _, trashedID := range w.trashedIDs {
+			// Also disabled, as it doesn't really matter if it exists as a ghost.
+			/*for _, trashedID := range w.trashedIDs {
 				if trashedID == r.NetID {
 					// Oh! we don't want to construct this, as it has already been trashed.
 					return nil
 				}
-			}
+			}*/
 			e.netID = r.NetID
 		}
 	}
