@@ -8,6 +8,7 @@ W 3@100 scrapper;5@100 scrapper;1@100 walker&scrapper;3@500 walker&scrapper
 W 3@100 scrapper;5@100 scrapper;1@100 walker&scrapper;3@500 walker&scrapper
 W 3@100 scrapper;5@100 scrapper;1@100 walker&scrapper;3@500 walker&scrapper
 W 3@100 scrapper;5@100 scrapper;1@100 walker&scrapper;3@500 walker&scrapper
+W 3@100 scrapper;5@100 scrapper;1@100 walker&scrapper;3@500 walker&scrapper
 N 003
 
     #######    
