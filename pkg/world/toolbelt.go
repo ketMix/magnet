@@ -26,11 +26,10 @@ func (t *Toolbelt) Update() (request Request) {
 
 	// Might as well allow mousewheel for the plebs.
 	wheelX, wheelY := ebiten.Wheel()
-	// TODO: I don't remember which way the mousewheel is supposed to scroll items since I don't use it much.
 	if wheelX < 0 || wheelY < 0 {
-		t.ScrollItem(1)
-	} else if wheelX > 0 || wheelY > 0 {
 		t.ScrollItem(-1)
+	} else if wheelX > 0 || wheelY > 0 {
+		t.ScrollItem(1)
 	}
 
 	// Update our individual slots.
