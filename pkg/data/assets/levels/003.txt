@@ -3,6 +3,7 @@ S magnet
 P 50
 W 10@100 walker;10@150 walker&runner;15@100 walker&runner&scrapper;2@5 trundler,20@75 walker&runner&scrapper
 W 10@100 walker;10@150 walker&runner;15@100 walker&runner&scrapper;2@5 trundler,20@75 walker&runner&scrapper
+N 004
 
 #################################################
 #,,,,,,,,,,,,,,,,,,,,,###.......................#
