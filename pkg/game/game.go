@@ -26,6 +26,7 @@ type Game struct {
 	//
 	players             []*world.Player
 	lostConnectionTimer int
+	HelpOverlayShown    bool
 }
 
 // Init is used to set up all initial game structures.

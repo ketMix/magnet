@@ -67,5 +67,7 @@ func (o *HelpOverlay) Draw(screen *ebiten.Image) {
 	data.DrawStaticText("Build turrets opposite the portals' polarities!", data.NormalFace, x, y, color.White, screen, true)
 	y += 16
 	data.DrawStaticText("Defend the crystal at all costs!", data.NormalFace, x, y, color.White, screen, true)
+	y += 32
 
+	data.DrawStaticText("Press H or F1 to toggle this screen!", data.BoldFace, x, y, color.RGBA{255, 255, 0, 255}, screen, true)
 }

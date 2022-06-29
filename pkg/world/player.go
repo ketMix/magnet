@@ -181,7 +181,6 @@ func (p *Player) Update(w *World) (EntityAction, error) {
 			if ebiten.IsKeyPressed(ebiten.KeyS) {
 				y++
 			}
-
 			action = &EntityActionMove{
 				X:        p.Entity.Physics().X + x,
 				Y:        p.Entity.Physics().Y + y,

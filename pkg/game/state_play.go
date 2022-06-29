@@ -231,10 +231,15 @@ func (s *PlayState) Update() error {
 	}
 
 	// Check if the player is holder our help buttons.
-	if ebiten.IsKeyPressed(ebiten.KeyF1) || ebiten.IsKeyPressed(ebiten.KeyH) {
+	if ebiten.IsKeyPressed(ebiten.KeyF1) || ebiten.IsKeyPressed(ebiten.KeyH) || !s.game.HelpOverlayShown {
 		s.showHelpOverlay = true
 	} else {
 		s.showHelpOverlay = false
+	}
+
+	// Use this to permanently toggle the helpOverlay as shown
+	if ebiten.IsKeyPressed(ebiten.KeyF1) || ebiten.IsKeyPressed(ebiten.KeyH) {
+		s.game.HelpOverlayShown = true
 	}
 
 	// Check if the player hit 'escape', toggle escape menu.
@@ -382,13 +387,22 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	viewbufferOp := ebiten.DrawImageOptions{}
 
 	// Let's first darken the render if we're in loss/victory.
+	// Disable world rendering if post game mode
 	switch s.world.Mode.(type) {
 	case *world.LossMode:
 		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
 	case *world.VictoryMode:
 		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
 	case *world.PostGameMode:
-		worldbufferOp.ColorM.Scale(0.7, 0.7, 0.7, 1)
+		// If we are in postgame mode, just draw the victory image and text
+		var victoryImage *ebiten.Image
+		if s.game.net.Active() {
+			victoryImage, _ = data.GetImage("ui/multi-win.png")
+		} else {
+			victoryImage, _ = data.GetImage("ui/solo-win.png")
+		}
+		s.viewbuffer.DrawImage(victoryImage, &ebiten.DrawImageOptions{})
+		// s.world.Mode.Draw(&s.world, s.viewbuffer)
 	}
 
 	// Also darken if we're in the escape menu.

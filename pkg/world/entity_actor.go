@@ -70,10 +70,15 @@ func (e *ActorEntity) Update(world *World) (request Request, err error) {
 			break
 		}
 
+		sprintMultiplier := 1.0
+		if ebiten.IsKeyPressed(ebiten.KeyShift) {
+			sprintMultiplier = 1.5
+		}
+
 		// FIXME: Make this use actual physics resolution!
 		r := math.Atan2(e.physics.Y-a.Y, e.physics.X-a.X)
-		x := math.Cos(r) * e.speed
-		y := math.Sin(r) * e.speed
+		x := math.Cos(r) * e.speed * sprintMultiplier
+		y := math.Sin(r) * e.speed * sprintMultiplier
 
 		origX := e.physics.X
 		origY := e.physics.Y
