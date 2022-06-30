@@ -574,13 +574,12 @@ func (w *World) SpawnOrbEntity(r SpawnOrbRequest) *OrbEntity {
 		e.netID = w.GetNextNetID()
 	} else {
 		if r.NetID != 0 {
-			// Also disabled, as it doesn't really matter if it exists as a ghost.
-			/*for _, trashedID := range w.trashedIDs {
+			for _, trashedID := range w.trashedIDs {
 				if trashedID == r.NetID {
 					// Oh! we don't want to construct this, as it has already been trashed.
 					return nil
 				}
-			}*/
+			}
 			e.netID = r.NetID
 		}
 	}
@@ -631,13 +630,12 @@ func (w *World) SpawnProjecticleEntity(r SpawnProjecticleRequest) *ProjecticleEn
 		e.netID = w.GetNextNetID()
 	} else {
 		if r.NetID != 0 {
-			// Commented out as this is suspected to lag out clients -- projectiles are generally so short-lived/fast that it doesn't matter if they spawn when they're supposed to be destroyed.
-			/*for _, trashedID := range w.trashedIDs {
+			for _, trashedID := range w.trashedIDs {
 				if trashedID == r.NetID {
 					// Oh! we don't want to construct this, as it has already been trashed.
 					return nil
 				}
-			}*/
+			}
 			e.netID = r.NetID
 		}
 	}
