@@ -1,0 +1,36 @@
+---
+# Generic
+back: "Back"
+cancel: "Cancel"
+exit: "Exit"
+start_game: "Start Game"
+leave_game: "Leave Game"
+map: "Map"
+
+# Menu Strings
+solo_game: "Solo Game"
+network_game: "Network Game"
+
+kettek_contrib: "Programming, Art, Sounds, Maps"
+liqmix_contrib: "Programming, Music, Maps"
+amaruuk_contrib: "Menu Art"
+connection_lost: "connection lost, returning to menu..."
+
+# Music Menu
+music_player: "Music Player"
+currently_playing: "Currently Playing"
+
+# Net Menu
+host_game: "Host Game"
+join_game: "Join Game"
+broadcast_game: "Broadcast Game (LAN)"
+find_broadcast: "Find Broadcast (LAN)"
+find_player: "Find Player"
+wait_for_player: "Wait for Player"
+local_player_name: "Local Player Name"
+remote_player_name: "Remote Player Name"
+host_sync_rate: "Host Sync Rate"
+ip_address: "IP Address/Host"
+port: "Port"
+
+# Help Screen

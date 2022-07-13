@@ -1,0 +1,36 @@
+---
+# Generic
+back: "戻る"
+cancel: "キャンセル"
+exit: "出るる"
+start_game: "始まる"
+leave_game: "出る"
+map: "地図"
+
+# Menu Strings
+solo_game: "一人ゲーム"
+network_game: "ネットゲーム"
+
+kettek_contrib: "実装、グラフィック、音、地図"
+liqmix_contrib: "実装、音楽、地図"
+amaruuk_contrib: "メヌの絵"
+connection_lost: "中止になった。。。メヌに戻る。。。"
+
+# Music Menu
+music_player: "ジュークボックス"
+currently_playing: "現在の曲"
+
+# Net Menu
+host_game: "ゲームのホストをする"
+join_game: "入力のゲムに入る"
+broadcast_game: "LANのゲームをばら撒く"
+find_broadcast: "LANのゲームを探す"
+find_player: "相手を探す"
+wait_for_player: "相手を待つ"
+local_player_name: "自分の名前"
+remote_player_name: "相手の名前"
+host_sync_rate: "ホストシンクの速度"
+ip_address: "ＩＰアドレス"
+port: "ポート"
+
+# Help Screen

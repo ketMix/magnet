@@ -76,7 +76,7 @@ func LoadData() error {
 	EmptyImage.Fill(color.White)
 
 	// Load the fonts.
-	d, err := ReadFile("fonts/OpenSansPX.ttf")
+	d, err := ReadFile("fonts/LanaPixel.ttf")
 	if err != nil {
 		return err
 	}
@@ -85,13 +85,13 @@ func LoadData() error {
 		return err
 	}
 	if NormalFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    16,
+		Size:    11,
 		DPI:     72,
 		Hinting: font.HintingFull,
 	}); err != nil {
 		return err
 	}
-	d, err = ReadFile("fonts/OpenSansPXBold.ttf")
+	d, err = ReadFile("fonts/LanaPixel.ttf")
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func LoadData() error {
 		return err
 	}
 	if BoldFace, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    16,
+		Size:    11,
 		DPI:     72,
 		Hinting: font.HintingFull,
 	}); err != nil {

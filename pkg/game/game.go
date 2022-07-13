@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
 )
@@ -43,6 +44,12 @@ func (g *Game) Init() (err error) {
 
 	// Setup audio context.
 	audio.NewContext(48000)
+
+	// Load lang
+	err = data.InitLang()
+	if err != nil {
+		return err
+	}
 
 	// Load configurations
 	err = data.LoadConfigurations()
@@ -159,7 +166,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			screen.DrawImage(img, op)
 		}
 		if g.net.Disconnected() {
-			data.DrawStaticText("connection lost, returning to menu...", data.BoldFace, world.ScreenWidth/2, world.ScreenHeight/2, color.White, screen, true)
+			data.DrawStaticTextByCode(lang.ConnectionLost, data.BoldFace, world.ScreenWidth/2, world.ScreenHeight/2, color.White, screen, true)
 		}
 	} else {
 	}
