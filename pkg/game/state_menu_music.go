@@ -57,7 +57,7 @@ func (s *MusicMenuState) Init() error {
 	backButton := data.NewButton(
 		15,
 		10,
-		"Back",
+		lang.Back,
 		func() {
 			s.game.SetState(&MenuState{
 				game: s.game,
