@@ -5,7 +5,6 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
 	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/data/ui"
@@ -132,8 +131,7 @@ func (s *SoloMenuState) Draw(screen *ebiten.Image) {
 	screen.DrawImage(s.backgroundImage, screenOp)
 
 	// Draw our title
-	titleBounds := text.BoundString(data.BoldFace, s.title)
-	data.DrawStaticTextByCode(
+	titleBounds := data.DrawStaticTextByCode(
 		s.title,
 		data.BoldFace,
 		world.ScreenWidth/2,
@@ -142,6 +140,7 @@ func (s *SoloMenuState) Draw(screen *ebiten.Image) {
 		screen,
 		true,
 	)
+
 	// Rotate our magnet about its center.
 	magnetOp := ebiten.DrawImageOptions{}
 	magnetOp.GeoM.Translate(-float64(s.magnetImage.Bounds().Dx())/2, -float64(s.magnetImage.Bounds().Dy())/2)
