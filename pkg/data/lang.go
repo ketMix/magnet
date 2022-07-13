@@ -47,6 +47,7 @@ func ChangeLang(lang Language) {
 	// if there's an error, let's just handle it gracefully
 	if err != nil {
 		println("oumch, had issies getin dat: ", err)
+		return
 	}
 
 	for key, value := range langStrings {
