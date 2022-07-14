@@ -11,6 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/net"
 )
 
@@ -141,8 +142,8 @@ func (m *BuildMode) Draw(w *World, screen *ebiten.Image) {
 	}
 
 	// hhmnh...
-	data.DrawStaticText(
-		"build mode",
+	data.DrawStaticTextByCode(
+		lang.BuildMode,
 		data.NormalFace,
 		8,
 		30,
@@ -157,8 +158,8 @@ func (m *BuildMode) Draw(w *World, screen *ebiten.Image) {
 	DrawWaves(w, screen, &spawnerOp)
 
 	// Hmm.
-	data.DrawStaticText(
-		"hit <spacebar> to start combat waves",
+	data.DrawStaticTextByCode(
+		lang.MessagePressToStart,
 		data.NormalFace,
 		ScreenWidth/2,
 		ScreenHeight-60,

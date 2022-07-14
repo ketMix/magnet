@@ -166,7 +166,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			screen.DrawImage(img, op)
 		}
 		if g.net.Disconnected() {
-			data.DrawStaticTextByCode(lang.ConnectionLost, data.BoldFace, world.ScreenWidth/2, world.ScreenHeight/2, color.White, screen, true)
+			data.DrawStaticTextByCode(lang.MessageConnectionLost, data.BoldFace, world.ScreenWidth/2, world.ScreenHeight/2, color.White, screen, true)
 		}
 	} else {
 	}

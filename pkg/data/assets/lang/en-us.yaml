@@ -6,6 +6,8 @@ exit: "Exit"
 start_game: "Start Game"
 leave_game: "Leave Game"
 map: "Map"
+wave: "Wave"
+build_mode: "build mode"
 
 # Menu Strings
 solo_game: "Solo Game"
@@ -14,7 +16,6 @@ network_game: "Network Game"
 kettek_contrib: "Programming, Art, Sounds, Maps"
 liqmix_contrib: "Programming, Music, Maps"
 amaruuk_contrib: "Menu Art"
-connection_lost: "connection lost, returning to menu..."
 
 # Music Menu
 music_player: "Music Player"
@@ -57,3 +58,47 @@ help_objectives: "Objectives"
 help_build_turrets: "Build turrets opposite the portals' polarities!"
 help_defend: "Defend the crystal at all costs!"
 help_toggle_help: "Press H or F1 to toggle this screen!"
+
+# Messages
+msg_want_to_start: "wants to start! Hit 'space bar' to confirm."
+msg_want_to_restart: "wants to restart! Hit 'R' to confirm."
+msg_press_to_start: "hit <spacebar> to start combat waves"
+msg_connection_lost: "connection lost, returning to menu..."
+
+# Tools / Turrets
+# & Descriptions
+gun: "gun"
+desc_gun: ""
+
+wall: "wall"
+desc_wall: ""
+
+destroy: "destroy"
+desc_destroy: ""
+
+# Can be handled within the tool file itself!
+# If these values aren't populated, it uses the entity file
+# basic: "basic"
+# desc_basic: ""
+
+# beam: "beam"
+# desc_beam: ""
+
+# fast: "fast"
+# desc_fast: ""
+
+# spread: "spread"
+# desc_spread: ""
+
+# polarizer: "polarizer"
+# desc_polarizer: ""
+
+# reflector: "reflector"
+# desc_reflector: ""
+
+
+
+
+
+
+

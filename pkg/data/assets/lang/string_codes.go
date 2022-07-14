@@ -11,6 +11,8 @@ const (
 	LeaveGame        = "leave_game"
 	StartGame        = "start_game"
 	Map              = "map"
+	Wave             = "wave"
+	BuildMode        = "build_mode"
 
 	// Menu Codes
 	SoloGame       = "solo_game"
@@ -18,8 +20,6 @@ const (
 	KettekContrib  = "kettek_contrib"
 	LiqMixContrib  = "liqmix_contrib"
 	AmaruukContrib = "amaruuk_contrib"
-
-	ConnectionLost = "connection_lost"
 
 	// Music Menu
 	MusicPlayer      = "music_player"
@@ -60,4 +60,31 @@ const (
 	HelpBuildTurrets = "help_build_turrets"
 	HelpDefend       = "help_defend"
 	HelpToggleHelp   = "help_toggle_help"
+
+	// Messages
+	MessageWantToStart    = "msg_want_to_start"
+	MessageWantToRestart  = "msg_want_to_restart"
+	MessagePressToStart   = "msg_press_to_start"
+	MessageConnectionLost = "msg_connection_lost"
+
+	// Tools / Turrets
+	Gun       = "gun"
+	Wall      = "wall"
+	Basic     = "basic"
+	Beam      = "beam"
+	Fast      = "fast"
+	Spread    = "spread"
+	Polarizer = "polarizer"
+	Reflector = "reflector"
+	Destroy   = "destroy"
+
+	// Tool Descriptions
+	DescGun       = "desc_gun"
+	DescWall      = "desc_wall"
+	DescBasic     = "desc_basic"
+	DescBeam      = "desc_beam"
+	DescFast      = "desc_fast"
+	DescPolarizer = "desc_polarizer"
+	DescReflector = "desc_reflector"
+	DescDestroy   = "desc_destroy"
 )

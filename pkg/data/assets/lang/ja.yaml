@@ -6,6 +6,8 @@ exit: "出る"
 start_game: "始まる"
 leave_game: "出る"
 map: "地図"
+wave: "敵の団体番号" 
+build_mode: "作る時間"
 
 # Menu Strings
 solo_game: "一人ゲーム"
@@ -14,7 +16,6 @@ network_game: "ネットゲーム"
 kettek_contrib: "実装、グラフィック、音、地図"
 liqmix_contrib: "実装、音楽、地図"
 amaruuk_contrib: "メヌの絵"
-connection_lost: "中止になった。。。メヌに戻る。。。"
 
 # Music Menu
 music_player: "ジュークボックス"
@@ -36,7 +37,7 @@ port: "ポート"
 # Help Screen
 help_tools_turrets: "ここに道具とターレットを見せている"
 help_cost: "点をはらってターレットを作って出来る"
-help_waves: "ここに全部敵の 団体"
+help_waves: "ここに全部敵の団体"
 help_shown: "を見せている"
 help_players: "ここに選手たちと点と"
 help_ready: "準備の除隊を見せている"
@@ -57,3 +58,39 @@ help_objectives: "目標"
 help_build_turrets: "ポータルの道に反対の極性ターレットを作る！"
 help_defend: "絶対に結晶を守る!"
 help_toggle_help: "「H / F1」を押すとこの指令を見る"
+
+# Messages
+msg_want_to_start: "は始めたい! 準備になったら「SPACE BAR」を押す"
+msg_want_to_restart: "は再起動にしたい! 準備になったら「R」を押す"
+msg_press_to_start: "準備になったら「SPACE BAR」を押すと敵の団体がくる"
+msg_connection_lost: "中止になった。。。メヌに戻る。。。"
+
+# Tools / Turrets
+# & Descriptions
+gun: "銃"
+desc_gun: ""
+
+wall: "壁"
+desc_wall: ""
+
+destroy: "消すもの"
+desc_destroy: ""
+
+
+basic: "普通"
+desc_basic: "撃てる"
+
+beam: "光線"
+desc_beam: "初めに一番弱い敵を撃つ"
+
+fast: "早"
+desc_fast: "そう書いてるもの"
+
+spread: "複数"
+desc_spread: "三弾を撃つ"
+
+polarizer: "極性を翻るもの"
+desc_polarizer: "弾丸に触るなら極性を変わる"
+
+reflector: "映すもの"
+desc_reflector: "弾丸に触るなら弾む"
