@@ -76,7 +76,7 @@ func LoadData() error {
 	EmptyImage.Fill(color.White)
 
 	// Load the fonts.
-	d, err := ReadFile("fonts/OpenSansPX.ttf")
+	d, err := ReadFile("fonts/x12y16pxMaruMonica.ttf")
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func LoadData() error {
 	}); err != nil {
 		return err
 	}
-	d, err = ReadFile("fonts/OpenSansPXBold.ttf")
+	d, err = ReadFile("fonts/x12y16pxMaruMonica.ttf")
 	if err != nil {
 		return err
 	}

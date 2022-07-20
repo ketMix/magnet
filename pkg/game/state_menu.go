@@ -7,6 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/world"
 )
 
@@ -56,13 +57,28 @@ func (s *MenuState) Init() error {
 		panic(err)
 	}
 
+	// Load our flag images.
+	var jaFlagImage *ebiten.Image
+	var usFlagImage *ebiten.Image
+
+	if img, err := data.ReadImage("/ui/ja.png"); err == nil {
+		jaFlagImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+	if img, err := data.ReadImage("/ui/us.png"); err == nil {
+		usFlagImage = ebiten.NewImageFromImage(img)
+	} else {
+		panic(err)
+	}
+
 	// Set Main Menu Buttons
 	x := world.ScreenWidth / 2
 	y := int(float64(world.ScreenHeight) / 2)
 	startGameButton := data.NewButton(
 		x,
 		y,
-		"Solo Game",
+		lang.SoloGame,
 		func() {
 			s.game.SetState(&SoloMenuState{
 				game: s.game,
@@ -74,7 +90,7 @@ func (s *MenuState) Init() error {
 	networkButton := data.NewButton(
 		x,
 		y,
-		"Network Game",
+		lang.NetworkGame,
 		func() {
 			s.game.SetState(&NetworkMenuState{
 				game: s.game,
@@ -86,7 +102,7 @@ func (s *MenuState) Init() error {
 	exitButton := data.NewButton(
 		x,
 		y,
-		"Exit",
+		lang.Exit,
 		func() {
 			s.shouldQuit = true
 		},
@@ -99,7 +115,7 @@ func (s *MenuState) Init() error {
 	credits1aButton := data.NewButton(
 		x,
 		y,
-		"Programming, Art, Sounds, Maps",
+		lang.KettekContrib,
 		func() {
 			// open github/website
 		},
@@ -121,7 +137,7 @@ func (s *MenuState) Init() error {
 	credits2aButton := data.NewButton(
 		x,
 		y,
-		"Programming, Music, Maps",
+		lang.LiqMixContrib,
 		func() {
 			s.game.SetState(&MusicMenuState{
 				game: s.game,
@@ -145,7 +161,7 @@ func (s *MenuState) Init() error {
 	credits3aButton := data.NewButton(
 		x,
 		y,
-		"Menu Art",
+		lang.AmaruukContrib,
 		func() {
 		},
 	)
@@ -162,6 +178,28 @@ func (s *MenuState) Init() error {
 	credits3bButton.Underline = true
 	credits3bButton.Hover = true
 
+	// Create our flag lang clickables, set them in bottom left corner
+	x = int(float64(world.ScreenWidth) * 0.05)
+	y = int(float64(world.ScreenHeight) * 0.95)
+	jaLangButton := data.NewImageButton(
+		x, y,
+		jaFlagImage,
+		func() {
+			data.ChangeLang(data.Japanese)
+		},
+	)
+	jaLangButton.Hover = true
+
+	x += jaFlagImage.Bounds().Dx() + 5
+	usLangButton := data.NewImageButton(
+		x, y,
+		usFlagImage,
+		func() {
+			data.ChangeLang(data.English)
+		},
+	)
+	usLangButton.Hover = true
+
 	s.buttons = []*data.Button{
 		startGameButton,
 		networkButton,
@@ -172,7 +210,10 @@ func (s *MenuState) Init() error {
 		credits2bButton,
 		credits3aButton,
 		credits3bButton,
+		jaLangButton,
+		usLangButton,
 	}
+
 	// Start the tunes
 	data.BGM.Set("menu.ogg")
 	return nil
@@ -201,7 +242,6 @@ func (s *MenuState) Update() error {
 	}
 
 	s.backgroundFadeIn++
-
 	return nil
 }
 

@@ -44,16 +44,21 @@ func (c *Clickable) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions
 
 func (c *Clickable) IsClicked() bool {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		cursorX, cursorY := ebiten.CursorPosition()
-		minX, maxX := c.x-c.image.Bounds().Dx()/2, c.x+c.image.Bounds().Dx()/2
-		minY, maxY := c.y-c.image.Bounds().Dy()/2, c.y+c.image.Bounds().Dy()/2
-		if int(minX) < cursorX && cursorX < int(maxX) {
-			if int(minY) < cursorY && cursorY < int(maxY) {
-				return true
-			}
-		}
+		return c.IsHit()
 	}
 
+	return false
+}
+
+func (c *Clickable) IsHit() bool {
+	cursorX, cursorY := ebiten.CursorPosition()
+	minX, maxX := c.x-c.image.Bounds().Dx()/2, c.x+c.image.Bounds().Dx()/2
+	minY, maxY := c.y-c.image.Bounds().Dy()/2, c.y+c.image.Bounds().Dy()/2
+	if int(minX) < cursorX && cursorX < int(maxX) {
+		if int(minY) < cursorY && cursorY < int(maxY) {
+			return true
+		}
+	}
 	return false
 }
 
@@ -125,7 +130,8 @@ const borderWidth = 5
 
 type Button struct {
 	Clickable
-	text             string
+	code             string
+	text             *string
 	OffsetX, OffsetY int // Forgive me.
 	Active           bool
 	Bold             bool
@@ -134,8 +140,9 @@ type Button struct {
 	isHovered        bool
 }
 
-func NewButton(x, y int, txt string, onClick func()) *Button {
-	bounds := text.BoundString(NormalFace, txt)
+func NewButton(x, y int, code string, onClick func()) *Button {
+	txtString := GiveMeString(code)
+	bounds := text.BoundString(NormalFace, txtString)
 	bgImage := ebiten.NewImage(bounds.Dx(), bounds.Dy())
 
 	return &Button{
@@ -145,7 +152,19 @@ func NewButton(x, y int, txt string, onClick func()) *Button {
 			image:   bgImage,
 			onClick: onClick,
 		},
-		text: txt,
+		code: code,
+		text: &txtString,
+	}
+}
+
+func NewImageButton(x, y int, image *ebiten.Image, onClick func()) *Button {
+	return &Button{
+		Clickable: Clickable{
+			x:       x,
+			y:       y,
+			image:   image,
+			onClick: onClick,
+		},
 	}
 }
 
@@ -156,6 +175,7 @@ func (b *Button) Update() {
 		ebiten.SetCursorShape(ebiten.CursorShapeDefault)
 		return
 	}
+
 	if b.Hover {
 		if b.IsHit() {
 			if !b.isHovered {
@@ -170,24 +190,25 @@ func (b *Button) Update() {
 		}
 	}
 }
+
 func (b *Button) IsClicked() bool {
+	if b.text == nil {
+		return b.Clickable.IsClicked()
+	}
+
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		bounds := text.BoundString(NormalFace, b.text)
-		cursorX, cursorY := ebiten.CursorPosition()
-		minX, maxX := b.OffsetX+b.x-bounds.Dx()/2, b.OffsetX+b.x+bounds.Dx()/2
-		minY, maxY := b.OffsetY+b.y-bounds.Dy()/2, b.OffsetY+b.y+bounds.Dy()/2
-		if int(minX) < cursorX && cursorX < int(maxX) {
-			if int(minY) < cursorY && cursorY < int(maxY) {
-				return true
-			}
-		}
+		return b.IsHit()
 	}
 
 	return false
 }
 
 func (b *Button) IsHit() bool {
-	bounds := text.BoundString(NormalFace, b.text)
+	if b.text == nil {
+		return b.Clickable.IsHit()
+	}
+
+	bounds := text.BoundString(NormalFace, *b.text)
 	cursorX, cursorY := ebiten.CursorPosition()
 	minX, maxX := b.OffsetX+b.x-bounds.Dx()/2, b.OffsetX+b.x+bounds.Dx()/2
 	minY, maxY := b.OffsetY+b.y-bounds.Dy()/2, b.OffsetY+b.y+bounds.Dy()/2
@@ -200,6 +221,11 @@ func (b *Button) IsHit() bool {
 }
 
 func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
+	if b.text == nil {
+		b.Clickable.Draw(screen, screenOp)
+		return
+	}
+
 	b.OffsetX = int(screenOp.GeoM.Element(0, 2))
 	b.OffsetY = int(screenOp.GeoM.Element(1, 2))
 	c := color.RGBA{255, 255, 255, 255}
@@ -212,27 +238,28 @@ func (b *Button) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOptions) {
 		face = BoldFace
 	}
 
-	text.Draw(
-		screen,
-		b.text,
+	bounds := DrawStaticTextByCode(
+		b.code,
 		face,
-		b.OffsetX+(b.x)-b.image.Bounds().Dx()/2,
-		b.OffsetY+(b.y)+b.image.Bounds().Dy()/2,
+		b.OffsetX+(b.x),
+		b.OffsetY+(b.y),
 		c,
+		screen,
+		true,
 	)
 
 	if b.Underline {
 		ebitenutil.DrawLine(
 			screen, // Wanna see a magic (number) trick?
-			float64(b.OffsetX+(b.x)-b.image.Bounds().Dx()/2)+4,
-			float64(b.OffsetY+(b.y)+b.image.Bounds().Dy())-3,
-			float64(b.OffsetX+(b.x)+b.image.Bounds().Dx()/2)+4,
-			float64(b.OffsetY+(b.y)+b.image.Bounds().Dy())-3,
+			float64(b.OffsetX+(b.x)-bounds.Dx()/2)+4,
+			float64(b.OffsetY+(b.y)+bounds.Dy())-3,
+			float64(b.OffsetX+(b.x)+bounds.Dx()/2)+4,
+			float64(b.OffsetY+(b.y)+bounds.Dy())-3,
 			c,
 		)
 	}
 }
 
 func (b *Button) Text() string {
-	return b.text
+	return *b.text
 }

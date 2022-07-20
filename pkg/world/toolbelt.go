@@ -171,10 +171,11 @@ func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
 		// Let's draw the title for active item here too
 		{
 			// Create title label
-			label := t.kind.Title
-			if label == "" {
-				label = string(t.tool)
+			toolTitle := t.kind.Title
+			if toolTitle == "" {
+				toolTitle = string(t.tool)
 			}
+			label := data.GiveMeString(toolTitle)
 
 			// Create polarity label
 			polarity := ""
@@ -217,7 +218,12 @@ func (t *ToolbeltItem) DrawSlot(screen *ebiten.Image) {
 				screen.DrawImage(orbImage, &imageOp)
 				x += orbImage.Bounds().Dx()
 			}
-			data.DrawStaticText(t.description, data.NormalFace, x, y, color.RGBA{255, 255, 255, 128}, screen, false)
+			descKey := fmt.Sprintf("desc_%s", toolTitle)
+			descTxt := data.GiveMeString(descKey)
+			if descKey == descTxt {
+				descTxt = t.description
+			}
+			data.DrawStaticText(descTxt, data.NormalFace, x, y, color.RGBA{255, 255, 255, 128}, screen, false)
 		}
 	} else {
 		op.GeoM.Translate(float64(t.x-toolSlotImage.Bounds().Dx()/2), float64(t.y-toolSlotImage.Bounds().Dy()/2))

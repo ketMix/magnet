@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
 )
@@ -39,7 +40,7 @@ func (s *PlayState) Init() error {
 	leaveGameButton := data.NewButton(
 		x,
 		y,
-		"Leave Game",
+		lang.LeaveGame,
 		func() {
 			// Let's be sure to close the network if we actually have it running.
 			if s.game.net.Active() {
@@ -185,14 +186,14 @@ func (s *PlayState) Update() error {
 				})
 			} else {
 				s.AddMessage(Message{
-					content: fmt.Sprintf("%s wants to restart! Hit 'r' to conform.", s.game.net.OtherName),
+					content: fmt.Sprintf("%s %s", s.game.net.OtherName, data.GiveMeString(lang.MessageWantToRestart)),
 				})
 			}
 		case world.StartModeRequest:
 			s.game.players[1].ReadyForWave = true
 			if !s.world.ArePlayersReady() {
 				s.AddMessage(Message{
-					content: fmt.Sprintf("%s wants to start! Hit '<spacebar>' to conform.", s.game.net.OtherName),
+					content: fmt.Sprintf("%s %s", s.game.net.OtherName, data.GiveMeString(lang.MessageWantToStart)),
 				})
 			}
 		default:
@@ -309,7 +310,7 @@ func (s *PlayState) Draw(screen *ebiten.Image) {
 	mx = 8
 	my = 16
 	offset := 16
-	t := fmt.Sprintf("wave: %d/%d", s.world.CurrentWave, s.world.MaxWave)
+	t := fmt.Sprintf("%s: %d/%d", data.GiveMeString(lang.Wave), s.world.CurrentWave, s.world.MaxWave)
 	bounds := text.BoundString(data.NormalFace, t)
 	data.DrawStaticText(
 		t,

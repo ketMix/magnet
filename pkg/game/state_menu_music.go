@@ -5,8 +5,8 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/data/ui"
 	"github.com/kettek/ebijam22/pkg/world"
 )
@@ -42,7 +42,7 @@ func (s *MusicMenuState) Init() error {
 	}
 
 	// Title Text
-	s.title = "Music Player"
+	s.title = lang.MusicPlayer
 
 	// Magnet Image
 	if img, err := data.ReadImage("/ui/magnet.png"); err == nil {
@@ -57,7 +57,7 @@ func (s *MusicMenuState) Init() error {
 	backButton := data.NewButton(
 		15,
 		10,
-		"Back",
+		lang.Back,
 		func() {
 			s.game.SetState(&MenuState{
 				game: s.game,
@@ -146,8 +146,7 @@ func (s *MusicMenuState) Draw(screen *ebiten.Image) {
 	centeredX := world.ScreenWidth / 2
 
 	// Draw our title
-	titleBounds := text.BoundString(data.BoldFace, s.title)
-	data.DrawStaticText(
+	titleBounds := data.DrawStaticTextByCode(
 		s.title,
 		data.BoldFace,
 		centeredX,
@@ -158,11 +157,9 @@ func (s *MusicMenuState) Draw(screen *ebiten.Image) {
 	)
 
 	// Draw currently playing
-	currentlyPlaying := "Currently Playing"
 	currentTrack := data.FormatTrackName(data.BGM.GetCurrentTrack())
-	textBounds := text.BoundString(data.NormalFace, currentlyPlaying)
-	data.DrawStaticText(
-		currentlyPlaying,
+	textBounds := data.DrawStaticTextByCode(
+		lang.CurrentlyPlaying,
 		data.NormalFace,
 		centeredX,
 		world.ScreenHeight/5,

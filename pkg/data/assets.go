@@ -7,6 +7,8 @@ import (
 	_ "image/png"
 	"path"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed assets/*
@@ -67,4 +69,14 @@ func GetPathFiles(p string) ([]string, error) {
 		}
 	}
 	return files, err
+}
+
+func ReadLanguageFile(lang Language) (map[string]string, error) {
+	var langStrings = make(map[string]string)
+	langFile, err := ReadFile(path.Join("lang", string(lang)+".yaml"))
+	if err != nil {
+		return langStrings, err
+	}
+	err = yaml.Unmarshal(langFile, langStrings)
+	return langStrings, err
 }

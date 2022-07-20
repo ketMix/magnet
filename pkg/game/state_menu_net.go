@@ -9,8 +9,8 @@ import (
 	"os/user"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/data/ui"
 	"github.com/kettek/ebijam22/pkg/net"
 	"github.com/kettek/ebijam22/pkg/world"
@@ -62,8 +62,9 @@ func (s *NetworkMenuState) Init() error {
 	if s.game.Options.Map != "" {
 		s.mapList.selectedMap = s.game.Options.Map
 	}
+
 	// Title Text
-	s.title = "Network Game"
+	s.title = lang.NetworkGame
 
 	// Set up our network response channel.
 	s.netResult = make(chan error)
@@ -87,7 +88,7 @@ func (s *NetworkMenuState) Init() error {
 	backButton := data.NewButton(
 		15,
 		10,
-		"Back",
+		lang.Back,
 		func() {
 			s.game.SetState(&MenuState{
 				game: s.game,
@@ -98,7 +99,7 @@ func (s *NetworkMenuState) Init() error {
 	hostGameButton := data.NewButton(
 		centeredX,
 		buttonY,
-		"Host Game",
+		lang.HostGame,
 		func() {
 			s.Host()
 		},
@@ -108,7 +109,7 @@ func (s *NetworkMenuState) Init() error {
 	joinGameButton := data.NewButton(
 		centeredX,
 		buttonY+hostGameButton.Image().Bounds().Dy()*2,
-		"Join Game",
+		lang.JoinGame,
 		func() {
 			s.JoinByIP()
 		},
@@ -117,7 +118,7 @@ func (s *NetworkMenuState) Init() error {
 	waitGameButton := data.NewButton(
 		localPlayerX,
 		buttonY,
-		"Wait for Player",
+		lang.WaitForPlayer,
 		func() {
 			s.Await()
 		},
@@ -126,7 +127,7 @@ func (s *NetworkMenuState) Init() error {
 	waitLanGameButton := data.NewButton(
 		localPlayerX,
 		buttonY+waitGameButton.Image().Bounds().Dy()*2,
-		"Broadcast Game (LAN)",
+		lang.BroadcastGame,
 		func() {
 			s.AwaitLan(false)
 		},
@@ -136,7 +137,7 @@ func (s *NetworkMenuState) Init() error {
 	findGameButton := data.NewButton(
 		remotePlayerX,
 		buttonY,
-		"Find Player",
+		lang.FindPlayer,
 		func() {
 			s.Find()
 		},
@@ -145,7 +146,7 @@ func (s *NetworkMenuState) Init() error {
 	findLanGameButton := data.NewButton(
 		remotePlayerX,
 		buttonY+findGameButton.Image().Bounds().Dy()*2,
-		"Find Broadcast (LAN)",
+		lang.FindBroadcast,
 		func() {
 			s.AwaitLan(true)
 		},
@@ -166,7 +167,7 @@ func (s *NetworkMenuState) Init() error {
 	s.cancelButton = *data.NewButton(
 		world.ScreenWidth/2,
 		world.ScreenHeight/2,
-		"Cancel",
+		lang.Cancel,
 		func() {
 			s.Cancel()
 		},
@@ -189,7 +190,7 @@ func (s *NetworkMenuState) Init() error {
 	// Create the inputs
 	// Player Name Input
 	s.playerNameInput = data.NewTextInput(
-		"Local Player Name",
+		lang.LocalPlayerName,
 		playerName,
 		15,
 		localPlayerX,
@@ -198,7 +199,7 @@ func (s *NetworkMenuState) Init() error {
 
 	// Other player name input
 	s.remotePlayerNameInput = data.NewTextInput(
-		"Remote Player Name",
+		lang.RemotePlayerName,
 		remoteName,
 		15,
 		remotePlayerX,
@@ -207,7 +208,7 @@ func (s *NetworkMenuState) Init() error {
 
 	// Sync RateInput
 	s.syncRateInput = data.NewTextInput(
-		"Host Sync Rate",
+		lang.HostSyncRate,
 		fmt.Sprintf("%d", s.game.Options.SyncRate),
 		15,
 		centeredX,
@@ -226,7 +227,7 @@ func (s *NetworkMenuState) Init() error {
 
 	// Address Input
 	s.addressInput = data.NewTextInput(
-		"IP Address/Host",
+		lang.IPAddress,
 		"",
 		15,
 		centeredX-30, // oops
@@ -235,7 +236,7 @@ func (s *NetworkMenuState) Init() error {
 
 	// Port Input
 	s.portInput = data.NewTextInput(
-		"Port",
+		lang.Port,
 		"20220",
 		6,
 		centeredX-30+int(float64(s.addressInput.Image().Bounds().Dx())*0.75),
@@ -317,8 +318,7 @@ func (s *NetworkMenuState) Draw(screen *ebiten.Image) {
 	screen.DrawImage(s.backgroundImage, screenOp)
 
 	// Draw our title
-	titleBounds := text.BoundString(data.BoldFace, s.title)
-	data.DrawStaticText(
+	titleBounds := data.DrawStaticTextByCode(
 		s.title,
 		data.BoldFace,
 		world.ScreenWidth/2,
@@ -327,6 +327,7 @@ func (s *NetworkMenuState) Draw(screen *ebiten.Image) {
 		screen,
 		true,
 	)
+
 	// Rotate our magnet about its center.
 	magnetOp := ebiten.DrawImageOptions{}
 	magnetOp.GeoM.Translate(-float64(s.magnetImage.Bounds().Dx())/2, -float64(s.magnetImage.Bounds().Dy())/2)

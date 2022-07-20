@@ -22,7 +22,14 @@ func CurrentlyReceivingInput() bool {
 	return false
 }
 
-func DrawStaticText(txt string, font font.Face, x, y int, color color.Color, screen *ebiten.Image, shouldCenter bool) {
+func DrawStaticTextByCode(code string, font font.Face, x, y int, color color.Color, screen *ebiten.Image, shouldCenter bool) image.Rectangle {
+	translatedString := GiveMeString(code)
+	return DrawStaticText(translatedString, font, x, y, color, screen, shouldCenter)
+}
+
+// Draw static text
+// Returns the bounds for convenience
+func DrawStaticText(txt string, font font.Face, x, y int, color color.Color, screen *ebiten.Image, shouldCenter bool) image.Rectangle {
 	var offsetX int
 	var offsetY int
 	bounds := text.BoundString(font, txt)
@@ -38,6 +45,7 @@ func DrawStaticText(txt string, font font.Face, x, y int, color color.Color, scr
 		y+offsetY,
 		color,
 	)
+	return bounds
 }
 
 // Implements UIComponent interface
@@ -88,7 +96,6 @@ func NewTextInput(label, placeholder string, maxLength, x, y int) *TextInput {
 func (ti *TextInput) Update() {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if ti.IsClicked() {
-			println("Clicked ", ti.label)
 			ti.isActive = true
 			receivingKeyboardInput[ti.label] = true
 		} else {
@@ -143,7 +150,7 @@ func (ti *TextInput) Draw(screen *ebiten.Image, screenOp *ebiten.DrawImageOption
 
 	// Draw the input box
 	screen.DrawImage(ti.image, &op)
-	DrawStaticText(
+	DrawStaticTextByCode(
 		ti.label,
 		NormalFace,
 		ti.x,

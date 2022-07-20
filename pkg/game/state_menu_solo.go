@@ -5,8 +5,8 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/data/ui"
 	"github.com/kettek/ebijam22/pkg/world"
 )
@@ -47,8 +47,9 @@ func (s *SoloMenuState) Init() error {
 	if s.game.Options.Map != "" {
 		s.mapList.selectedMap = s.game.Options.Map
 	}
+
 	// Title Text
-	s.title = "Solo Game"
+	s.title = lang.SoloGame
 
 	// Magnet Image
 	if img, err := data.ReadImage("/ui/magnet.png"); err == nil {
@@ -65,7 +66,7 @@ func (s *SoloMenuState) Init() error {
 	backButton := data.NewButton(
 		15,
 		10,
-		"Back",
+		lang.Back,
 		func() {
 			s.game.SetState(&MenuState{
 				game: s.game,
@@ -77,7 +78,7 @@ func (s *SoloMenuState) Init() error {
 	startGameButton := data.NewButton(
 		centeredX,
 		buttonY,
-		"Start Game",
+		lang.StartGame,
 		func() {
 			s.StartGame()
 		},
@@ -130,8 +131,7 @@ func (s *SoloMenuState) Draw(screen *ebiten.Image) {
 	screen.DrawImage(s.backgroundImage, screenOp)
 
 	// Draw our title
-	titleBounds := text.BoundString(data.BoldFace, s.title)
-	data.DrawStaticText(
+	titleBounds := data.DrawStaticTextByCode(
 		s.title,
 		data.BoldFace,
 		world.ScreenWidth/2,
@@ -140,6 +140,7 @@ func (s *SoloMenuState) Draw(screen *ebiten.Image) {
 		screen,
 		true,
 	)
+
 	// Rotate our magnet about its center.
 	magnetOp := ebiten.DrawImageOptions{}
 	magnetOp.GeoM.Translate(-float64(s.magnetImage.Bounds().Dx())/2, -float64(s.magnetImage.Bounds().Dy())/2)

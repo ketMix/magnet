@@ -6,6 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/kettek/ebijam22/pkg/data"
+	"github.com/kettek/ebijam22/pkg/data/assets/lang"
 	"github.com/kettek/ebijam22/pkg/world"
 )
 
@@ -57,7 +58,7 @@ func (m *MapList) Update() error {
 }
 
 func (m *MapList) Draw(screen *ebiten.Image, op *ebiten.DrawImageOptions) {
-	data.DrawStaticText("Map: ", data.BoldFace, int(op.GeoM.Element(0, 2)), int(op.GeoM.Element(1, 2))+4, color.White, screen, false)
+	data.DrawStaticTextByCode(lang.Map, data.BoldFace, int(op.GeoM.Element(0, 2)), int(op.GeoM.Element(1, 2))+4, color.White, screen, false)
 	for _, b := range m.buttons {
 		b.Draw(screen, op)
 	}
